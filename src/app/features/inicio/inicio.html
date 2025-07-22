@@ -2,24 +2,27 @@
   <div>
     <img src="upao_logo_white.png" alt="" class="w-20" />
   </div>
-  <div class="text-white justify-center flex items-center">
-    <!-- Tailwind button with custom styles for glass effect -->
-    <button class="glass-button text-sm text-white bg-transparent border border-transparent hover:bg-white/20 transform hover:scale-105 transition-all duration-300" (click)="ingresar()">INGRESAR</button>
+  <div class="text-white flex justify-center items-center">
+    <!-- PrimeNG button with Tailwind styles -->
+    <p-button label="INGRESAR" class="bg-black text-white hover:bg-white hover:text-black transition-all duration-300"></p-button>
   </div>
 </div>
+
 <section class="w-full h-screen bg-gradient-to-r from-[#1C3D67] to-[#000000] bg-cover bg-fixed">
-  <div class="grid grid-cols-12 gap-4 h-full">
-    <!-- Título: Ocupa 8 columnas -->
-    <div class="col-span-8 flex justify-center items-center text-white p-5">
-      <div>
-        <h1 class="text-4xl font-bold glow-title">{{ title }}</h1>
-        <h3 class="text-xl glow-title">{{ title1 }}</h3>
+  <div class="flex w-full h-full">
+    <!-- Título: Ocupa 8 columnas (w-8/12) -->
+    <div class="w-8/12 flex justify-center items-start text-white flex-col" style="padding:30px">
+      <div class="text-8xl font-bold">
+        IIS UPAO
+      </div>
+      <div class="text-3xl">
+        INFRAESTRUCTURA DE INTEGRACIÓN DE SERVICIOS
       </div>
     </div>
 
-    <!-- Imagen: Ocupa 4 columnas -->
-      <div class="col-span-4 relative min-h-[92.5vh] min-w-fit bg-cover bg-no-repeat bg-center-right right-col" style="background-image: url('herobg.jpg'); z-index: 0;">
-        <img src="integ.jpg" alt="Laptop y silla" class="overlay-img img-fluid degradado-img" />
-      </div>
+    <!-- Imagen: Ocupa 4 columnas (w-4/12) -->
+    <div class="w-4/12 relative min-h-[92.5vh] bg-cover bg-no-repeat bg-center-right right-col" style="background-image: url('herobg.jpg'); z-index: 0;">
+      <img src="integ.jpg" alt="Laptop y silla" class="overlay-img img-fluid degradado-img" />
+    </div>
   </div>
 </section>
