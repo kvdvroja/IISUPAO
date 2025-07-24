@@ -1,90 +1,108 @@
-import { Component, OnInit, HostListener } from '@angular/core';
-import { NgIf } from '@angular/common';
-import { RouterModule } from '@angular/router';
-import { NgTemplateOutlet } from '@angular/common';
+import { CommonModule } from '@angular/common';
+import { Component, OnInit, inject, Output, EventEmitter, Input } from '@angular/core';
 import { Router } from '@angular/router';
-
+import { ButtonModule } from 'primeng/button';
 Router
 
 @Component({
   selector: 'app-navbar',
-  imports: [],
+  imports: [CommonModule,ButtonModule],
   templateUrl: './navbar.html',
   styleUrl: './navbar.css'
 })
 export class Navbar implements OnInit {
-menuAbierto: boolean = false;
-  showUserMenu = false;
 
-  userId: string | null = null;
-  userRoles: string[] = [];
-  nombreUsuario: string | null = null;
-  constructor(private router: Router) {}
+@Input() isSidebarOpen: boolean = true;
+@Output() sidebarToggle = new EventEmitter<void>();
+  router = inject(Router);
+  fotoLink: string = "";
+  postulanteId: string = "";
+  usuario: any;
+  rol: string = "";
+  title: string = "Egresados | UPAO";
+  nroPermisos: number = 0;
+
+
+  constructor() {
+  }
+
+toggleSidebar() {
+  this.isSidebarOpen = !this.isSidebarOpen;
+  this.sidebarToggle.emit(); // Se comunica con el padre
+}
+
 
   ngOnInit() {
-    // const usuario = this.authService.obtenerUsuario();
-    // if (usuario) {
-    //   this.userId = usuario.usua_id;
-    //   if (typeof usuario.rol === 'string') {
-    //     this.userRoles = usuario.rol.split(',').map(r => r.trim());
-    //   } else if (Array.isArray(usuario.rol)) {
-    //     this.userRoles = usuario.rol;
-    //   }
-    //   this.nombreUsuario = usuario.nom_completo;
-    // }
-  }
+    if (localStorage.getItem('postulanteId')) {
+      var postEncripted = localStorage.getItem('postulanteId');
 
-  toggleUserMenu(event: MouseEvent): void {
-    event.stopPropagation();
-    this.showUserMenu = !this.showUserMenu;
-  }
+    }
+    const imgUrl = 'https://static.upao.edu.pe/upload/f/' + '000033505' + '.jpg'; //f1
+    this.cargarImagen(imgUrl)
+      .then((imagen) => {
+        this.fotoLink = imgUrl;
+      })
+      .catch((error) => {
+        // Se produjo un error al cargar la imagen
+        this.fotoLink = 'https://static.upao.edu.pe/upload/f/sf.jpg'; //f1
+      });
+    /*
+}else{
+  this.authService.logout();
+}*/
 
-  @HostListener('document:click', ['$event'])
-  onDocumentClick(event: MouseEvent) {
-    // Check if event.target is an HTMLElement and then use closest
-    const target = event.target as HTMLElement;
+    /*var permisos = JSON.parse(localStorage.getItem("permisos"));
+    this.nroPermisos =  permisos.length;
     
-    // If the click is outside the user-menu div, close the menu
-    if (target && !target.closest('.user-menu')) {
-      this.showUserMenu = false;
+    this.dataService.getData().subscribe((data) =>{
+      if(data){
+        this.permisoActivo = data;
+      }
+      else{
+        this.authService.logout();
+      }
+    })
+    if(localStorage.getItem('rol')){
+      this.rol = localStorage.getItem('rol');
+    }*/
+  }
+  logout() {
+    const valueToKeep = localStorage.getItem('ubigeo');
+    localStorage.clear();
+    if (valueToKeep !== null) {
+      localStorage.setItem('ubigeo', valueToKeep);
     }
+    this.router.navigate(["/Home"]);
+
+  }
+  cargarImagen(url: string): Promise<HTMLImageElement> {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      try {
+        img.src = url;
+      }
+      catch (error) {
+        console.log("No existe imagen " + error)
+      }
+      img.onload = () => {
+        resolve(img); // Resuelve la promesa cuando la imagen se ha cargado con éxito
+      };
+
+      img.onerror = () => {
+        reject(new Error(`No se pudo cargar la imagen en la URL: ${url}`)); // Rechaza la promesa en caso de error
+      };
+    });
+  }
+  selectPermiso() {
+    let accionSelect: string = 's';
+    localStorage.setItem('accionSelect', accionSelect)
   }
 
-  irAMisProyectos() {
-    if (this.userRoles.includes('AUT') || this.userRoles.includes('AUA')) {
-      this.router.navigate(['/alumno/mis-proyectos']);
-    } else if (this.userRoles.some(r => ['ASE', 'DIR', 'DEC', 'SEC','ADM'].includes(r))) {
-      this.router.navigate(['/asesor/mis-proyectos']);
-    }
-  
-    this.menuAbierto = false;
+  verCuenta() {
+    this.router.navigate(["IISMuro/VerCuenta"]);
+
   }
-
-  reemplazarImagen(event: Event, id_usuario: string) {
-    const imgElement = event.target as HTMLImageElement;
-    imgElement.src = 'UserSinFoto.svg';
-  }
-
-  cerrarSesion(): void {
-    // this.authService.cerrarSesion();
-    window.location.reload();
-  }
-
-  isDarkMode = false;
-
-  toggleDarkMode() {
-    this.isDarkMode = !this.isDarkMode;
-    const body = document.querySelector('body')!;
-    const appRoot = document.querySelector('app-root')!;
-
-    if (this.isDarkMode) {
-      appRoot.classList.add('my-app-dark');
-    } else {
-      appRoot.classList.remove('my-app-dark');
-    }
-  }
-
-  SoloAdmin(): boolean {
-    return this.userRoles.includes('ADM');
+  cambiarPassword() {
+    this.router.navigate(["Postulante/CambiarPasswordPost"]);
   }
 }

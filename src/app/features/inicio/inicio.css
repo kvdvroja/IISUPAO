@@ -77,16 +77,7 @@ html {
   }
 }
 
-
-.glow-title {
-  position: relative;
-  color: white;
-  font-size: 3.5rem;
-  z-index: 1;
-  transition: color 0.3s ease-in-out;
-}
-
-
-.glow-title:hover::after {
-  opacity: 1;
+:host ::ng-deep .hover-black:hover {
+  background-color: #1a1a1a !important;
+  border-color: #1a1a1a !important;
 }

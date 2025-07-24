@@ -1,0 +1,26 @@
+.sidebar {
+  width: 250px;
+  height: 100vh;
+  background: #2e4768;
+  color: white;
+  position: fixed;
+  top: 0px;
+  left: 0;
+  transition: width 0.3s ease-in-out;
+  overflow: hidden;
+}
+
+.sidebar.closed {
+  width: 0;
+  padding: 0;
+}
+
+ul {
+  list-style: none;
+  padding: 20px;
+}
+
+ul li a {
+  color: white;
+  text-decoration: none;
+}

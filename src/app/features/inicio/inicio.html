@@ -1,10 +1,14 @@
-<div class="bg-black flex justify-between w-full bg-gradient-to-r from-[#1C3D67] to-[#000000] bg-cover bg-fixed">
+<div class="bg-black flex justify-between w-full bg-gradient-to-r from-[#1C3D67] to-[#000000] bg-cover bg-fixed" style="padding:8px">
   <div>
     <img src="upao_logo_white.png" alt="" class="w-20" />
   </div>
   <div class="text-white flex justify-center items-center">
     <!-- PrimeNG button with Tailwind styles -->
-    <p-button label="INGRESAR" class="bg-black text-white hover:bg-white hover:text-black transition-all duration-300"></p-button>
+    <p-button
+  label="INGRESAR"
+  [style]="{ 'background-color': 'black', 'border-color': 'black', 'color': 'white' }"
+  styleClass="hover-black transition-all duration-300" (click)="ingresar()">
+</p-button>
   </div>
 </div>
 
