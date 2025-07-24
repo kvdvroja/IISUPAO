@@ -13,11 +13,12 @@ import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
 import { NgFor } from '@angular/common';
+import { Dialog } from 'primeng/dialog';
+import { Toast } from 'primeng/toast';
 import { ViewChild } from '@angular/core';
 import { ConfirmationService } from 'primeng/api';
 import { SistemasI } from '../../core/interfaces/Sistemas';
 import { FormsModule } from '@angular/forms';
-
 
 @Component({
   selector: 'app-sistemas',
@@ -32,7 +33,9 @@ import { FormsModule } from '@angular/forms';
     IconField,
     InputTextModule,
     InputGroupModule,
-    InputGroupAddonModule
+    InputGroupAddonModule,
+    Dialog,
+    Toast,
   ],
   providers: [MessageService, ConfirmationService],
   templateUrl: './sistemas.html',
@@ -42,7 +45,17 @@ export class Sistemas implements OnInit {
   @ViewChild('dt1') dt1!: Table;
   pantallaPequena = false;
   mostrarSoloPendientes: boolean = false;
+  mostrarDialogoAgregar: boolean = false;
+  registroExitoso: boolean = false;
   sistemas!: SistemasI[];
+
+  nuevoSistema: {
+    nombre: string;
+    descripcion: string;
+  } = {
+    nombre: '',
+    descripcion: '',
+  };
   ngOnInit(): void {}
   filtrarGlobal(event: Event) {
     const valor = (event.target as HTMLInputElement).value;
@@ -58,4 +71,22 @@ export class Sistemas implements OnInit {
   }
 
   showEditar(sistema: any): void {}
+
+  AgregarSistema(): void {
+    this.mostrarDialogoAgregar = true;
+  }
+
+  cerrarDialogoAgregar(): void {
+    this.mostrarDialogoAgregar = false;
+    this.registroExitoso = false;
+  }
+
+    guardarNuevoSistema(): void {
+    if (
+      !this.nuevoSistema.nombre ||
+      !this.nuevoSistema.descripcion 
+    ) {
+      return;
+    }
+  }
 }

@@ -10,7 +10,12 @@ export const MAIN_LAYOUT: Routes = [
         path: 'IISMuro',
         loadChildren: () =>
           import('../../features/home/home.routes').then((m) => m.HOME_ROUTES),
-      }
-    ]
-  }
+      },
+      {
+        path: 'Tickets',
+        loadChildren: () =>
+          import('../../features/tickets/tickets.routes').then((m) => m.TICKETS_ROUTES),
+      },
+    ],
+  },
 ];
