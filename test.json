@@ -1,0 +1,25 @@
+[
+  {
+    "credentials": [
+      { "type": "bannerSourcedId", "value": "77845" },
+      { "type": "bannerUserName", "value": "vtorres6" },
+      { "type": "bannerUdcId", "value": "369B6A06C02F93F6E0630752010A4E85" },
+      { "type": "bannerId", "value": "000127007" }
+    ],
+    "dateOfBirth": "1996-01-21",
+    "gender": "female",
+    "genderMarker": { "id": "e29d33e6-21ee-42b4-9680-519748963bf3" },
+    "id": "db8edb52-c7a3-42de-98f6-9b3d1df38231",
+    "names": [
+      {
+        "firstName": "VANESSA",
+        "fullName": "VANESSA KATHERIN TORRES  MAMANI",
+        "lastName": "TORRES  MAMANI",
+        "middleName": "KATHERIN",
+        "preference": "preferred"
+      }
+    ],
+    "privacyStatus": { "privacyCategory": "restricted" },
+    "roles": [{ "role": "student", "startOn": "2013-03-18T00:00:00Z" }]
+  }
+]
