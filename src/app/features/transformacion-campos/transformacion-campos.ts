@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit,inject } from '@angular/core';
+import { ChangeDetectorRef } from '@angular/core';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { MessageService } from 'primeng/api';
 import { TableModule } from 'primeng/table';
@@ -20,6 +21,7 @@ import { ConfirmationService } from 'primeng/api';
 import { Transformacion_CamposI } from '../../core/interfaces/Transformacion_Campos';
 import { FormsModule } from '@angular/forms';
 import { SelectModule } from 'primeng/select';
+import { TransformacionCampoS } from '../../core/services/mant/transformacion-campo/transformacion-campo';
 
 @Component({
   selector: 'app-transformacion-campos',
@@ -45,7 +47,8 @@ import { SelectModule } from 'primeng/select';
 })
 export class TransformacionCampos implements OnInit {
   @ViewChild('dt1') dt1!: Table;
-
+  transformacionCamposService = inject(TransformacionCampoS);
+  cdRef = inject(ChangeDetectorRef);
   pantallaPequena = false;
   mostrarDialogoAgregar = false;
 
@@ -63,7 +66,22 @@ export class TransformacionCampos implements OnInit {
     pd_id: ''
   };
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.cargarData();
+  }
+
+  cargarData(): void {
+    this.transformacionCamposService.getAllTransformacionCampos().subscribe({
+      next: (response) => {
+        this.campos = response.result.data;
+        this.cdRef.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error cargando plantillas destino', err);
+      },
+    });
+  }
+
 
   get datosFiltrados(): Transformacion_CamposI[] {
     return this.campos;

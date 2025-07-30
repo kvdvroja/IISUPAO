@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { MessageService } from 'primeng/api';
 import { TableModule } from 'primeng/table';
@@ -20,6 +20,8 @@ import { ConfirmationService } from 'primeng/api';
 import { Plantilla_IntegracionI } from '../../core/interfaces/Plantilla_Integracion';
 import { FormsModule } from '@angular/forms';
 import { SelectModule } from 'primeng/select';
+import { ChangeDetectorRef } from '@angular/core';
+import { PlantillaIntegracionS } from '../../core/services/mant/plantilla-integracion/plantilla-integracion';
 
 
 @Component({
@@ -47,7 +49,8 @@ import { SelectModule } from 'primeng/select';
 })
 export class PlantillaIntegracion implements OnInit {
   @ViewChild('dt') dt!: Table;
-
+  plantillaIntegracionService = inject(PlantillaIntegracionS);
+  cdRef = inject(ChangeDetectorRef);
   pantallaPequena = false;
   mostrarDialogoAgregar = false;
   registroExitoso = false;
@@ -81,7 +84,19 @@ export class PlantillaIntegracion implements OnInit {
   };
 
   ngOnInit(): void {
-    // Lógica inicial
+    this.cargarPlantillas();
+  }
+
+  cargarPlantillas(): void {
+    this.plantillaIntegracionService.getAllPlantillas().subscribe({
+      next: (response) => {
+        this.plantillas = response.result.data;
+        this.cdRef.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error cargando plantillas destino', err);
+      },
+    });
   }
 
   filtrarGlobal(event: Event) {

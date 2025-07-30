@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, inject } from '@angular/core';
 import { Table } from 'primeng/table';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -10,10 +10,12 @@ import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { InputGroupModule } from 'primeng/inputgroup';
 import { ButtonModule } from 'primeng/button';
 import { Dialog } from 'primeng/dialog';
+import { ChangeDetectorRef } from '@angular/core';
 import { Toast } from 'primeng/toast';
 import { InputIcon } from 'primeng/inputicon';
 import { IconField } from 'primeng/iconfield';
 import { Plantilla_DestinoI } from '../../core/interfaces/Plantilla_Destino';
+import { PlantillaDestinoS } from '../../core/services/mant/plantilla-destino/plantilla-destino';
 
 @Component({
   selector: 'app-plantilla-destino',
@@ -38,6 +40,8 @@ import { Plantilla_DestinoI } from '../../core/interfaces/Plantilla_Destino';
 })
 export class PlantillaDestino implements OnInit {
   @ViewChild('dt1') dt1!: Table;
+  plantillaDestinoService = inject(PlantillaDestinoS);
+  cdRef = inject(ChangeDetectorRef);
   pantallaPequena = false;
   mostrarDialogoAgregar: boolean = false;
   plantillaDestinos: Plantilla_DestinoI[] = [];
@@ -55,8 +59,21 @@ export class PlantillaDestino implements OnInit {
     pd_tipo_transformacion: '',
   };
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.cargarPlantillas();
+  }
 
+  cargarPlantillas(): void {
+    this.plantillaDestinoService.getAllPlantillas().subscribe({
+      next: (response) => {
+        this.plantillaDestinos = response.result.data;
+        this.cdRef.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error cargando plantillas destino', err);
+      },
+    });
+  }
   get datosFiltrados(): Plantilla_DestinoI[] {
     return this.plantillaDestinos;
   }

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { MessageService } from 'primeng/api';
 import { TableModule } from 'primeng/table';
@@ -8,6 +8,7 @@ import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { InputGroupModule } from 'primeng/inputgroup';
 import { Table } from 'primeng/table';
 import { InputIcon } from 'primeng/inputicon';
+import { ChangeDetectorRef} from '@angular/core';
 import { IconField } from 'primeng/iconfield';
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -19,6 +20,7 @@ import { ViewChild } from '@angular/core';
 import { ConfirmationService } from 'primeng/api';
 import { SistemasI } from '../../core/interfaces/Sistemas';
 import { FormsModule } from '@angular/forms';
+import { SistemasS } from '../../core/services/mant/sistemas/sistemas';
 
 @Component({
   selector: 'app-sistemas',
@@ -42,6 +44,8 @@ import { FormsModule } from '@angular/forms';
   styleUrl: './sistemas.css',
 })
 export class Sistemas implements OnInit {
+  sistemasService = inject(SistemasS);
+  cdRef = inject(ChangeDetectorRef);
   @ViewChild('dt1') dt1!: Table;
   pantallaPequena = false;
   mostrarSoloPendientes: boolean = false;
@@ -56,7 +60,9 @@ export class Sistemas implements OnInit {
     nombre: '',
     descripcion: '',
   };
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.cargarSistemas();
+  }
   filtrarGlobal(event: Event) {
     const valor = (event.target as HTMLInputElement).value;
     this.dt1.filterGlobal(valor, 'contains');
@@ -69,6 +75,19 @@ export class Sistemas implements OnInit {
 
     return this.sistemas;
   }
+
+    cargarSistemas(): void {
+    this.sistemasService.getAllSistemas().subscribe({
+      next: (response) => {
+        this.sistemas = response.result.data;
+        this.cdRef.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error cargando sistemas', err);
+      },
+    });
+  }
+
 
   showEditar(sistema: any): void {}
 

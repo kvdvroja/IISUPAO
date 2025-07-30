@@ -20,6 +20,9 @@ import { ConfirmationService } from 'primeng/api';
 import { EndpointI } from '../../core/interfaces/Endpoint';
 import { FormsModule } from '@angular/forms';
 import { SelectModule } from 'primeng/select';
+import { ChangeDetectorRef } from '@angular/core';
+import { inject } from '@angular/core';
+import { Endpoint } from '../../core/services/mant/endpoint/endpoint';
 
 @Component({
   selector: 'app-endpoints',
@@ -44,6 +47,8 @@ import { SelectModule } from 'primeng/select';
   styleUrl: './endpoints.css',
 })
 export class Endpoints {
+  endpointService = inject(Endpoint);
+  cdRef = inject(ChangeDetectorRef);
   @ViewChild('dt1') dt1!: Table;
   pantallaPequena = false;
   mostrarSoloPendientes: boolean = false;
@@ -55,18 +60,20 @@ export class Endpoints {
     { label: 'No', value: 'N' },
   ];
   nuevoEndpoint: EndpointI = {
-    se_id: '',
+    se_id: 0,
     se_sistema_id: '',
     se_nombre: '',
     se_url: '',
     se_metodo_http: '',
-    se_requiere_transformar: '',
+    se_requiere_transformar: false,
     se_usua_id: '',
     se_fecha_actividad: '',
     se_ind_estado: '',
-    se_requiere_auth: '',
+    se_requiere_auth: false,
   };
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.cargarEndpoints();
+  }
   filtrarGlobal(event: Event) {
     const valor = (event.target as HTMLInputElement).value;
     this.dt1.filterGlobal(valor, 'contains');
@@ -78,6 +85,18 @@ export class Endpoints {
     }
 
     return this.endpoint;
+  }
+
+  cargarEndpoints(): void {
+    this.endpointService.getAllEndpoints().subscribe({
+      next: (response) => {
+        this.endpoint = response.result.data;
+        this.cdRef.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error cargando endpoints', err);
+      },
+    });
   }
 
   showEditar(endpoint: any): void {}
