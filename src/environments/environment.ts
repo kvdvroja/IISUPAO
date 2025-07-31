@@ -8,6 +8,7 @@ export const environment = {
   },
   get endpointsApiUrl() { return `${this.apiBaseUrl}endpoints/`; },
   get getAllEndpoints() { return `${this.endpointsApiUrl}get_all_endpoints`; },
+  get EndpointCrudUrl() {return `${this.endpointsApiUrl}crud2`; },
 
   get sistemasApiUrl() { return `${this.apiBaseUrl}systems/`; },
   get getAllSistemas() { return `${this.sistemasApiUrl}get_all_systems`; },

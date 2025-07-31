@@ -24,4 +24,11 @@ export class Endpoint {
       }
     );
   }
+
+  endpointCrud(endpoint: EndpointI, action: string): Observable<any> {
+    const url = `${environment.EndpointCrudUrl}?action=${action}`; // Agregar el parámetro 'action' a la URL
+    return this.http.post<any>(url, endpoint, {
+      headers: this.getHeaders(),
+    });
+  }
 }

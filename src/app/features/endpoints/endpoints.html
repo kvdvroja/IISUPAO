@@ -16,19 +16,24 @@
       pInputText
       type="text"
       (input)="filtrarGlobal($event)"
-      placeholder="Buscar Sistema..."
+      placeholder="Buscar endpoint..."
       class="w-full"
     />
   </p-iconfield>
 </div>
 <div *ngIf="pantallaPequena" class="flex flex-col gap-4">
-  <div *ngFor="let endpoint of endpointsFiltrados" class="bg-white p-4 rounded shadow border">
+  <div
+    *ngFor="let endpoint of endpointsFiltrados"
+    class="bg-white p-4 rounded shadow border"
+  >
     <div><strong>Código:</strong> {{ endpoint.se_id }}</div>
     <div><strong>Sistema:</strong> {{ endpoint.se_sistema_id }}</div>
     <div><strong>Nombre:</strong> {{ endpoint.se_nombre }}</div>
     <div><strong>URL:</strong> {{ endpoint.se_url }}</div>
     <div><strong>Método HTTP:</strong> {{ endpoint.se_metodo_http }}</div>
-    <div><strong>Fecha Actividad:</strong> {{ endpoint.se_fecha_actividad }}</div>
+    <div>
+      <strong>Fecha Actividad:</strong> {{ endpoint.se_fecha_actividad }}
+    </div>
     <div><strong>Estado:</strong> {{ endpoint.se_ind_estado }}</div>
     <div class="flex justify-end mt-2">
       <p-button
@@ -51,7 +56,7 @@
     [globalFilterFields]="['se_nombre', 'se_sistema_id', 'se_url']"
   >
     <ng-template #caption>
-            <div
+      <div
         class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 sm:gap-2 w-full px-2"
       >
         <div class="flex flex-wrap gap-2">
@@ -109,12 +114,8 @@
         <td>{{ endpoint.se_ind_estado }}</td>
         <td>
           <div class="flex gap-2 justify-center">
-            <p-button
-              icon="pi pi-pencil"
-              severity="secondary"
-              rounded
-              (onClick)="showEditar(endpoint)"
-            ></p-button>
+            <p-button icon="pi pi-pencil" severity="secondary" rounded (onClick)="showEditar(endpoint)"></p-button>
+            <p-button icon="pi pi-trash" severity="danger" rounded (onClick)="eliminarEndpoint(endpoint)"></p-button>
           </div>
         </td>
       </tr>
@@ -128,87 +129,40 @@
   </p-table>
 </div>
 <p-toast></p-toast>
-<p-dialog
-  [(visible)]="mostrarDialogoAgregar"
-  header="Agregar Endpoint"
-  [style]="{ width: '40rem'}"
-  [breakpoints]="{ '960px': '90vw' }"
-  modal
-  [dismissableMask]="true"
-  (visibleChange)="cerrarDialogoAgregar()"
->
+<p-dialog [(visible)]="mostrarDialogoAgregar" header="Agregar Endpoint" [style]="{ width: '40rem' }" [breakpoints]="{ '960px': '90vw' }" modal [dismissableMask]="true" (visibleChange)="cerrarDialogoAgregar()">
   <div class="flex flex-col gap-4 h-full">
-    <!-- Sistema ID -->
     <p-inputgroup>
       <p-inputgroup-addon><i class="pi pi-sitemap"></i></p-inputgroup-addon>
-      <input
-        pInputText
-        placeholder="Sistema ID"
-        [(ngModel)]="nuevoEndpoint.se_sistema_id"
-      />
+      <input pInputText placeholder="Sistema ID" [(ngModel)]="nuevoEndpoint.se_sistema_id" />
     </p-inputgroup>
 
-    <!-- Nombre -->
     <p-inputgroup>
       <p-inputgroup-addon><i class="pi pi-tag"></i></p-inputgroup-addon>
-      <input
-        pInputText
-        placeholder="Nombre"
-        [(ngModel)]="nuevoEndpoint.se_nombre"
-      />
+      <input pInputText placeholder="Nombre" [(ngModel)]="nuevoEndpoint.se_nombre" />
     </p-inputgroup>
 
-    <!-- URL -->
     <p-inputgroup>
       <p-inputgroup-addon><i class="pi pi-link"></i></p-inputgroup-addon>
       <input pInputText placeholder="URL" [(ngModel)]="nuevoEndpoint.se_url" />
     </p-inputgroup>
 
-    <!-- Método HTTP -->
     <p-inputgroup>
       <p-inputgroup-addon><i class="pi pi-server"></i></p-inputgroup-addon>
-      <input
-        pInputText
-        placeholder="Método HTTP (GET, POST, etc)"
-        [(ngModel)]="nuevoEndpoint.se_metodo_http"
-      />
+      <input pInputText placeholder="Método HTTP (GET, POST, etc)" [(ngModel)]="nuevoEndpoint.se_metodo_http" />
     </p-inputgroup>
 
-    <!-- Requiere Transformar -->
     <div class="flex flex-col">
       <label class="font-semibold text-sm">¿Requiere Transformar?</label>
-      <p-select
-        [(ngModel)]="nuevoEndpoint.se_requiere_transformar"
-        [options]="opcionesTransformacion"
-        optionLabel="label"
-        placeholder="Seleccione"
-        class="w-full md:w-56"
-      />
+      <p-select [(ngModel)]="nuevoEndpoint.se_requiere_transformar" [options]="opcionesTransformacion" optionLabel="label" optionValue="value" placeholder="Seleccione" class="w-full md:w-56" />
     </div>
 
-    <!-- Botones -->
     <div class="flex justify-end gap-2 pt-4">
-      <p-button
-        label="Cancelar"
-        icon="pi pi-times"
-        (click)="mostrarDialogoAgregar = false"
-        outlined
-      ></p-button>
-      <p-button
-        label="Guardar"
-        icon="pi pi-check"
-        (click)="guardarNuevoEndpoint()"
-        [disabled]="
-          !nuevoEndpoint.se_sistema_id ||
-          !nuevoEndpoint.se_nombre ||
-          !nuevoEndpoint.se_url ||
-          !nuevoEndpoint.se_metodo_http ||
-          nuevoEndpoint.se_requiere_transformar === undefined
-        "
-      ></p-button>
+      <p-button label="Cancelar" icon="pi pi-times" (click)="mostrarDialogoAgregar = false" outlined></p-button>
+      <p-button label="Guardar" icon="pi pi-check" (click)="guardarNuevoEndpoint()" [disabled]="!nuevoEndpoint.se_sistema_id || !nuevoEndpoint.se_nombre || !nuevoEndpoint.se_url || !nuevoEndpoint.se_metodo_http || nuevoEndpoint.se_requiere_transformar === undefined"></p-button>
     </div>
   </div>
 </p-dialog>
+
 
 <p-confirmDialog #cd>
   <ng-template
