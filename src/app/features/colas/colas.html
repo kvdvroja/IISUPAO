@@ -22,6 +22,7 @@
     <div><strong>Estado:</strong> {{ cola.cola_ind_estado }}</div>
     <div class="flex justify-end mt-2">
       <p-button icon="pi pi-pencil" (onClick)="showEditar(cola)" severity="secondary" rounded></p-button>
+      <p-button  *ngIf="cola.cola_ind_estado == 'A'" icon="pi pi-trash" severity="danger" rounded (onClick)="eliminarCola(cola)"></p-button>
     </div>
   </div>
 </div>
@@ -66,6 +67,7 @@
         <td>
           <div class="flex gap-2 justify-center">
             <p-button icon="pi pi-pencil" severity="secondary" rounded (onClick)="showEditar(cola)"></p-button>
+            <p-button  *ngIf="cola.cola_ind_estado == 'A'" icon="pi pi-trash" severity="danger" rounded (onClick)="eliminarCola(cola)"></p-button>
           </div>
         </td>
       </tr>
@@ -85,8 +87,21 @@
   <div class="flex flex-col gap-4 h-full">
     <p-inputgroup>
       <p-inputgroup-addon><i class="pi pi-tag"></i></p-inputgroup-addon>
-      <input pInputText placeholder="Nombre de la cola" [(ngModel)]="nuevaCola.cola_nombre" />
+      <input pInputText placeholder="ID de la Cola" [(ngModel)]="nuevaCola.cola_id" />
     </p-inputgroup>
+
+    <!-- Input para Nombre de la Cola -->
+    <p-inputgroup>
+      <p-inputgroup-addon><i class="pi pi-tag"></i></p-inputgroup-addon>
+      <input pInputText placeholder="Nombre de la Cola" [(ngModel)]="nuevaCola.cola_nombre" />
+    </p-inputgroup>
+
+    <!-- Input para Usuario ID -->
+    <p-inputgroup>
+      <p-inputgroup-addon><i class="pi pi-user"></i></p-inputgroup-addon>
+      <input pInputText placeholder="Usuario ID" [(ngModel)]="nuevaCola.cola_usua_id" />
+    </p-inputgroup>
+
 
     <div class="flex justify-end gap-2 pt-4">
       <p-button label="Cancelar" icon="pi pi-times" (click)="mostrarDialogoAgregar = false" outlined></p-button>
