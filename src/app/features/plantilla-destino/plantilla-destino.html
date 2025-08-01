@@ -46,6 +46,7 @@
         severity="secondary"
         rounded
       ></p-button>
+      <p-button  *ngIf="item.pd_ind_estado == 'A'" icon="pi pi-trash" severity="danger" rounded (onClick)="eliminar(item)"></p-button>
     </div>
   </div>
 </div>
@@ -125,6 +126,7 @@
             severity="secondary"
             rounded
           ></p-button>
+          <p-button *ngIf="row.pd_ind_estado == 'A'" icon="pi pi-trash" severity="danger" rounded (onClick)="eliminar(row)"></p-button>
         </td>
       </tr>
     </ng-template>
@@ -236,3 +238,32 @@
   </div>
 </p-dialog>
 <p-toast></p-toast>
+<p-confirmDialog #cd>
+  <ng-template
+    #headless
+    let-message
+    let-onAccept="onAccept"
+    let-onReject="onReject"
+  >
+    <div
+      class="flex flex-col items-center p-6 bg-white dark:bg-surface-900 rounded"
+    >
+      <i class="pi pi-exclamation-triangle text-orange-500 text-4xl mb-3"></i>
+      <div class="text-lg font-semibold mb-2">{{ message.header }}</div>
+      <p class="text-center">{{ message.message }}</p>
+      <div class="flex justify-center gap-3 mt-4">
+        <p-button
+          label="SI"
+          (onClick)="onAccept()"
+          styleClass="w-32"
+        ></p-button>
+        <p-button
+          label="NO"
+          [outlined]="true"
+          (onClick)="onReject()"
+          styleClass="w-32"
+        ></p-button>
+      </div>
+    </div>
+  </ng-template>
+</p-confirmDialog>

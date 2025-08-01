@@ -96,7 +96,7 @@ export class PlantillaDestino implements OnInit {
   showEditar(row: Plantilla_DestinoI): void {
     this.editando = true;
     this.mostrarDialogoAgregar = true;
-    this.nuevo = { ...row }; // Pasamos los datos del sistema a los campos del formulario
+    this.nuevo = { ...row };
   }
 
   Agregar(): void {
@@ -113,7 +113,7 @@ export class PlantillaDestino implements OnInit {
     this.nuevo = {
       pd_id: '',
       pd_plan_inte_id: '',
-      pd_prioridad: '',
+      pd_priodridad: '',
       pd_ind_estado: 'A',
       pd_sist_dest_id: '',
       pd_schema: '',
@@ -126,26 +126,24 @@ export class PlantillaDestino implements OnInit {
   guardarNuevo(): void {
     if (
       !this.nuevo.pd_plan_inte_id ||
-      !this.nuevo.pd_prioridad ||
+      !this.nuevo.pd_priodridad ||
       !this.nuevo.pd_sist_dest_id ||
       !this.nuevo.pd_url ||
       !this.nuevo.pd_metodo_http ||
       !this.nuevo.pd_tipo_transformacion
     )
       return;
-
-    // Eliminar pd_id del payload en caso de inserción
+    console.log('Nuevo objeto:', this.nuevo);
     if (!this.editando) {
-      this.nuevo.pd_id = null; // Eliminar pd_id para no enviarlo en la inserción
+      this.nuevo.pd_id = null;
     }
 
-    // Si estamos editando, aseguramos que pd_id esté presente y sea un número
     if (this.editando && this.nuevo.pd_id) {
-      this.nuevo.pd_id = Number(this.nuevo.pd_id); // Convertir a número si es necesario
+      this.nuevo.pd_id = Number(this.nuevo.pd_id);
     }
 
-    const accion = this.editando ? 'U' : 'I'; // 'U' para actualizar, 'I' para insertar
-    const payload = { ...this.nuevo }; // Usamos el objeto "nuevo" como payload
+    const accion = this.editando ? 'U' : 'I';
+    const payload = { ...this.nuevo };
 
     this.plantillaDestinoService
       .plantillaDestinoCrud(payload as any, accion)

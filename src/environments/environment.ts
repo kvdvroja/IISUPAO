@@ -17,8 +17,9 @@ export const environment = {
   get usuariosApiUrl() { return `${this.apiBaseUrl}users/`; },
   get getAllUsuarios() { return `${this.usuariosApiUrl}get_all_users`; },
 
-  get colasApiUrl() { return `${this.apiBaseUrl}colas/`; },
-  get getAllColas() { return `${this.colasApiUrl}get_all_colas`; },
+  get colasApiUrl() { return `${this.apiBaseUrl}queues/`; },
+  get getAllColas() { return `${this.colasApiUrl}get_all_queue`; },
+  get colasCrudUrl() { return `${this.colasApiUrl}crud`; },
 
   get plantillaIntegracionApiUrl() { return `${this.apiBaseUrl}integration_templates/`; },
   get getAllPlantillaIntegracion() { return `${this.plantillaIntegracionApiUrl}get_all_integration_templates`; },
@@ -30,8 +31,9 @@ export const environment = {
   get transformacionCampospiUrl() { return `${this.apiBaseUrl}transformable_fields/`; },
   get getAlltransformacionCampos() { return `${this.transformacionCampospiUrl}get_all_transformable_field`; },
 
-  get transformacionValorespiUrl() { return `${this.apiBaseUrl}transformable_values/`; },
-  get getAlltransformacionValores() { return `${this.transformacionValorespiUrl}get_all_transformable_values`; },
+  get transformacionValorespiUrl() { return `${this.apiBaseUrl}transformable_value/`; },
+  get getAlltransformacionValores() { return `${this.transformacionValorespiUrl}get_all_transformable_value`; },
+  get transformacionValoresCrudUrl() { return `${this.transformacionValorespiUrl}crud_transformable_value`; },
 
   urlSSO: 'https://upaosso.upao.edu.pe:420',
   urlAngular: 'http://localhost:4200/#',

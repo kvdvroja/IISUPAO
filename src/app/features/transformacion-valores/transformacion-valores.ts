@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { MessageService } from 'primeng/api';
 import { TableModule } from 'primeng/table';
@@ -20,6 +20,7 @@ import { ConfirmationService } from 'primeng/api';
 import { Transformacion_ValorI } from '../../core/interfaces/Transformacion_Valor';
 import { FormsModule } from '@angular/forms';
 import { SelectModule } from 'primeng/select';
+import { TransformacionValorS } from '../../core/services/mant/transformacion-valor/transformacion-valor';
 
 @Component({
   selector: 'app-transformacion-valor',
@@ -44,12 +45,15 @@ import { SelectModule } from 'primeng/select';
 })
 export class TransformacionValores implements OnInit {
   @ViewChild('dt') dt!: Table;
+  transformacionValoresService = inject(TransformacionValorS);
+  cdRef = inject(ChangeDetectorRef);
+  messageService = inject(MessageService);
+  confirmService = inject(ConfirmationService);
   pantallaPequena = false;
   mostrarDialogoAgregar = false;
 
   valores: Transformacion_ValorI[] = [];
-  nuevoValor: Transformacion_ValorI = {
-    vt_id: '',
+  nuevoValor: any = {
     vt_camp_tran_id: '',
     vt_valor_origen: '',
     vt_valor_destino: '',
@@ -59,7 +63,21 @@ export class TransformacionValores implements OnInit {
     return this.valores;
   }
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.cargarData();
+  }
+
+  cargarData(): void {
+    this.transformacionValoresService.getAllTransformacionValor().subscribe({
+      next: (response) => {
+        this.valores = response.result.data;
+        this.cdRef.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error cargando la data.', err);
+      },
+    });
+  }
 
   filtrarGlobal(event: Event): void {
     const valor = (event.target as HTMLInputElement).value;
@@ -67,7 +85,8 @@ export class TransformacionValores implements OnInit {
   }
 
   editar(valor: Transformacion_ValorI): void {
-    // lógica para editar
+    this.nuevoValor = { ...valor };
+    this.mostrarDialogoAgregar = true;
   }
 
   cerrarDialogoAgregar(): void {
@@ -75,16 +94,76 @@ export class TransformacionValores implements OnInit {
   }
 
   guardarNuevoValor(): void {
-    // Aquí deberías enviar el nuevo valor a tu backend o servicio
-    this.valores.push({ ...this.nuevoValor });
-    this.mostrarDialogoAgregar = false;
+    if (
+      !this.nuevoValor.vt_camp_tran_id ||
+      !this.nuevoValor.vt_valor_origen ||
+      !this.nuevoValor.vt_valor_destino
+    )
+      return;
 
-    // Reiniciar campos
-    this.nuevoValor = {
-      vt_id: '',
-      vt_camp_tran_id: '',
-      vt_valor_origen: '',
-      vt_valor_destino: '',
-    };
+    if (!this.nuevoValor.vt_id) {
+      // Eliminar vt_id para el caso de inserción
+      this.nuevoValor.vt_id = null; // Asegúrate de eliminar vt_id en la inserción
+    }
+
+    // Si tiene vt_id, es una actualización
+    const accion = this.nuevoValor.vt_id ? 'U' : 'I';
+
+    this.transformacionValoresService
+      .transformacionValoresCrud(this.nuevoValor, accion)
+      .subscribe({
+        next: () => {
+          this.messageService.add({
+            severity: 'success',
+            summary: this.nuevoValor.vt_id
+              ? 'Valor actualizado'
+              : 'Valor registrado',
+            detail: 'Operación exitosa',
+          });
+          this.cargarData();
+          this.cerrarDialogoAgregar();
+        },
+        error: (err) => {
+          console.error('Error al guardar', err);
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'No se pudo guardar el valor',
+          });
+        },
+      });
+  }
+
+  eliminar(valor: Transformacion_ValorI): void {
+    this.confirmService.confirm({
+      message: `¿Deseas eliminar el valor con ID: ${valor.vt_id}?`,
+      header: 'Confirmación',
+      icon: 'pi pi-exclamation-triangle',
+      accept: () => {
+        this.transformacionValoresService
+          .transformacionValoresCrud(
+            { vt_id: valor.vt_id } as Transformacion_ValorI,
+            'D'
+          )
+          .subscribe({
+            next: () => {
+              this.messageService.add({
+                severity: 'success',
+                summary: 'Valor eliminado',
+                detail: 'El valor fue eliminado exitosamente.',
+              });
+              this.cargarData();
+            },
+            error: (err) => {
+              this.messageService.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'No se pudo eliminar el valor',
+              });
+              console.error(err);
+            },
+          });
+      },
+    });
   }
 }
