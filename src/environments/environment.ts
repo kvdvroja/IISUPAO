@@ -12,6 +12,7 @@ export const environment = {
 
   get sistemasApiUrl() { return `${this.apiBaseUrl}systems/`; },
   get getAllSistemas() { return `${this.sistemasApiUrl}get_all_systems`; },
+  get SistemasCrudUrl() { return `${this.sistemasApiUrl}crud`; },
 
   get usuariosApiUrl() { return `${this.apiBaseUrl}users/`; },
   get getAllUsuarios() { return `${this.usuariosApiUrl}get_all_users`; },
@@ -24,6 +25,7 @@ export const environment = {
 
   get plantillaDestinoApiUrl() { return `${this.apiBaseUrl}integration_ends/`; },
   get getAllPlantillaDestino() { return `${this.plantillaDestinoApiUrl}get_all_integration_end`; },
+  get plantillaDestinoCrudUrl() { return `${this.plantillaDestinoApiUrl}crud_end`; },
 
   get transformacionCampospiUrl() { return `${this.apiBaseUrl}transformable_fields/`; },
   get getAlltransformacionCampos() { return `${this.transformacionCampospiUrl}get_all_transformable_field`; },

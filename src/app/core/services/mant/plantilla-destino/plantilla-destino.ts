@@ -4,12 +4,11 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
 import { Plantilla_DestinoI } from '../../../interfaces/Plantilla_Destino';
 
-
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class PlantillaDestinoS {
-    http = inject(HttpClient);
+  http = inject(HttpClient);
 
   private getHeaders(): HttpHeaders {
     return new HttpHeaders({
@@ -24,5 +23,15 @@ export class PlantillaDestinoS {
         headers: this.getHeaders(),
       }
     );
+  }
+
+  plantillaDestinoCrud(
+    plantilla: Plantilla_DestinoI,
+    action: string
+  ): Observable<any> {
+    const url = `${environment.plantillaDestinoCrudUrl}?action=${action}`; // Agregar el parámetro 'action' a la URL
+    return this.http.post<any>(url, plantilla, {
+      headers: this.getHeaders(),
+    });
   }
 }

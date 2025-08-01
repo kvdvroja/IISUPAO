@@ -189,7 +189,7 @@ export class Endpoints implements OnInit{
               summary: 'Endpoint eliminado',
               detail: 'El endpoint fue eliminado exitosamente.',
             });
-            this.cargarEndpoints(); // Recargar la tabla
+            this.cargarEndpoints();
           },
           error: (err) => {
             console.error('Error al eliminar endpoint', err);
@@ -202,7 +202,6 @@ export class Endpoints implements OnInit{
         });
       },
       reject: () => {
-        // Acción de cancelación si se rechaza la confirmación
         console.log('Eliminación cancelada');
       },
     });

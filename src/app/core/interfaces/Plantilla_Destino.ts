@@ -1,7 +1,7 @@
 export interface Plantilla_DestinoI {
   pd_id: string;
   pd_plan_inte_id: string;
-  pd_prioridad: string;
+  pd_priodridad: string;
   pd_ind_estado: string;
   pd_sist_dest_id: string;
   pd_schema: string;

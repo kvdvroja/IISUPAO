@@ -5,10 +5,10 @@ import { environment } from '../../../../../environments/environment';
 import { SistemasI } from '../../../interfaces/Sistemas';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class SistemasS {
-    http = inject(HttpClient);
+  http = inject(HttpClient);
 
   private getHeaders(): HttpHeaders {
     return new HttpHeaders({
@@ -23,5 +23,12 @@ export class SistemasS {
         headers: this.getHeaders(),
       }
     );
+  }
+
+  sistemasCrud(sistemas: SistemasI, action: string): Observable<any> {
+    const url = `${environment.SistemasCrudUrl}?action=${action}`; // Agregar el parámetro 'action' a la URL
+    return this.http.post<any>(url, sistemas, {
+      headers: this.getHeaders(),
+    });
   }
 }

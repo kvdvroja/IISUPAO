@@ -2,7 +2,8 @@
   class="flex flex-col md:flex-row md:items-center md:justify-between mb-6 border-b-4 border-[#1C3D67] p-4"
 >
   <h2
-    class="text-2xl font-bold uppercase tracking-wide pb-2 text-[#1c3d67] dark:text-white">
+    class="text-2xl font-bold uppercase tracking-wide pb-2 text-[#1c3d67] dark:text-white"
+  >
     Sistemas
   </h2>
 </div>
@@ -27,7 +28,7 @@
   >
     <div><strong>Código:</strong> {{ sistema.sistema_id }}</div>
     <div><strong>Nombre:</strong> {{ sistema.sistema_nombre }}</div>
-    <div><strong>Descripción:</strong> {{ sistema.sistema_descipcion }}</div>
+    <div><strong>Descripción:</strong> {{ sistema.sistema_descripcion }}</div>
     <div><strong>Estado:</strong> {{ sistema.sistema_ind_estado }}%</div>
     <div class="flex justify-end">
       <p-button
@@ -35,6 +36,12 @@
         (onClick)="showEditar(sistema)"
         severity="secondary"
         rounded
+      ></p-button>
+      <p-button
+        icon="pi pi-trash"
+        severity="danger"
+        rounded
+        (onClick)="eliminarSistema(sistema)"
       ></p-button>
     </div>
   </div>
@@ -106,7 +113,7 @@
     <ng-template #body let-sistema>
       <tr>
         <td>{{ sistema.sistema_id }}</td>
-        <td class="hidden xl:table-cell">
+        <td class="table-cell">
           {{ sistema.sistema_nombre }}
         </td>
         <td
@@ -115,7 +122,7 @@
         >
           {{ sistema.sistema_descripcion }}
         </td>
-        <td class="hidden xl:table-cell">
+        <td class="table-cell">
           <div class="flex justify-center">
             {{ sistema.sistema_ind_estado }}
           </div>
@@ -128,6 +135,12 @@
               severity="secondary"
               rounded
               (onClick)="showEditar(sistema)"
+            ></p-button>
+            <p-button
+              icon="pi pi-trash"
+              severity="danger"
+              rounded
+              (onClick)="eliminarSistema(sistema)"
             ></p-button>
           </div>
         </td>
@@ -154,11 +167,22 @@
   <div class="flex flex-col gap-4">
     <p-inputgroup class="shadow-lg">
       <p-inputgroup-addon>
+        <i class="pi pi-id-card"></i>
+      </p-inputgroup-addon>
+      <input
+        pInputText
+        [(ngModel)]="nuevoSistema.sistema_id"
+        placeholder="Código"
+        [disabled]="editando"
+      />
+    </p-inputgroup>
+    <p-inputgroup class="shadow-lg">
+      <p-inputgroup-addon>
         <i class="pi pi-calendar"></i>
       </p-inputgroup-addon>
       <input
         pInputText
-        [(ngModel)]="nuevoSistema.nombre"
+        [(ngModel)]="nuevoSistema.sistema_nombre"
         placeholder="Nombre"
         [disabled]="registroExitoso"
       />
@@ -170,12 +194,11 @@
       </p-inputgroup-addon>
       <input
         pInputText
-        [(ngModel)]="nuevoSistema.descripcion"
+        [(ngModel)]="nuevoSistema.sistema_descripcion"
         placeholder="Descripción"
         [disabled]="registroExitoso"
       />
     </p-inputgroup>
-
 
     <div class="flex justify-end gap-2 pt-4">
       <p-button
@@ -189,8 +212,10 @@
         icon="pi pi-check"
         (click)="guardarNuevoSistema()"
         [disabled]="
-          !nuevoSistema.nombre ||
-          !nuevoSistema.descripcion"
+          !nuevoSistema.sistema_id ||
+          !nuevoSistema.sistema_nombre ||
+          !nuevoSistema.sistema_descripcion
+        "
       ></p-button>
     </div>
   </div>
