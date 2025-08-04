@@ -26,7 +26,7 @@ export class ColaS {
     );
   }
 
-  colasCrud(cola: ColaI, action: string): Observable<any> {
+  colasCrud(cola: any, action: string): Observable<any> {
     const url = `${environment.colasCrudUrl}?action=${action}`; // Agregar el parámetro 'action' a la URL
     return this.http.post<any>(url, cola, {
       headers: this.getHeaders(),

@@ -53,13 +53,11 @@ export class Colas implements OnInit {
   mostrarDialogoAgregar = false;
   registroExitoso = false;
   editando = false;
-  colas: ColaI[] = [];
+  colas: any[] = [];
 
   nuevaCola: any = {
     cola_nombre: '',
     cola_usua_id: '',
-    cola_fecha_actividad: '',
-    cola_ind_estado: '',
   };
 
   ngOnInit(): void {
@@ -86,7 +84,7 @@ export class Colas implements OnInit {
     return this.colas;
   }
 
-  showEditar(cola: ColaI): void {
+  showEditar(cola: any): void {
     this.editando = true;  // Establecer como modo de edición
     this.mostrarDialogoAgregar = true;
     this.nuevaCola = { ...cola };  // Cargar los datos de la cola en el formulario
@@ -105,8 +103,6 @@ export class Colas implements OnInit {
       cola_id: '',
       cola_nombre: '',
       cola_usua_id: '',
-      cola_fecha_actividad: '',
-      cola_ind_estado: '',
     };
   }
 
@@ -121,11 +117,6 @@ export class Colas implements OnInit {
 
     const accion = this.editando ? 'U' : 'I';
 
-    // Si es una inserción, se genera un nuevo `cola_id` y se asigna la fecha actual
-    if (!this.editando) {// Generación del ID
-      this.nuevaCola.cola_fecha_actividad = new Date().toISOString(); 
-      this.nuevaCola.cola_ind_estado = 'A'; 
-    }
     // Llamar al servicio para guardar los datos (insertar o actualizar según corresponda)
     this.colasService.colasCrud(this.nuevaCola, accion).subscribe({
       next: () => {
