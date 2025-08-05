@@ -14,7 +14,7 @@ export interface TicketI {
   ticket_observacion: string;
   ticket_cant_reg_fallido: string;
   ticket_cant_reg_migrado: string;
-  ticket_priorida: string;
+  ticket_prioridad: string;
   ticket_dp_plan_id: string;
   ticket_schema: string;
   ticket_cola_id: string;

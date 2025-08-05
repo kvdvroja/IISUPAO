@@ -1,0 +1,37 @@
+:host {
+  display: block;
+}
+
+.fondo {
+  background-color: var(--fondo-gral);
+}
+
+.main-content {
+  margin-left: 250px;
+  padding: 0px;
+  min-height: 100vh;
+  transition: margin-left 0.3s ease-in-out, width 0.3s ease-in-out;
+}
+
+.main-content.expanded {
+  margin-left: 0;
+  width: 100%;
+}
+
+.sidebar {
+  width: 250px;
+  height: 100vh; /* Asegura que la altura sea de toda la pantalla */
+  overflow-y: scroll; /* Permite el desplazamiento vertical */
+  overflow-x: hidden; /* Oculta el desplazamiento horizontal */
+  scrollbar-width: none; /* Oculta el scroll en Firefox */
+  -ms-overflow-style: none; /* Oculta el scroll en Internet Explorer/Edge */
+  background-color: #343a40; /* Fondo oscuro */
+  color: white;
+  position: fixed;
+  padding: 1rem 0;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.section {
+  padding: 0;
+}

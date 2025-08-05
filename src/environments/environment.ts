@@ -6,6 +6,11 @@ export const environment = {
   get apiBaseUrl() {
     return `${this.apiLocalUrl}/api/${this.apiVersion}/`;
   },
+
+  get ticketsApiUrl() { return `${this.apiBaseUrl}tickets/`; },
+  get getAllTickets() { return `${this.ticketsApiUrl}get_all_tickets`; },
+  get TicketsCrudUrl() { return `${this.ticketsApiUrl}crud`; },
+
   get endpointsApiUrl() { return `${this.apiBaseUrl}endpoints/`; },
   get getAllEndpoints() { return `${this.endpointsApiUrl}get_all_endpoints`; },
   get EndpointCrudUrl() {return `${this.endpointsApiUrl}crud2`; },

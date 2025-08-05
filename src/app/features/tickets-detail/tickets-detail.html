@@ -1,19 +1,37 @@
-<div class="container mx-auto p-6 space-y-6">
+<div class="section">
+  <app-sidebar [isOpen]="sidebarOpen"></app-sidebar>
+</div>
+<div class="main-content" [class.expanded]="!sidebarOpen">
   <!-- Header -->
-  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+  <app-navbar
+    [isSidebarOpen]="sidebarOpen"
+    (sidebarToggle)="toggleSidebar()"
+  ></app-navbar>
+  <div class="flex flex-col px-4">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
     <div class="flex items-center gap-2">
-      <button pButton icon="pi pi-arrow-left" label="Volver" class="p-button-text text-[#1C3D67]"></button>
+      <button
+        pButton
+        icon="pi pi-arrow-left"
+        label="Volver"
+        class="p-button-text text-[#1C3D67]"
+      ></button>
     </div>
     <div class="flex-1">
-      <h1 class="text-3xl font-bold tracking-tight">{{ ticket.ticket_codigo }}</h1>
-      <p class="text-gray-500">{{ ticket.ticket_nombre }}</p>
+      <h1 class="text-3xl font-bold tracking-tight">
+        {{ tickets[0].ticket_codigo }}
+      </h1>
+      <p class="text-gray-500">{{ tickets[0].ticket_nombre }}</p>
     </div>
     <div class="flex gap-2">
       <p-tag
-        [value]="ticket.ticket_estado.replace('_', ' ')"
-        [severity]="getEstadoSeverity(ticket.ticket_estado)"
+        [value]="tickets[0].ticket_estado.replace('_', ' ')"
+        [severity]="getEstadoSeverity(tickets[0].ticket_estado)"
       ></p-tag>
-      <p-tag [value]="'Prioridad ' + ticket.ticket_prioridad" [severity]="getPrioridadSeverity(ticket.ticket_prioridad)"></p-tag>
+      <p-tag
+        [value]="'Prioridad ' + tickets[0].ticket_prioridad"
+        [severity]="getPrioridadSeverity(tickets[0].ticket_prioridad)"
+      ></p-tag>
     </div>
   </div>
 
@@ -23,10 +41,10 @@
       <p-card>
         <ng-template pTemplate="header">
           <span class="font-semibold flex items-center gap-2">
-            <i class="pi pi-file"></i> Descripción
+            <i class="pi pi-file"></i> Nombre
           </span>
         </ng-template>
-        <p>{{ ticket.ticket_descripcion }}</p>
+        <p>{{ tickets[0].ticket_nombre }}</p>
       </p-card>
 
       <p-card>
@@ -36,11 +54,13 @@
           </span>
         </ng-template>
         <div class="text-sm text-gray-700 mb-4">
-          {{ ticket.ticket_observaciones }}
+          {{ tickets[0].ticket_plan_inte_id }}
         </div>
         <p-divider></p-divider>
         <div class="space-y-2">
-          <label for="comentario" class="text-sm font-medium">Agregar comentario</label>
+          <label for="comentario" class="text-sm font-medium"
+            >Agregar comentario</label
+          >
           <textarea
             pInputTextarea
             id="comentario"
@@ -49,7 +69,11 @@
             class="w-full"
             placeholder="Escribe tu comentario aquí..."
           ></textarea>
-          <button pButton label="Agregar Comentario" class="p-button-sm mt-2"></button>
+          <button
+            pButton
+            label="Agregar Comentario"
+            class="p-button-sm mt-2"
+          ></button>
         </div>
       </p-card>
 
@@ -60,7 +84,10 @@
           </span>
         </ng-template>
         <div class="space-y-4">
-          <div *ngFor="let log of ticket.logs" class="pb-4 border-b last:border-b-0">
+          <!-- <div
+            *ngFor="let log of tickets.logs"
+            class="pb-4 border-b last:border-b-0"
+          >
             <div class="flex gap-2 items-center text-sm">
               <span class="font-medium">{{ log.usuario }}</span>
               <span class="text-gray-400">•</span>
@@ -68,7 +95,7 @@
             </div>
             <p class="text-sm font-semibold">{{ log.accion }}</p>
             <p class="text-sm text-gray-500">{{ log.descripcion }}</p>
-          </div>
+          </div> -->
         </div>
       </p-card>
     </div>
@@ -84,22 +111,24 @@
             <i class="pi pi-calendar text-gray-500 mt-1"></i>
             <div>
               <p class="font-medium">Fecha de Creación</p>
-              <p class="text-gray-500">{{ formatDate(ticket.ticket_fecha_inicio) }}</p>
+              <p class="text-gray-500">
+                {{ formatDate(tickets[0].ticket_fecha_registro) }}
+              </p>
             </div>
           </div>
           <div class="flex gap-2 items-start">
             <i class="pi pi-user text-gray-500 mt-1"></i>
             <div>
               <p class="font-medium">Solicitante</p>
-              <p class="text-gray-500">{{ ticket.usuario_nombre }}</p>
-              <p class="text-gray-400 text-xs">{{ ticket.usuario_email }}</p>
+              <p class="text-gray-500">{{ tickets[0].ticket_usua_id }}</p>
+              <p class="text-gray-400 text-xs">{{ tickets[0].ticket_usua_id }}</p>
             </div>
           </div>
           <div class="flex gap-2 items-start">
             <i class="pi pi-building text-gray-500 mt-1"></i>
             <div>
               <p class="font-medium">Departamento</p>
-              <p class="text-gray-500">{{ ticket.destino_nombre }}</p>
+              <p class="text-gray-500">{{ tickets[0].ticket_schema }}</p>
             </div>
           </div>
         </div>
@@ -110,12 +139,29 @@
           <span class="font-semibold">Acciones</span>
         </ng-template>
         <div class="space-y-2">
-          <button pButton label="Cambiar Estado" class="w-full bg-black text-white hover:bg-gray-900"></button>
-          <button pButton label="Asignar Técnico" class="w-full p-button-outlined"></button>
-          <button pButton label="Cambiar Prioridad" class="w-full p-button-outlined"></button>
-          <button pButton label="Cerrar Ticket" class="w-full p-button-danger"></button>
+          <button
+            pButton
+            label="Cambiar Estado"
+            class="w-full bg-black text-white hover:bg-gray-900"
+          ></button>
+          <button
+            pButton
+            label="Asignar Técnico"
+            class="w-full p-button-outlined"
+          ></button>
+          <button
+            pButton
+            label="Cambiar Prioridad"
+            class="w-full p-button-outlined"
+          ></button>
+          <button
+            pButton
+            label="Cerrar Ticket"
+            class="w-full p-button-danger"
+          ></button>
         </div>
       </p-card>
     </div>
+  </div>
   </div>
 </div>

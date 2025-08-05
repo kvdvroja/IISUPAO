@@ -1,12 +1,19 @@
-import { Component } from '@angular/core'
-import { CommonModule } from '@angular/common'
-import { BadgeModule } from 'primeng/badge'
-import { ButtonModule } from 'primeng/button'
-import { DividerModule } from 'primeng/divider'
-import { InputTextModule } from 'primeng/inputtext'
-import { CardModule } from 'primeng/card'
-import { TagModule } from 'primeng/tag'
-import { FormsModule } from '@angular/forms'
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { BadgeModule } from 'primeng/badge';
+import { ButtonModule } from 'primeng/button';
+import { DividerModule } from 'primeng/divider';
+import { InputTextModule } from 'primeng/inputtext';
+import { CardModule } from 'primeng/card';
+import { TagModule } from 'primeng/tag';
+import { Navbar } from '../../shared/components/navbar/navbar';
+import { Sidebar } from '../../shared/components/sidebar/sidebar';
+import { FormsModule } from '@angular/forms';
+import { TicketsS } from '../../core/services/tickets/tickets';
+import { ChangeDetectorRef, inject } from '@angular/core';
+import { Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
+import { TicketI } from '../../core/interfaces/Ticket';
 
 @Component({
   selector: 'app-ticket-detail',
@@ -20,45 +27,37 @@ import { FormsModule } from '@angular/forms'
     DividerModule,
     InputTextModule,
     TagModule,
+    Sidebar,
+    Navbar
   ],
   templateUrl: './tickets-detail.html',
+  styleUrl: './tickets-detail.css',
 })
-export class TicketsDetail{
-  comentario = ''
-  ticket = {
-    ticket_id: 'TCK-001',
-    ticket_codigo: 'SYS-LOGIN-001',
-    ticket_nombre: 'Sistema de login no funciona',
-    ticket_estado: 'abierto',
-    ticket_prioridad: 'alta',
-    ticket_fecha_inicio: '2024-01-15T10:30:00Z',
-    ticket_descripcion:
-      'El sistema de autenticación presenta fallas intermitentes que impiden el acceso normal de los usuarios. Se requiere revisión urgente del servidor de autenticación y base de datos de usuarios.',
-    ticket_observaciones:
-      'Los usuarios reportan que no pueden acceder al sistema desde esta mañana. El error aparece después de ingresar las credenciales correctas.',
-    usuario_nombre: 'Juan Pérez',
-    usuario_email: 'juan.perez@empresa.com',
-    destino_nombre: 'Soporte Técnico',
-    logs: [
-      {
-        fecha: '2024-01-15T10:30:00Z',
-        usuario: 'Juan Pérez',
-        accion: 'Ticket creado',
-        descripcion: 'Ticket inicial creado por el usuario',
+export class TicketsDetail implements OnInit {
+  ticketsService = inject(TicketsS);
+  cdRef = inject(ChangeDetectorRef);
+  route = inject(ActivatedRoute);
+  comentario = '';
+  sidebarOpen = true;
+  tickets: TicketI[] = [];
+  ticketId: string = '';
+
+  ngOnInit(): void {
+    this.route.paramMap.subscribe((params) => {
+      this.ticketId = params.get('id') || ''; // 'id' es el nombre del parámetro de la ruta
+      console.log('ID del ticket:', this.ticketId); // Aquí obtienes el valor de la URL
+    });
+    this.cargarTickets();
+  }
+
+  cargarTickets(): void {
+    this.ticketsService.getTicket(this.ticketId).subscribe({
+      next: (res) => {
+        this.tickets = res.result.data;
+        this.cdRef.detectChanges();
       },
-      {
-        fecha: '2024-01-15T11:15:00Z',
-        usuario: 'Ana Soporte',
-        accion: 'Asignado',
-        descripcion: 'Ticket asignado al equipo de soporte técnico',
-      },
-      {
-        fecha: '2024-01-15T14:20:00Z',
-        usuario: 'Carlos Técnico',
-        accion: 'En revisión',
-        descripcion: 'Iniciando diagnóstico del problema de autenticación',
-      },
-    ],
+      error: (err) => console.error('Error al cargar sistemas', err),
+    });
   }
 
   formatDate(dateStr: string): string {
@@ -68,22 +67,30 @@ export class TicketsDetail{
       day: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
-    })
+    });
+  }
+
+  toggleSidebar() {
+    this.sidebarOpen = !this.sidebarOpen;
   }
 
   getEstadoSeverity(estado: string): string {
-    return {
-      abierto: 'danger',
-      en_proceso: 'warning',
-      cerrado: 'success',
-    }[estado] ?? 'info'
+    return (
+      {
+        abierto: 'danger',
+        en_proceso: 'warning',
+        cerrado: 'success',
+      }[estado] ?? 'info'
+    );
   }
 
   getPrioridadSeverity(prioridad: string): string {
-    return {
-      alta: 'danger',
-      media: 'info',
-      baja: 'success',
-    }[prioridad] ?? 'info'
+    return (
+      {
+        alta: 'danger',
+        media: 'info',
+        baja: 'success',
+      }[prioridad] ?? 'info'
+    );
   }
 }

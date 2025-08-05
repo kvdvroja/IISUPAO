@@ -16,6 +16,11 @@ export const MAIN_LAYOUT: Routes = [
         loadChildren: () =>
           import('../../features/tickets/tickets.routes').then((m) => m.TICKETS_ROUTES),
       },
+            {
+        path: 'tickets-detail',
+        loadChildren: () =>
+          import('../../features/tickets-detail/tickets-detail.routes').then((m) => m.TICKETS_DETAIL_ROUTES),
+      },
     ],
   },
 ];

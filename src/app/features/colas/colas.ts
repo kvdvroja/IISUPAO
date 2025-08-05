@@ -84,11 +84,17 @@ export class Colas implements OnInit {
     return this.colas;
   }
 
-  showEditar(cola: any): void {
-    this.editando = true;  // Establecer como modo de edición
-    this.mostrarDialogoAgregar = true;
-    this.nuevaCola = { ...cola };  // Cargar los datos de la cola en el formulario
-  }
+showEditar(cola: any): void {
+  this.editando = true;  
+  this.mostrarDialogoAgregar = true;
+
+  // Solo copiar los campos que quieres enviar
+  this.nuevaCola = {
+    cola_id: cola.cola_id,
+    cola_nombre: cola.cola_nombre,
+    cola_usua_id: cola.cola_usua_id
+  };
+}
 
   // Mostrar el formulario para agregar una nueva cola
   AgregarCola(): void {
