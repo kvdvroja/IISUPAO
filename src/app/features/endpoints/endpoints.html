@@ -44,7 +44,12 @@
     [paginator]="true"
     [rows]="10"
     [rowsPerPageOptions]="[10, 25, 50]"
-    [globalFilterFields]="['se_nombre', 'se_sistema_id', 'se_url', 'se_metodo_http']"
+    [globalFilterFields]="[
+      'se_nombre',
+      'se_sistema_id',
+      'se_url',
+      'se_metodo_http'
+    ]"
   >
     <ng-template #header>
       <tr>
@@ -105,14 +110,15 @@
   (visibleChange)="cerrarDialogoAgregar()"
 >
   <div class="flex flex-col gap-4 h-full">
-    <p-inputgroup>
-      <p-inputgroup-addon><i class="pi pi-sitemap"></i></p-inputgroup-addon>
-      <input
-        pInputText
-        placeholder="Sistema ID"
+    <div class="flex flex-col">
+      <label class="font-semibold text-sm">Sistema</label>
+      <p-select
         [(ngModel)]="nuevoEndpoint.se_sistema_id"
+        [options]="sistemasOptions"
+        placeholder="Seleccione un sistema"
+        class="w-full"
       />
-    </p-inputgroup>
+    </div>
 
     <p-inputgroup>
       <p-inputgroup-addon><i class="pi pi-tag"></i></p-inputgroup-addon>

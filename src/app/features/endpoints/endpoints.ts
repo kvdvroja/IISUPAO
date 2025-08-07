@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit, OnChanges } from '@angular/core';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { MessageService } from 'primeng/api';
 import { TableModule } from 'primeng/table';
@@ -23,6 +23,7 @@ import { FormsModule } from '@angular/forms';
 import { SelectModule } from 'primeng/select';
 import { ChangeDetectorRef } from '@angular/core';
 import { inject } from '@angular/core';
+import { SistemasI } from '../../core/interfaces/Sistemas';
 import { Endpoint } from '../../core/services/mant/endpoint/endpoint';
 
 @Component({
@@ -47,9 +48,17 @@ import { Endpoint } from '../../core/services/mant/endpoint/endpoint';
   templateUrl: './endpoints.html',
   styleUrl: './endpoints.css',
 })
-export class Endpoints implements OnInit {
+export class Endpoints implements OnInit{
+  private _sistemasLista: SistemasI[] = [];
   @ViewChild('dt') dt!: Table;
   @Input() sistemaId!: string | null | undefined;
+  @Input() set sistemasLista(value: SistemasI[]) {
+  this._sistemasLista = value;
+  this.sistemasOptions = value.map((s) => ({
+    label: `${s.sistema_id} - ${s.sistema_nombre}`,
+    value: s.sistema_id,
+  }));
+}
   endpointService = inject(Endpoint);
   cdRef = inject(ChangeDetectorRef);
   messageService = inject(MessageService);
@@ -59,6 +68,7 @@ export class Endpoints implements OnInit {
   mostrarDialogoAgregar: boolean = false;
   registroExitoso: boolean = false;
   endpoint: EndpointI[] = [];
+  sistemasOptions: { label: string; value: string }[] = [];
   opcionesTransformacion = [
     { label: 'Sí', value: true },
     { label: 'No', value: false },
@@ -165,10 +175,11 @@ export class Endpoints implements OnInit {
 
     this.endpointService.endpointCrud(this.nuevoEndpoint, action).subscribe({
       next: (response) => {
-        console.log(
-          action === 'I' ? 'Nuevo endpoint agregado' : 'Endpoint actualizado',
-          response
-        );
+        this.messageService.add({
+          severity: 'success',
+          summary: action === 'I' ? 'Endpoint agregado' : 'Endpoint actualizado',
+          detail: 'Operación exitosa',
+        });
         this.registroExitoso = true;
         this.cargarEndpoints();
         this.cerrarDialogoAgregar();

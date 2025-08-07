@@ -144,7 +144,9 @@
               {{ sistema.sistema_ind_estado }}
             </div>
           </td>
-          <td>{{ sistema.sistema_fecha_actividad | date : "dd MMM yyyy, HH:mm" }}</td>
+          <td>
+            {{ sistema.sistema_fecha_actividad | date : "dd MMM yyyy, HH:mm" }}
+          </td>
           <td class="text-center">
             <div class="flex gap-2">
               <p-button
@@ -182,6 +184,7 @@
     [sistemaId]="
       modoFiltradoPorSistema ? sistemaSeleccionado?.sistema_id : null
     "
+    [sistemasLista]="sistemas"
   ></app-endpoints>
 </div>
 <p-toast></p-toast>
@@ -212,12 +215,14 @@
       <p-inputgroup-addon>
         <i class="pi pi-briefcase"></i>
       </p-inputgroup-addon>
-      <input
-        pInputText
+      <textarea
+        pInputTextarea
         [(ngModel)]="nuevoSistema.sistema_descripcion"
         placeholder="Descripción"
         [disabled]="registroExitoso"
-      />
+        rows="3"
+        class="w-full border border-gray-400 rounded-r p-2 text-gray-600"
+      ></textarea>
     </p-inputgroup>
 
     <div class="flex justify-end gap-2 pt-4">
