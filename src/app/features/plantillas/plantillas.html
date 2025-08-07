@@ -1,14 +1,92 @@
+<!-- Cabecera -->
 <div
-  class="flex flex-col md:flex-row md:items-center md:justify-between mb-6 border-b-4 border-[#1C3D67] p-4"
+  class="flex items-center justify-between border-b border-gray-200 p-3 bg-white"
 >
-  <h2
-    class="text-2xl font-bold uppercase tracking-wide pb-2 text-[#1c3d67] dark:text-white"
+  <!-- Botón regresar -->
+  <button
+    *ngIf="activeTab === 'destino'"
+    class="flex items-center justify-center border rounded-md p-2 hover:bg-gray-100"
+    (click)="volver()"
+    title="Volver"
   >
-    Plantilla Integración
-  </h2>
-</div>
+    <i class="pi pi-arrow-left text-xl text-gray-700"></i>
+  </button>
 
-<div *ngIf="pantallaPequena" class="p-2">
+  <!-- Título -->
+  <div class="flex-1 px-4">
+    <h2 class="text-2xl font-bold text-gray-800">
+      {{ activeTab === "integracion" ? "PLANTILLA / PLANTILLA INTEGRACION" : "PLANTILLA / PLANTILLA DESTINO" }}
+    </h2>
+    <p *ngIf="activeTab === 'integracion'" class="text-sm text-gray-500">
+      Gestión de plantillas de integración  
+    </p>
+    <p *ngIf="activeTab === 'destino'" class="text-sm text-gray-500">
+      Gestión de plantillas de destino
+    </p>
+  </div>
+
+  <!-- Acciones -->
+  <div class="flex items-center space-x-2">
+    <p-splitButton
+      label="Acciones"
+      icon="pi pi-cog"
+      [model]="accionesDropdown"
+      class="p-button-outlined p-button-sm"
+    ></p-splitButton>
+    <p-button
+      label="Nuevo"
+      icon="pi pi-plus"
+      class="p-button-sm"
+      (click)="
+        activeTab === 'integracion' ? AgregarPlantilla() : agregarDesdeDestino()
+      "
+    ></p-button>
+    <p-button
+      label="Limpiar"
+      [outlined]="true"
+      icon="pi pi-filter-slash"
+      (click)="dt.clear()"
+    ></p-button>
+    <p-iconfield iconPosition="left" class="w-64">
+      <p-inputicon>
+        <i class="pi pi-search"></i>
+      </p-inputicon>
+      <input
+        pInputText
+        (input)="onBuscarGlobal($event)"
+        placeholder="Buscar..."
+        class="w-full"
+      />
+    </p-iconfield>
+  </div>
+</div>
+<!-- Tabs -->
+<div class="flex space-x-6 border-b border-gray-200 px-6 pt-4">
+  <button
+    class="pb-4 border-b-2 transition-all duration-150 text-sm font-medium"
+    [ngClass]="{
+      'border-[#1c3d67] text-[#1c3d67]': activeTab === 'integracion',
+      'border-transparent text-gray-500 hover:text-[#1c3d67] hover:border-[#1c3d67]':
+        activeTab !== 'integracion'
+    }"
+    (click)="activeTab = 'integracion'"
+  >
+    PLANTILLA INTEGRACION
+  </button>
+  <button
+    class="pb-4 border-b-2 transition-all duration-150 text-sm font-medium"
+    [ngClass]="{
+      'border-[#1c3d67] text-[#1c3d67]': activeTab === 'destino',
+      'border-transparent text-gray-500 hover:text-[#1c3d67] hover:border-[#1c3d67]':
+        activeTab !== 'destino'
+    }"
+    (click)="verTodasLasPlantillasD()"
+  >
+    PLANTILLA DESTINO
+  </button>
+</div>
+<div *ngIf="activeTab === 'integracion'">
+  <div *ngIf="pantallaPequena" class="p-2">
   <p-iconfield iconPosition="left" class="w-full mb-4">
     <p-inputicon>
       <i class="pi pi-search"></i>
@@ -65,41 +143,6 @@
       'pi_url'
     ]"
   >
-    <ng-template #caption>
-      <div
-        class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 sm:gap-2 w-full px-2"
-      >
-        <div class="flex flex-wrap gap-2">
-          <p-button
-            label="Limpiar"
-            [outlined]="true"
-            icon="pi pi-filter-slash"
-            (click)="dt.clear()"
-          ></p-button>
-        </div>
-        <div class="flex gap-2 items-center">
-          <button
-            pButton
-            icon="pi pi-plus"
-            title="Nuevo"
-            label="Nuevo"
-            (click)="AgregarPlantilla()"
-          ></button>
-          <p-iconfield iconPosition="left" class="w-64">
-            <p-inputicon>
-              <i class="pi pi-search"></i>
-            </p-inputicon>
-            <input
-              pInputText
-              (input)="filtrarGlobal($event)"
-              placeholder="Buscar..."
-              class="w-full"
-            />
-          </p-iconfield>
-        </div>
-      </div>
-    </ng-template>
-
     <ng-template #header>
       <tr>
         <th>Código</th>
@@ -143,6 +186,12 @@
   </p-table>
 </div>
 
+</div>
+<div *ngIf="activeTab === 'destino'">
+  <app-plantilla-destino [plantillaIId]="
+      modoFiltradoPorSistema ? plantillaISeleccionado?.pi_id : null
+    "></app-plantilla-destino>
+</div>
 <p-toast></p-toast>
 
 <p-dialog

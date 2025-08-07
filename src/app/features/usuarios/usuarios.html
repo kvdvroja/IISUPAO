@@ -37,6 +37,7 @@
         severity="secondary"
         rounded
       ></p-button>
+      <p-button icon="pi pi-trash" severity="danger" rounded (onClick)="eliminarUsuario(usuario)"></p-button>
     </div>
   </div>
 </div>
@@ -106,7 +107,7 @@
         <td>{{ usuario.usuario_email }}</td>
         <td>{{ usuario.usuario_apellido_pat }}</td>
         <td>{{ usuario.usuario_apellido_mat }}</td>
-        <td>{{ usuario.usuarios_ind_estado }}</td>
+        <td>{{ usuario.usuario_ind_estado }}</td>
         <td>
           <div class="flex gap-2 justify-center">
             <p-button
@@ -115,6 +116,7 @@
               rounded
               (onClick)="showEditar(usuario)"
             ></p-button>
+            <p-button icon="pi pi-trash" severity="danger" rounded (onClick)="eliminarUsuario(usuario)"></p-button>
           </div>
         </td>
       </tr>
@@ -137,6 +139,16 @@
   [dismissableMask]="true"
   (visibleChange)="cerrarDialogoAgregar()"
 >
+ <div class="flex flex-col gap-4 h-full">
+    <p-inputgroup>
+      <p-inputgroup-addon><i class="pi pi-sitemap"></i></p-inputgroup-addon>
+      <input
+        pInputText
+        placeholder="ID"
+        [(ngModel)]="nuevoUsuario.usuario_id"
+      />
+    </p-inputgroup>
+
   <div class="flex flex-col gap-4 h-full">
     <p-inputgroup>
       <p-inputgroup-addon><i class="pi pi-user"></i></p-inputgroup-addon>
@@ -194,7 +206,7 @@
       ></p-button>
     </div>
   </div>
-</p-dialog>
+  
 <p-confirmDialog #cd>
   <ng-template
     #headless

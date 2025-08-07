@@ -20,9 +20,10 @@ import { ConfirmationService } from 'primeng/api';
 import { Plantilla_IntegracionI } from '../../core/interfaces/Plantilla_Integracion';
 import { FormsModule } from '@angular/forms';
 import { SelectModule } from 'primeng/select';
+import { SplitButtonModule } from 'primeng/splitbutton';
 import { ChangeDetectorRef } from '@angular/core';
 import { PlantillaIntegracionS } from '../../core/services/mant/plantilla-integracion/plantilla-integracion';
-
+import { PlantillaDestino } from '../plantilla-destino/plantilla-destino';
 
 @Component({
   selector: 'app-plantilla-integracion',
@@ -41,26 +42,51 @@ import { PlantillaIntegracionS } from '../../core/services/mant/plantilla-integr
     InputGroupAddonModule,
     Dialog,
     Toast,
-    SelectModule
+    SelectModule,
+    SplitButtonModule,
+    PlantillaDestino,
   ],
   providers: [MessageService, ConfirmationService],
-  templateUrl: './plantilla-integracion.html',
-  styleUrl: './plantilla-integracion.css',
+  templateUrl: './plantillas.html',
+  styleUrl: './plantillas.css',
 })
-export class PlantillaIntegracion implements OnInit {
+export class Plantillas implements OnInit {
   @ViewChild('dt') dt!: Table;
+  @ViewChild(PlantillaDestino) plantillasDComponent!: PlantillaDestino;
   plantillaIntegracionService = inject(PlantillaIntegracionS);
   cdRef = inject(ChangeDetectorRef);
   pantallaPequena = false;
   mostrarDialogoAgregar = false;
   registroExitoso = false;
+  activeTab: 'integracion' | 'destino' = 'integracion';
+  plantillaISeleccionado: Plantilla_IntegracionI | null = null;
+  modoFiltradoPorSistema: boolean = false;
 
   plantillas: Plantilla_IntegracionI[] = [];
 
   opcionesTipoServicio = [
     { label: 'REST', value: 'REST' },
     { label: 'SOAP', value: 'SOAP' },
-    { label: 'FTP', value: 'FTP' }
+    { label: 'FTP', value: 'FTP' },
+  ];
+
+  accionesDropdown = [
+    {
+      label: 'Refrescar',
+      icon: 'pi pi-refresh',
+      command: () => {
+        if (this.activeTab === 'integracion') {
+          this.cargarPlantillas();
+        } else if (this.activeTab === 'destino') {
+          this.plantillasDComponent?.cargarPlantillas();
+        }
+      },
+    },
+    {
+      label: 'Exportar',
+      icon: 'pi pi-download',
+      command: () => this.exportarDatos(),
+    },
   ];
 
   nuevaPlantilla: Plantilla_IntegracionI = {
@@ -80,7 +106,7 @@ export class PlantillaIntegracion implements OnInit {
     pi_sist_id: '',
     pi_cola_id: '',
     pi_valida: '',
-    pi_transforma: ''
+    pi_transforma: '',
   };
 
   ngOnInit(): void {
@@ -99,6 +125,11 @@ export class PlantillaIntegracion implements OnInit {
     });
   }
 
+  exportarDatos(): void {
+    // Implementar lógica de exportación aquí
+    console.log('Exportando datos...');
+  }
+
   filtrarGlobal(event: Event) {
     const valor = (event.target as HTMLInputElement).value;
     this.dt.filterGlobal(valor, 'contains');
@@ -110,6 +141,26 @@ export class PlantillaIntegracion implements OnInit {
 
   showEditar(plantilla: Plantilla_IntegracionI): void {
     console.log('Editar plantilla:', plantilla);
+  }
+
+  volver() {
+    this.activeTab = 'integracion';
+    this.plantillaISeleccionado = null;
+    this.modoFiltradoPorSistema = false;
+  }
+
+  agregarDesdeDestino(): void {
+    this.plantillasDComponent.Agregar();
+  }
+
+  onBuscarGlobal(event: Event): void {
+    const input = (event.target as HTMLInputElement).value;
+
+    if (this.activeTab === 'integracion') {
+      this.dt.filterGlobal(input, 'contains');
+    } else if (this.activeTab === 'destino') {
+      this.plantillasDComponent?.filtrarDesdePadre(input);
+    }
   }
 
   AgregarPlantilla(): void {
@@ -131,7 +182,7 @@ export class PlantillaIntegracion implements OnInit {
       pi_sist_id: '',
       pi_cola_id: '',
       pi_valida: '',
-      pi_transforma: ''
+      pi_transforma: '',
     };
   }
 
@@ -144,7 +195,11 @@ export class PlantillaIntegracion implements OnInit {
     const nueva = { ...this.nuevaPlantilla };
     nueva.pi_id = Date.now().toString();
     nueva.pi_fecha_actividad = new Date().toISOString();
-    nueva.pi_codigo = 'PL-' + Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+    nueva.pi_codigo =
+      'PL-' +
+      Math.floor(Math.random() * 10000)
+        .toString()
+        .padStart(4, '0');
     nueva.pi_ind_estado = 'Activo';
     nueva.pi_valida = 'N';
     nueva.pi_transforma = 'N';
@@ -157,5 +212,11 @@ export class PlantillaIntegracion implements OnInit {
     this.plantillas.push(nueva);
     this.mostrarDialogoAgregar = false;
     this.registroExitoso = true;
+  }
+
+    verTodasLasPlantillasD(): void {
+    this.activeTab = 'destino';
+    this.modoFiltradoPorSistema = false;
+    this.plantillaISeleccionado = null;
   }
 }

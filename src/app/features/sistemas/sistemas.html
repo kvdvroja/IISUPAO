@@ -1,157 +1,188 @@
+<!-- Cabecera -->
 <div
-  class="flex flex-col md:flex-row md:items-center md:justify-between mb-6 border-b-4 border-[#1C3D67] p-4"
+  class="flex items-center justify-between border-b border-gray-200 p-3 bg-white"
 >
-  <h2
-    class="text-2xl font-bold uppercase tracking-wide pb-2 text-[#1c3d67] dark:text-white"
+  <!-- Botón regresar -->
+  <button
+    *ngIf="activeTab === 'endpoints'"
+    class="flex items-center justify-center border rounded-md p-2 hover:bg-gray-100"
+    (click)="volver()"
+    title="Volver"
   >
-    Sistemas
-  </h2>
-</div>
-<div *ngIf="pantallaPequena" class="p-2">
-  <p-iconfield iconPosition="left" class="w-full mb-4">
-    <p-inputicon>
-      <i class="pi pi-search"></i>
-    </p-inputicon>
-    <input
-      pInputText
-      type="text"
-      (input)="filtrarGlobal($event)"
-      placeholder="Buscar Sistema..."
-      class="w-full"
-    />
-  </p-iconfield>
-</div>
-<div *ngIf="pantallaPequena" class="flex flex-col gap-4">
-  <div
-    *ngFor="let sistema of sistemasFiltradas"
-    class="bg-white p-4 rounded shadow border"
-  >
-    <div><strong>Código:</strong> {{ sistema.sistema_id }}</div>
-    <div><strong>Nombre:</strong> {{ sistema.sistema_nombre }}</div>
-    <div><strong>Descripción:</strong> {{ sistema.sistema_descripcion }}</div>
-    <div><strong>Estado:</strong> {{ sistema.sistema_ind_estado }}%</div>
-    <div class="flex justify-end">
-      <p-button
-        icon="pi pi-pencil"
-        (onClick)="showEditar(sistema)"
-        severity="secondary"
-        rounded
-      ></p-button>
-      <p-button
-        icon="pi pi-trash"
-        severity="danger"
-        rounded
-        (onClick)="eliminarSistema(sistema)"
-      ></p-button>
-    </div>
+    <i class="pi pi-arrow-left text-xl text-gray-700"></i>
+  </button>
+
+  <!-- Título -->
+  <div class="flex-1 px-4">
+    <h2 class="text-2xl font-bold text-gray-800">
+      {{ activeTab === "systems" ? "SISTEMAS" : "SISTEMAS / ENDPOINTS" }}
+    </h2>
+    <p *ngIf="activeTab === 'systems'" class="text-sm text-gray-500">
+      Gestión de sistemas
+    </p>
+    <p *ngIf="activeTab === 'endpoints'" class="text-sm text-gray-500">
+      Gestión de endpoints del sistema seleccionado
+    </p>
+  </div>
+
+  <!-- Acciones -->
+  <div class="flex items-center space-x-2">
+    <p-splitButton
+      label="Acciones"
+      icon="pi pi-cog"
+      [model]="accionesDropdown"
+      class="p-button-outlined p-button-sm"
+    ></p-splitButton>
+    <p-button
+      label="Nuevo"
+      icon="pi pi-plus"
+      class="p-button-sm"
+      (click)="
+        activeTab === 'systems' ? AgregarSistema() : agregarDesdeEndpoints()
+      "
+    ></p-button>
+    <p-button
+      label="Limpiar"
+      [outlined]="true"
+      icon="pi pi-filter-slash"
+      (click)="dt.clear()"
+    ></p-button>
+    <p-iconfield iconPosition="left" class="w-64">
+      <p-inputicon>
+        <i class="pi pi-search"></i>
+      </p-inputicon>
+      <input
+        pInputText
+        (input)="onBuscarGlobal($event)"
+        placeholder="Buscar..."
+        class="w-full"
+      />
+    </p-iconfield>
   </div>
 </div>
-<div *ngIf="!pantallaPequena" class="p-2 text-center text-gray-600">
-  <p-table
-    #dt1
-    [value]="sistemasFiltradas"
-    dataKey="sistema_id"
-    [rows]="10"
-    [rowsPerPageOptions]="[10, 25, 50]"
-    [paginator]="true"
-    [globalFilterFields]="[
-      'sistema_id',
-      'sistema_nombre',
-      'sistema_descripcion'
-    ]"
+
+<!-- Tabs -->
+<div class="flex space-x-6 border-b border-gray-200 px-6 pt-4">
+  <button
+    class="pb-4 border-b-2 transition-all duration-150 text-sm font-medium"
+    [ngClass]="{
+      'border-[#1c3d67] text-[#1c3d67]': activeTab === 'systems',
+      'border-transparent text-gray-500 hover:text-[#1c3d67] hover:border-[#1c3d67]':
+        activeTab !== 'systems'
+    }"
+    (click)="activeTab = 'systems'"
   >
+    SISTEMAS
+  </button>
+  <button
+    class="pb-4 border-b-2 transition-all duration-150 text-sm font-medium"
+    [ngClass]="{
+      'border-[#1c3d67] text-[#1c3d67]': activeTab === 'endpoints',
+      'border-transparent text-gray-500 hover:text-[#1c3d67] hover:border-[#1c3d67]':
+        activeTab !== 'endpoints'
+    }"
+    (click)="verTodosLosEndpoints()"
+  >
+    ENDPOINTS
+  </button>
+</div>
+
+<div *ngIf="activeTab === 'systems'">
+  <div *ngIf="pantallaPequena" class="flex flex-col gap-4">
+    <div
+      *ngFor="let sistema of sistemasFiltradas"
+      class="bg-white p-4 rounded shadow border"
     >
-    <ng-template #caption>
-      <div
-        class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 sm:gap-2 w-full px-2"
+      <div><strong>Código:</strong> {{ sistema.sistema_id }}</div>
+      <div><strong>Nombre:</strong> {{ sistema.sistema_nombre }}</div>
+      <div><strong>Descripción:</strong> {{ sistema.sistema_descripcion }}</div>
+      <div><strong>Estado:</strong> {{ sistema.sistema_ind_estado }}%</div>
+    </div>
+  </div>
+  <div *ngIf="!pantallaPequena" class="p-2 text-center text-gray-600">
+    <p-table
+      #dt
+      [value]="sistemasFiltradas"
+      dataKey="sistema_id"
+      [rows]="10"
+      [rowsPerPageOptions]="[10, 25, 50]"
+      [paginator]="true"
+      [globalFilterFields]="[
+        'sistema_id',
+        'sistema_nombre',
+        'sistema_descripcion'
+      ]"
+    >
       >
-        <div class="flex flex-wrap gap-2">
-          <p-button
-            label="Limpiar"
-            [outlined]="true"
-            icon="pi pi-filter-slash"
-            (click)="dt1.clear()"
-          ></p-button>
-        </div>
-        <div class="flex gap-2">
-          <button
-            pButton
-            icon="pi pi-plus"
-            title="Nuevo"
-            label="Nuevo"
-            (click)="AgregarSistema()"
-          ></button>
-          <p-iconfield iconPosition="left" class="w-full sm:w-64">
-            <p-inputicon>
-              <i class="pi pi-search"></i>
-            </p-inputicon>
-            <input
-              pInputText
-              type="text"
-              (input)="filtrarGlobal($event)"
-              placeholder="Buscar..."
-              class="w-full"
-            />
-          </p-iconfield>
-        </div>
-      </div>
-    </ng-template>
+      <!-- Cabecera con Filtros -->
+      <ng-template #header>
+        <tr>
+          <th>Código</th>
+          <th>Nombre</th>
+          <th>Descripción</th>
+          <th>Estado</th>
+          <th>Fecha Actividad</th>
+          <th>Acciones</th>
+        </tr>
+      </ng-template>
 
-    <!-- Cabecera con Filtros -->
-    <ng-template #header>
-      <tr>
-        <th>Código</th>
-        <th>Nombre</th>
-        <th>Descripción</th>
-        <th>Estado</th>
-        <th>Fecha Actividad</th>
-        <th>Acciones</th>
-      </tr>
-    </ng-template>
-
-    <!-- Cuerpo -->
-    <ng-template #body let-sistema>
-      <tr>
-        <td>{{ sistema.sistema_id }}</td>
-        <td class="table-cell">
-          {{ sistema.sistema_nombre }}
-        </td>
-        <td
-          class="text-sm overflow-hidden text-ellipsis"
-          style="max-width: 35rem"
-        >
-          {{ sistema.sistema_descripcion }}
-        </td>
-        <td class="table-cell">
-          <div class="flex justify-center">
-            {{ sistema.sistema_ind_estado }}
-          </div>
-        </td>
-        <td>{{ sistema.sistema_fecha_actividad }}</td>
-        <td class="text-center">
-          <div class="flex gap-2">
-            <p-button
-              icon="pi pi-pencil"
-              severity="secondary"
-              rounded
-              (onClick)="showEditar(sistema)"
-            ></p-button>
-            <p-button
-              icon="pi pi-trash"
-              severity="danger"
-              rounded
-              (onClick)="eliminarSistema(sistema)"
-            ></p-button>
-          </div>
-        </td>
-      </tr>
-    </ng-template>
-    <ng-template #emptymessage>
-      <tr>
-        <td colspan="8">No se encontraron registros.</td>
-      </tr>
-    </ng-template>
-  </p-table>
+      <!-- Cuerpo -->
+      <ng-template #body let-sistema>
+        <tr>
+          <td>{{ sistema.sistema_id }}</td>
+          <td class="table-cell">
+            {{ sistema.sistema_nombre }}
+          </td>
+          <td
+            class="text-sm overflow-hidden text-ellipsis"
+            style="max-width: 35rem"
+          >
+            {{ sistema.sistema_descripcion }}
+          </td>
+          <td class="table-cell">
+            <div class="flex justify-center">
+              {{ sistema.sistema_ind_estado }}
+            </div>
+          </td>
+          <td>{{ sistema.sistema_fecha_actividad | date : "dd MMM yyyy, HH:mm" }}</td>
+          <td class="text-center">
+            <div class="flex gap-2">
+              <p-button
+                icon="pi pi-pencil"
+                severity="secondary"
+                rounded
+                (onClick)="showEditar(sistema)"
+              ></p-button>
+              <p-button
+                icon="pi pi-link"
+                severity="info"
+                title="Ver Endpoints"
+                (onClick)="verEndpoints(sistema)"
+              ></p-button>
+              <p-button
+                icon="pi pi-trash"
+                severity="danger"
+                rounded
+                (onClick)="eliminarSistema(sistema)"
+              ></p-button>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template #emptymessage>
+        <tr>
+          <td colspan="8">No se encontraron registros.</td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+</div>
+<div *ngIf="activeTab === 'endpoints'">
+  <app-endpoints
+    [sistemaId]="
+      modoFiltradoPorSistema ? sistemaSeleccionado?.sistema_id : null
+    "
+  ></app-endpoints>
 </div>
 <p-toast></p-toast>
 <p-dialog
@@ -165,17 +196,6 @@
   (visibleChange)="cerrarDialogoAgregar()"
 >
   <div class="flex flex-col gap-4">
-    <p-inputgroup class="shadow-lg">
-      <p-inputgroup-addon>
-        <i class="pi pi-id-card"></i>
-      </p-inputgroup-addon>
-      <input
-        pInputText
-        [(ngModel)]="nuevoSistema.sistema_id"
-        placeholder="Código"
-        [disabled]="editando"
-      />
-    </p-inputgroup>
     <p-inputgroup class="shadow-lg">
       <p-inputgroup-addon>
         <i class="pi pi-calendar"></i>
@@ -212,9 +232,7 @@
         icon="pi pi-check"
         (click)="guardarNuevoSistema()"
         [disabled]="
-          !nuevoSistema.sistema_id ||
-          !nuevoSistema.sistema_nombre ||
-          !nuevoSistema.sistema_descripcion
+          !nuevoSistema.sistema_nombre || !nuevoSistema.sistema_descripcion
         "
       ></p-button>
     </div>

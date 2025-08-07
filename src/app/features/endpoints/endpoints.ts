@@ -14,6 +14,7 @@ import { CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
 import { NgFor } from '@angular/common';
 import { Dialog } from 'primeng/dialog';
+import { Input } from '@angular/core';
 import { Toast } from 'primeng/toast';
 import { ViewChild } from '@angular/core';
 import { ConfirmationService } from 'primeng/api';
@@ -46,8 +47,9 @@ import { Endpoint } from '../../core/services/mant/endpoint/endpoint';
   templateUrl: './endpoints.html',
   styleUrl: './endpoints.css',
 })
-export class Endpoints implements OnInit{
+export class Endpoints implements OnInit {
   @ViewChild('dt') dt!: Table;
+  @Input() sistemaId!: string | null | undefined;
   endpointService = inject(Endpoint);
   cdRef = inject(ChangeDetectorRef);
   messageService = inject(MessageService);
@@ -56,7 +58,7 @@ export class Endpoints implements OnInit{
   mostrarSoloPendientes: boolean = false;
   mostrarDialogoAgregar: boolean = false;
   registroExitoso: boolean = false;
-  endpoint!: EndpointI[];
+  endpoint: EndpointI[] = [];
   opcionesTransformacion = [
     { label: 'Sí', value: true },
     { label: 'No', value: false },
@@ -85,16 +87,22 @@ export class Endpoints implements OnInit{
     this.cargarEndpoints();
   }
 
-  // ngAfterViewInit(): void {
-  //   this.cdRef.detectChanges();
-  // }
   filtrarGlobal(event: Event) {
     const input = event.target as HTMLInputElement;
     this.dt.filterGlobal(input.value, 'contains');
   }
 
   get endpointsFiltrados(): any[] {
-    return this.endpoint;
+    if (!this.sistemaId) return this.endpoint; // mostrar todos
+    return this.endpoint.filter(
+      (endpoint) => endpoint.se_sistema_id === this.sistemaId
+    );
+  }
+
+  filtrarDesdePadre(valor: string): void {
+    if (this.dt) {
+      this.dt.filterGlobal(valor, 'contains');
+    }
   }
 
   cargarEndpoints(): void {

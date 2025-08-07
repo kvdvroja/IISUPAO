@@ -17,6 +17,7 @@ import { InputIcon } from 'primeng/inputicon';
 import { IconField } from 'primeng/iconfield';
 import { Plantilla_DestinoI } from '../../core/interfaces/Plantilla_Destino';
 import { PlantillaDestinoS } from '../../core/services/mant/plantilla-destino/plantilla-destino';
+import { Input } from '@angular/core';
 
 @Component({
   selector: 'app-plantilla-destino',
@@ -41,7 +42,8 @@ import { PlantillaDestinoS } from '../../core/services/mant/plantilla-destino/pl
   providers: [MessageService, ConfirmationService],
 })
 export class PlantillaDestino implements OnInit {
-  @ViewChild('dt1') dt1!: Table;
+  @ViewChild('dt') dt!: Table;
+  @Input() plantillaIId!: string | null | undefined;
   plantillaDestinoService = inject(PlantillaDestinoS);
   cdRef = inject(ChangeDetectorRef);
   messageService = inject(MessageService);
@@ -90,7 +92,7 @@ export class PlantillaDestino implements OnInit {
 
   filtrarGlobal(event: Event) {
     const valor = (event.target as HTMLInputElement).value;
-    this.dt1.filterGlobal(valor, 'contains');
+    this.dt.filterGlobal(valor, 'contains');
   }
 
   showEditar(row: Plantilla_DestinoI): void {
@@ -107,6 +109,12 @@ export class PlantillaDestino implements OnInit {
 
   cerrarDialogoAgregar(): void {
     this.mostrarDialogoAgregar = false;
+  }
+
+  filtrarDesdePadre(valor: string): void {
+    if (this.dt) {
+      this.dt.filterGlobal(valor, 'contains');
+    }
   }
 
   limpiarFormulario(): void {

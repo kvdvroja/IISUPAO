@@ -29,7 +29,7 @@ export const HOME_ROUTES: Routes = [
       {
         path: 'Plantilla-Integracion',
         loadChildren: () =>
-          import('../plantilla-integracion/plantilla-integracion.routes').then((m) => m.PLANTILLA_INTEGRACION_ROUTES),
+          import('../plantillas/plantillas.route').then((m) => m.PLANTILLA_INTEGRACION_ROUTES),
       },
       {
         path: 'Transformacion-Campos',

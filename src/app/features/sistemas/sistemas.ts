@@ -21,6 +21,8 @@ import { ConfirmationService } from 'primeng/api';
 import { SistemasI } from '../../core/interfaces/Sistemas';
 import { FormsModule } from '@angular/forms';
 import { SistemasS } from '../../core/services/mant/sistemas/sistemas';
+import { SplitButtonModule } from 'primeng/splitbutton';
+import { Endpoints } from '../endpoints/endpoints';
 
 @Component({
   selector: 'app-sistemas',
@@ -38,23 +40,29 @@ import { SistemasS } from '../../core/services/mant/sistemas/sistemas';
     InputGroupAddonModule,
     Dialog,
     Toast,
+    Endpoints,
+    SplitButtonModule,
   ],
   providers: [MessageService, ConfirmationService],
   templateUrl: './sistemas.html',
   styleUrl: './sistemas.css',
 })
 export class Sistemas implements OnInit {
+  @ViewChild(Endpoints) endpointsComponent!: Endpoints;
   sistemasService = inject(SistemasS);
   cdRef = inject(ChangeDetectorRef);
   messageService = inject(MessageService);
   confirmService = inject(ConfirmationService);
-  @ViewChild('dt1') dt1!: Table;
+  @ViewChild('dt') dt!: Table;
   pantallaPequena = false;
   mostrarSoloPendientes: boolean = false;
   mostrarDialogoAgregar: boolean = false;
   registroExitoso: boolean = false;
   sistemas!: SistemasI[];
   editando: boolean = false;
+  activeTab: 'systems' | 'endpoints' = 'systems';
+  sistemaSeleccionado: SistemasI | null = null;
+  modoFiltradoPorSistema: boolean = false;
   nuevoSistema: any = {
     sistema_id: '',
     sistema_nombre: '',
@@ -62,6 +70,24 @@ export class Sistemas implements OnInit {
     sistema_usua_id: '',
     sistema_ind_estado: '',
   };
+  accionesDropdown = [
+    {
+      label: 'Refrescar',
+      icon: 'pi pi-refresh',
+      command: () => {
+        if (this.activeTab === 'systems') {
+          this.cargarSistemas();
+        } else if (this.activeTab === 'endpoints') {
+          this.endpointsComponent?.cargarEndpoints();
+        }
+      },
+    },
+    {
+      label: 'Exportar',
+      icon: 'pi pi-download',
+      command: () => this.exportarDatos(),
+    },
+  ];
   ngOnInit(): void {
     this.cargarSistemas();
   }
@@ -72,7 +98,16 @@ export class Sistemas implements OnInit {
 
   filtrarGlobal(event: Event) {
     const valor = (event.target as HTMLInputElement).value;
-    this.dt1?.filterGlobal(valor, 'contains');
+    this.dt?.filterGlobal(valor, 'contains');
+  }
+  onBuscarGlobal(event: Event): void {
+    const input = (event.target as HTMLInputElement).value;
+
+    if (this.activeTab === 'systems') {
+      this.dt.filterGlobal(input, 'contains');
+    } else if (this.activeTab === 'endpoints') {
+      this.endpointsComponent?.filtrarDesdePadre(input);
+    }
   }
 
   cargarSistemas(): void {
@@ -101,6 +136,12 @@ export class Sistemas implements OnInit {
     };
   }
 
+  volver() {
+    this.activeTab = 'systems';
+    this.sistemaSeleccionado = null;
+    this.modoFiltradoPorSistema = false;
+  }
+
   showEditar(sistema: SistemasI): void {
     this.editando = true;
     this.mostrarDialogoAgregar = true;
@@ -116,7 +157,6 @@ export class Sistemas implements OnInit {
 
   limpiarFormulario(): void {
     this.nuevoSistema = {
-      sistema_id: '',
       sistema_nombre: '',
       sistema_descripcion: '',
       sistema_usua_id: '',
@@ -124,8 +164,28 @@ export class Sistemas implements OnInit {
     };
   }
 
+  volverASistemas(): void {
+    this.activeTab = 'systems';
+    this.modoFiltradoPorSistema = false;
+    this.sistemaSeleccionado = null;
+  }
+
+  verEndpoints(sistema: SistemasI): void {
+    this.sistemaSeleccionado = sistema;
+    this.activeTab = 'endpoints';
+    this.modoFiltradoPorSistema = true;
+  }
+  verTodosLosEndpoints(): void {
+    this.activeTab = 'endpoints';
+    this.modoFiltradoPorSistema = false;
+    this.sistemaSeleccionado = null;
+  }
+
   guardarNuevoSistema(): void {
-    if (!this.nuevoSistema.sistema_id || !this.nuevoSistema.sistema_nombre || !this.nuevoSistema.sistema_descripcion)
+    if (
+      !this.nuevoSistema.sistema_nombre ||
+      !this.nuevoSistema.sistema_descripcion
+    )
       return;
 
     this.nuevoSistema.sistema_usua_id = 'ADMIN';
@@ -153,6 +213,14 @@ export class Sistemas implements OnInit {
         console.error(err);
       },
     });
+  }
+
+  agregarDesdeEndpoints(): void {
+    this.endpointsComponent.AgregarEndpoint();
+  }
+
+  exportarDatos(): void {
+    console.log('Exportando datos...');
   }
 
   eliminarSistema(sistema: SistemasI): void {

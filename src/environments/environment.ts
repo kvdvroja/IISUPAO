@@ -21,6 +21,7 @@ export const environment = {
 
   get usuariosApiUrl() { return `${this.apiBaseUrl}users/`; },
   get getAllUsuarios() { return `${this.usuariosApiUrl}get_all_users`; },
+  get UsuarioCrudUrl() { return `${this.usuariosApiUrl}crud_users`; },
 
   get colasApiUrl() { return `${this.apiBaseUrl}queues/`; },
   get getAllColas() { return `${this.colasApiUrl}get_all_queue`; },
