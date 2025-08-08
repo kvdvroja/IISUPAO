@@ -1,4 +1,10 @@
-import { Component, OnInit, inject } from '@angular/core';
+import {
+  Component,
+  OnChanges,
+  OnInit,
+  SimpleChange,
+  inject,
+} from '@angular/core';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { MessageService } from 'primeng/api';
 import { TableModule } from 'primeng/table';
@@ -24,9 +30,11 @@ import { SplitButtonModule } from 'primeng/splitbutton';
 import { ChangeDetectorRef } from '@angular/core';
 import { PlantillaIntegracionS } from '../../core/services/mant/plantilla-integracion/plantilla-integracion';
 import { PlantillaDestino } from '../plantilla-destino/plantilla-destino';
+import { Input, Output, EventEmitter } from '@angular/core';
+import { SimpleChanges } from '@angular/core';
 
 @Component({
-  selector: 'app-plantilla-integracion',
+  selector: 'app-plantillas',
   standalone: true,
   imports: [
     ConfirmDialogModule,
@@ -50,15 +58,19 @@ import { PlantillaDestino } from '../plantilla-destino/plantilla-destino';
   templateUrl: './plantillas.html',
   styleUrl: './plantillas.css',
 })
-export class Plantillas implements OnInit {
+export class Plantillas implements OnInit, OnChanges {
   @ViewChild('dt') dt!: Table;
   @ViewChild(PlantillaDestino) plantillasDComponent!: PlantillaDestino;
+  @Input() tabFromParent: 'integracion' | 'destino' | null = null;
+  @Output() stepNavigate = new EventEmitter<string>(); 
+  @Output() stepProgress = new EventEmitter<number>(); 
+
+  activeTab: 'integracion' | 'destino' = 'integracion';
   plantillaIntegracionService = inject(PlantillaIntegracionS);
   cdRef = inject(ChangeDetectorRef);
   pantallaPequena = false;
   mostrarDialogoAgregar = false;
   registroExitoso = false;
-  activeTab: 'integracion' | 'destino' = 'integracion';
   plantillaISeleccionado: Plantilla_IntegracionI | null = null;
   modoFiltradoPorSistema: boolean = false;
 
@@ -113,6 +125,12 @@ export class Plantillas implements OnInit {
     this.cargarPlantillas();
   }
 
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['tabFromParent'] && this.tabFromParent) {
+      this.goTab(this.tabFromParent);
+    }
+  }
+
   cargarPlantillas(): void {
     this.plantillaIntegracionService.getAllPlantillas().subscribe({
       next: (response) => {
@@ -126,7 +144,6 @@ export class Plantillas implements OnInit {
   }
 
   exportarDatos(): void {
-    // Implementar lógica de exportación aquí
     console.log('Exportando datos...');
   }
 
@@ -145,8 +162,17 @@ export class Plantillas implements OnInit {
 
   volver() {
     this.activeTab = 'integracion';
+    this.stepNavigate.emit('PLANTILLA_INTEGRACION');
     this.plantillaISeleccionado = null;
     this.modoFiltradoPorSistema = false;
+  }
+
+  goTab(tab: 'integracion' | 'destino', opts?: { pct?: number }) {
+    this.activeTab = tab;
+    this.stepNavigate.emit(
+      tab === 'destino' ? 'PLANTILLA_DESTINO' : 'PLANTILLA_INTEGRACION'
+    );
+    if (opts?.pct !== undefined) this.stepProgress.emit(opts.pct);
   }
 
   agregarDesdeDestino(): void {
@@ -214,7 +240,7 @@ export class Plantillas implements OnInit {
     this.registroExitoso = true;
   }
 
-    verTodasLasPlantillasD(): void {
+  verTodasLasPlantillasD(): void {
     this.activeTab = 'destino';
     this.modoFiltradoPorSistema = false;
     this.plantillaISeleccionado = null;

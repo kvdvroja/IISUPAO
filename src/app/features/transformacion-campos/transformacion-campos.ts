@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnChanges, OnInit, inject } from '@angular/core';
 import { ChangeDetectorRef } from '@angular/core';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { MessageService } from 'primeng/api';
@@ -24,6 +24,7 @@ import { SelectModule } from 'primeng/select';
 import { SplitButtonModule } from 'primeng/splitbutton';
 import { TransformacionValores } from '../transformacion-valores/transformacion-valores';
 import { TransformacionCampoS } from '../../core/services/mant/transformacion-campo/transformacion-campo';
+import { Input, Output, EventEmitter, SimpleChanges } from '@angular/core';
 
 @Component({
   selector: 'app-transformacion-campos',
@@ -49,9 +50,12 @@ import { TransformacionCampoS } from '../../core/services/mant/transformacion-ca
   templateUrl: './transformacion-campos.html',
   styleUrl: './transformacion-campos.css',
 })
-export class TransformacionCampos implements OnInit {
+export class TransformacionCampos implements OnInit, OnChanges {
   @ViewChild('dt') dt!: Table;
   @ViewChild(TransformacionValores) valoresComponent!: TransformacionValores;
+  @Input() tabFromParent: 'campos' | 'valores' | null = null;
+  @Output() stepNavigate = new EventEmitter<string>();
+  @Output() stepProgress = new EventEmitter<number>();
   transformacionCamposService = inject(TransformacionCampoS);
   cdRef = inject(ChangeDetectorRef);
   pantallaPequena = false;
@@ -98,14 +102,28 @@ export class TransformacionCampos implements OnInit {
     this.cargarData();
   }
 
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['tabFromParent'] && this.tabFromParent) {
+      this.goTab(this.tabFromParent);
+    }
+  }
+
+  goTab(tab: 'campos' | 'valores', opts?: { pct?: number }) {
+    this.activeTab = tab;
+    this.stepNavigate.emit(
+      tab === 'campos' ? 'TRANSFORMACION_CAMPOS' : 'TRANSFORMACION_VALORES'
+    );
+    if (opts?.pct !== undefined) this.stepProgress.emit(opts.pct);
+  }
+
   exportarDatos(): void {
-    // Implementar lógica de exportación de datos
   }
 
   volver() {
     this.activeTab = 'campos';
     this.camposSeleccionado = null;
     this.modoFiltradoPorSistema = false;
+    this.stepNavigate.emit('TRANSFORMACION_CAMPOS');
   }
 
   cargarData(): void {
@@ -163,7 +181,7 @@ export class TransformacionCampos implements OnInit {
     console.log('Editar campo:', campo);
   }
 
-    verTodasLosValores(): void {
+  verTodasLosValores(): void {
     this.activeTab = 'valores';
     this.modoFiltradoPorSistema = false;
     this.camposSeleccionado = null;

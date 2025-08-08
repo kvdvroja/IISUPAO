@@ -23,7 +23,7 @@ import { FormsModule } from '@angular/forms';
 import { SistemasS } from '../../core/services/mant/sistemas/sistemas';
 import { SplitButtonModule } from 'primeng/splitbutton';
 import { Endpoints } from '../endpoints/endpoints';
-import { EventEmitter, Output, Input, SimpleChanges } from '@angular/core';
+import { EventEmitter, Output, Input, SimpleChanges, AfterViewInit } from '@angular/core';
 
 @Component({
   selector: 'app-sistemas',
@@ -48,7 +48,7 @@ import { EventEmitter, Output, Input, SimpleChanges } from '@angular/core';
   templateUrl: './sistemas.html',
   styleUrl: './sistemas.css',
 })
-export class Sistemas implements OnInit, OnChanges {
+export class Sistemas implements OnInit, OnChanges, AfterViewInit  {
   @ViewChild(Endpoints) endpointsComponent!: Endpoints;
   @Output() stepNavigate = new EventEmitter<string>();
   @Output() stepProgress = new EventEmitter<number>();
@@ -208,6 +208,13 @@ export class Sistemas implements OnInit, OnChanges {
     this.sistemaSeleccionado = null;
   }
 
+  abrirModalAgregarEndpoint(sistema: SistemasI): void {
+    this.sistemaSeleccionado = sistema;
+    this.activeTab = 'endpoints';
+    this.stepNavigate.emit('endpoints');
+    this.modoFiltradoPorSistema = true;
+  }
+
   guardarNuevoSistema(): void {
     if (
       !this.nuevoSistema.sistema_nombre ||
@@ -242,8 +249,25 @@ export class Sistemas implements OnInit, OnChanges {
     });
   }
 
+  ngAfterViewInit(): void {
+    // Verifica si el componente Endpoints ha sido inicializado correctamente
+    if (this.endpointsComponent) {
+      console.log('endpointsComponent está inicializado correctamente');
+    } else {
+      console.error('endpointsComponent no está inicializado.');
+    }
+  }
+
   agregarDesdeEndpoints(): void {
     this.endpointsComponent.AgregarEndpoint();
+  }
+
+  agregarDesdeEndpointsT(sistema_id: string): void {
+    if (this.endpointsComponent) {
+      this.endpointsComponent.AgregarEndpointT(sistema_id);
+    } else {
+      console.error('endpointsComponent no está inicializado.');
+    }
   }
 
   exportarDatos(): void {

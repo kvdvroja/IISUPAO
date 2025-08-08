@@ -48,17 +48,17 @@ import { Endpoint } from '../../core/services/mant/endpoint/endpoint';
   templateUrl: './endpoints.html',
   styleUrl: './endpoints.css',
 })
-export class Endpoints implements OnInit{
+export class Endpoints implements OnInit {
   private _sistemasLista: SistemasI[] = [];
   @ViewChild('dt') dt!: Table;
   @Input() sistemaId!: string | null | undefined;
   @Input() set sistemasLista(value: SistemasI[]) {
-  this._sistemasLista = value;
-  this.sistemasOptions = value.map((s) => ({
-    label: `${s.sistema_id} - ${s.sistema_nombre}`,
-    value: s.sistema_id,
-  }));
-}
+    this._sistemasLista = value;
+    this.sistemasOptions = value.map((s) => ({
+      label: `${s.sistema_id} - ${s.sistema_nombre}`,
+      value: s.sistema_id,
+    }));
+  }
   endpointService = inject(Endpoint);
   cdRef = inject(ChangeDetectorRef);
   messageService = inject(MessageService);
@@ -80,7 +80,6 @@ export class Endpoints implements OnInit{
     se_metodo_http: '',
     se_requiere_transformar: false,
     se_usua_id: '',
-    se_ind_estado: '',
   };
 
   endpointParaEditar: any = {
@@ -139,6 +138,11 @@ export class Endpoints implements OnInit{
     this.mostrarDialogoAgregar = true;
   }
 
+  AgregarEndpointT(sistema_id: string): void {
+    this.nuevoEndpoint.se_sistema_id = sistema_id;
+    this.mostrarDialogoAgregar = true; 
+  }
+
   cerrarDialogoAgregar(): void {
     this.mostrarDialogoAgregar = false;
     this.registroExitoso = false;
@@ -153,7 +157,6 @@ export class Endpoints implements OnInit{
       se_metodo_http: '',
       se_requiere_transformar: false,
       se_usua_id: '',
-      se_ind_estado: '',
     };
   }
 
@@ -177,7 +180,8 @@ export class Endpoints implements OnInit{
       next: (response) => {
         this.messageService.add({
           severity: 'success',
-          summary: action === 'I' ? 'Endpoint agregado' : 'Endpoint actualizado',
+          summary:
+            action === 'I' ? 'Endpoint agregado' : 'Endpoint actualizado',
           detail: 'Operación exitosa',
         });
         this.registroExitoso = true;

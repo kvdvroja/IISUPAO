@@ -6,6 +6,8 @@ import { Navbar } from '../../shared/components/navbar/navbar';
 import { ButtonModule } from 'primeng/button';
 import { TooltipModule } from 'primeng/tooltip';
 import { Sistemas } from '../sistemas/sistemas';
+import { Plantillas } from '../plantillas/plantillas';
+import { TransformacionCampos } from '../transformacion-campos/transformacion-campos';
 
 type StepItem = {
   id: string;
@@ -18,32 +20,32 @@ const DEFAULT_STEPS: StepItem[] = [
   {
     id: 'SISTEMAS',
     title: 'SISTEMAS',
-    description: 'Manage and register systems',
+    description: 'Gestionar y registrar sistemas',
   },
   {
     id: 'endpoints',
     title: 'ENDPOINTS',
-    description: 'Configure system endpoints',
+    description: 'Configurar endpoints del sistema',
   },
   {
     id: 'PLANTILLA_INTEGRACION',
     title: 'PLANTILLA INTEGRACION',
-    description: 'Define integration template',
+    description: 'Definir plantilla de integración',
   },
   {
     id: 'PLANTILLA_DESTINO',
     title: 'PLANTILLA DESTINO',
-    description: 'Map destination fields',
+    description: 'Mapear campos de destino',
   },
   {
     id: 'TRANSFORMACION_CAMPOS',
     title: 'TRANSFORMACIÓN DE CAMPOS',
-    description: 'Transform fields',
+    description: 'Transformar campos',
   },
   {
     id: 'TRANSFORMACION_VALORES',
     title: 'TRANSFORMACIÓN DE VALORES',
-    description: 'Transform values',
+    description: 'Transformar valores',
   },
 ];
 
@@ -58,6 +60,8 @@ const DEFAULT_STEPS: StepItem[] = [
     TooltipModule,
     CommonModule,
     Sistemas,
+    Plantillas,
+    TransformacionCampos
   ],
   templateUrl: './menu-instructivo.html',
   styleUrl: './menu-instructivo.css',
@@ -92,12 +96,10 @@ export class MenuInstructivo implements OnInit {
   }
 
   get progressWidthCalc(): string {
-    // calc(% - 0.75rem) para respetar paddings como en el diseño de referencia
     return `calc(${this.progressPct}% - 0.75rem)`;
   }
 
-    get progressWidthCss(): string {
-    // evita ancho negativo al estar en 0%
+  get progressWidthCss(): string {
     return `max(0px, calc(${this.progressPct}% - 0.75rem))`;
   }
 
@@ -107,8 +109,6 @@ export class MenuInstructivo implements OnInit {
     const step = this.steps[index];
     if (!step || step.disabled) return;
     this.internalStep.set(index);
-    // Si cambias de paso, puedes limpiar el manual si quieres:
-    // this.manualProgress.set(null);
   }
 
   next() {
@@ -118,14 +118,12 @@ export class MenuInstructivo implements OnInit {
     this.setActive(Math.max(this.active() - 1, 0));
   }
 
-  /** Estado visual del botón (contenedor) según step */
   buttonStateClass(index: number, disabled: boolean): string {
     if (disabled) return 'border-border bg-muted';
     const isDone = index < this.active();
     const isActive = index === this.active();
 
     if (isActive) {
-      // Active: glass + gradient ring (simulado con before vía Tailwind utilities simplificadas)
       return (
         'border-transparent bg-background/70 shadow-[0_1px_0_0_rgba(0,0,0,0.02)] backdrop-blur supports-[backdrop-filter]:backdrop-blur ' +
         'before:absolute before:-inset-[1.5px] before:-z-10 before:rounded-full ' +
@@ -133,17 +131,14 @@ export class MenuInstructivo implements OnInit {
       );
     }
     if (isDone) {
-      // Done: verde muy sutil + hover
       return (
         'border-transparent bg-[linear-gradient(135deg,theme(colors.emerald.600/_12),theme(colors.emerald.600/_0))] ' +
         'hover:bg-[linear-gradient(135deg,theme(colors.emerald.600/_18),theme(colors.emerald.600/_0))]'
       );
     }
-    // Default
     return 'border-border hover:bg-muted';
   }
 
-  /** Estado visual del badge (círculo) según step */
   badgeStateClass(index: number, disabled: boolean): string {
     if (disabled) return 'bg-muted text-foreground/60';
     const isDone = index < this.active();
@@ -153,7 +148,6 @@ export class MenuInstructivo implements OnInit {
     return 'bg-muted text-foreground/80';
   }
 
-  /** Ícono genérico según id (PrimeIcons) */
   iconClass(id: string): string {
     switch (id) {
       case 'SISTEMAS':
@@ -182,24 +176,9 @@ export class MenuInstructivo implements OnInit {
     this.goToStepById(stepId);
   }
   onStepProgress(pct: number) {
-    // activa progreso manual (o déjalo en 'byStep' y solo usa navigate)
     this.progressMode = 'manual';
     const clamp = Math.max(0, Math.min(100, Math.round(pct)));
     this.manualProgress.set(clamp);
   }
-
-  // Opcional: navegar por rutas
-  // private mapStepToRoute(id: string): string {
-  //   switch (id) {
-  //     case 'SISTEMAS': return '/sistemas';
-  //     case 'endpoints': return '/endpoints';
-  //     case 'PLANTILLA_INTEGRACION': return '/plantilla-integracion';
-  //     case 'PLANTILLA_DESTINO': return '/plantilla-destino';
-  //     case 'TRANSFORMACION_CAMPOS': return '/transformacion-campos';
-  //     case 'TRANSFORMACION_VALORES': return '/transformacion-valores';
-  //     default: return '/';
-  //   }
-  // }
-
   ngOnInit(): void {}
 }

@@ -20,6 +20,6 @@ export class Inicio implements OnInit {
   }
 
   async ingresar() {
-    this.router.navigate(['/IISMuro']);
+    this.router.navigate(['/Menu']);
   }
 }

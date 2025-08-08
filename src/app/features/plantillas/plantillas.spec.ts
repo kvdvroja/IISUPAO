@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { Plantillas } from './plantillas';
 
-describe('PlantillaIntegracion', () => {
+describe('Plantillas', () => {
   let component: Plantillas;
   let fixture: ComponentFixture<Plantillas>;
 
