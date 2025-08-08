@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnChanges, OnInit, inject } from '@angular/core';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { MessageService } from 'primeng/api';
 import { TableModule } from 'primeng/table';
@@ -23,6 +23,7 @@ import { FormsModule } from '@angular/forms';
 import { SistemasS } from '../../core/services/mant/sistemas/sistemas';
 import { SplitButtonModule } from 'primeng/splitbutton';
 import { Endpoints } from '../endpoints/endpoints';
+import { EventEmitter, Output, Input, SimpleChanges } from '@angular/core';
 
 @Component({
   selector: 'app-sistemas',
@@ -47,8 +48,11 @@ import { Endpoints } from '../endpoints/endpoints';
   templateUrl: './sistemas.html',
   styleUrl: './sistemas.css',
 })
-export class Sistemas implements OnInit {
+export class Sistemas implements OnInit, OnChanges {
   @ViewChild(Endpoints) endpointsComponent!: Endpoints;
+  @Output() stepNavigate = new EventEmitter<string>();
+  @Output() stepProgress = new EventEmitter<number>();
+  @Input() tabFromParent: 'systems' | 'endpoints' | null = null;
   sistemasService = inject(SistemasS);
   cdRef = inject(ChangeDetectorRef);
   messageService = inject(MessageService);
@@ -90,6 +94,12 @@ export class Sistemas implements OnInit {
   ];
   ngOnInit(): void {
     this.cargarSistemas();
+  }
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['tabFromParent'] && this.tabFromParent) {
+      // navega internamente cuando el padre cambie de step
+      this.goTab(this.tabFromParent);
+    }
   }
 
   get sistemasFiltradas(): any[] {
@@ -138,6 +148,7 @@ export class Sistemas implements OnInit {
 
   volver() {
     this.activeTab = 'systems';
+    this.stepNavigate.emit('SISTEMAS');
     this.sistemaSeleccionado = null;
     this.modoFiltradoPorSistema = false;
   }
@@ -164,6 +175,21 @@ export class Sistemas implements OnInit {
     };
   }
 
+  goTab(
+    tab: 'systems' | 'endpoints',
+    opts?: { pct?: number; byStep?: boolean }
+  ) {
+    this.activeTab = tab;
+
+    // avisa al padre qué paso debe mostrarse en el menú instructivo
+    this.stepNavigate.emit(tab === 'endpoints' ? 'endpoints' : 'SISTEMAS');
+
+    // (opcional) si pasas un porcentaje, súbelo
+    if (opts?.pct !== undefined) {
+      this.stepProgress.emit(opts.pct); // ej. 40, 60, 80...
+    }
+  }
+
   volverASistemas(): void {
     this.activeTab = 'systems';
     this.modoFiltradoPorSistema = false;
@@ -177,6 +203,7 @@ export class Sistemas implements OnInit {
   }
   verTodosLosEndpoints(): void {
     this.activeTab = 'endpoints';
+    this.stepNavigate.emit('endpoints');
     this.modoFiltradoPorSistema = false;
     this.sistemaSeleccionado = null;
   }

@@ -21,6 +21,11 @@ export const MAIN_LAYOUT: Routes = [
         loadChildren: () =>
           import('../../features/tickets-detail/tickets-detail.routes').then((m) => m.TICKETS_DETAIL_ROUTES),
       },
+      {
+        path: 'Menu',
+        loadChildren: () =>
+          import('../../features/menu-instructivo/menu-instructivo.routes').then((m) => m.MENU_INSTRUCTIVO_ROUTES),
+      }
     ],
   },
 ];

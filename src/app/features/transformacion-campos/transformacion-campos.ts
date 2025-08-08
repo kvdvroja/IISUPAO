@@ -1,4 +1,4 @@
-import { Component, OnInit,inject } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { ChangeDetectorRef } from '@angular/core';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { MessageService } from 'primeng/api';
@@ -21,6 +21,8 @@ import { ConfirmationService } from 'primeng/api';
 import { Transformacion_CamposI } from '../../core/interfaces/Transformacion_Campos';
 import { FormsModule } from '@angular/forms';
 import { SelectModule } from 'primeng/select';
+import { SplitButtonModule } from 'primeng/splitbutton';
+import { TransformacionValores } from '../transformacion-valores/transformacion-valores';
 import { TransformacionCampoS } from '../../core/services/mant/transformacion-campo/transformacion-campo';
 
 @Component({
@@ -39,19 +41,26 @@ import { TransformacionCampoS } from '../../core/services/mant/transformacion-ca
     InputGroupModule,
     InputGroupAddonModule,
     Dialog,
-    Toast
+    Toast,
+    SplitButtonModule,
+    TransformacionValores,
   ],
   providers: [MessageService, ConfirmationService],
   templateUrl: './transformacion-campos.html',
   styleUrl: './transformacion-campos.css',
 })
 export class TransformacionCampos implements OnInit {
-  @ViewChild('dt1') dt1!: Table;
+  @ViewChild('dt') dt!: Table;
+  @ViewChild(TransformacionValores) valoresComponent!: TransformacionValores;
   transformacionCamposService = inject(TransformacionCampoS);
   cdRef = inject(ChangeDetectorRef);
   pantallaPequena = false;
   mostrarDialogoAgregar = false;
-
+  activeTab: 'campos' | 'valores' = 'campos';
+  camposSeleccionado: Transformacion_CamposI | null = null;
+  modoFiltradoPorSistema: boolean = false;
+  mostrarSoloPendientes: boolean = false;
+  registroExitoso: boolean = false;
   campos: Transformacion_CamposI[] = [];
 
   nuevoCampo: Transformacion_CamposI = {
@@ -63,11 +72,40 @@ export class TransformacionCampos implements OnInit {
     ct_obligatorio: '',
     ct_usua_id: '',
     ct_fecha_actividad: '',
-    pd_id: ''
+    pd_id: '',
   };
+
+  accionesDropdown = [
+    {
+      label: 'Refrescar',
+      icon: 'pi pi-refresh',
+      command: () => {
+        if (this.activeTab === 'campos') {
+          this.cargarData();
+        } else if (this.activeTab === 'valores') {
+          this.valoresComponent?.cargarData();
+        }
+      },
+    },
+    {
+      label: 'Exportar',
+      icon: 'pi pi-download',
+      command: () => this.exportarDatos(),
+    },
+  ];
 
   ngOnInit(): void {
     this.cargarData();
+  }
+
+  exportarDatos(): void {
+    // Implementar lógica de exportación de datos
+  }
+
+  volver() {
+    this.activeTab = 'campos';
+    this.camposSeleccionado = null;
+    this.modoFiltradoPorSistema = false;
   }
 
   cargarData(): void {
@@ -82,18 +120,30 @@ export class TransformacionCampos implements OnInit {
     });
   }
 
-
   get datosFiltrados(): Transformacion_CamposI[] {
     return this.campos;
   }
 
   filtrarGlobal(event: Event) {
     const valor = (event.target as HTMLInputElement).value;
-    this.dt1.filterGlobal(valor, 'contains');
+    this.dt.filterGlobal(valor, 'contains');
+  }
+
+  onBuscarGlobal(event: Event): void {
+    const input = (event.target as HTMLInputElement).value;
+
+    if (this.activeTab === 'campos') {
+      this.dt.filterGlobal(input, 'contains');
+    } else if (this.activeTab === 'valores') {
+      this.valoresComponent?.filtrarDesdePadre(input);
+    }
   }
 
   Agregar(): void {
     this.mostrarDialogoAgregar = true;
+  }
+  agregarDesdeValores(): void {
+    this.valoresComponent.mostrarDialogoAgregar = true;
   }
 
   cerrarDialogoAgregar(): void {
@@ -111,5 +161,11 @@ export class TransformacionCampos implements OnInit {
 
   showEditar(campo: Transformacion_CamposI): void {
     console.log('Editar campo:', campo);
+  }
+
+    verTodasLosValores(): void {
+    this.activeTab = 'valores';
+    this.modoFiltradoPorSistema = false;
+    this.camposSeleccionado = null;
   }
 }

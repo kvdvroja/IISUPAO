@@ -19,6 +19,7 @@ import { ViewChild } from '@angular/core';
 import { ConfirmationService } from 'primeng/api';
 import { Transformacion_ValorI } from '../../core/interfaces/Transformacion_Valor';
 import { FormsModule } from '@angular/forms';
+import { Input } from '@angular/core';
 import { SelectModule } from 'primeng/select';
 import { TransformacionValorS } from '../../core/services/mant/transformacion-valor/transformacion-valor';
 
@@ -45,6 +46,7 @@ import { TransformacionValorS } from '../../core/services/mant/transformacion-va
 })
 export class TransformacionValores implements OnInit {
   @ViewChild('dt') dt!: Table;
+  @Input() campoId!: string | null | undefined;
   transformacionValoresService = inject(TransformacionValorS);
   cdRef = inject(ChangeDetectorRef);
   messageService = inject(MessageService);
@@ -91,6 +93,12 @@ export class TransformacionValores implements OnInit {
 
   cerrarDialogoAgregar(): void {
     this.mostrarDialogoAgregar = false;
+  }
+
+  filtrarDesdePadre(valor: string): void {
+    if (this.dt) {
+      this.dt.filterGlobal(valor, 'contains');
+    }
   }
 
   guardarNuevoValor(): void {

@@ -8,7 +8,7 @@
   </div>
 
   <!-- Botón Dashboard destacado -->
-  <div class="border-t border-white/30 px-4 py-2">
+  <div class="border-t border-white/30 px-4 pt-2">
     <a
       routerLink="/Tickets"
       routerLinkActive="bg-white/10 font-semibold"
@@ -19,14 +19,26 @@
     </a>
   </div>
 
-  <div class="border-b border-white/30 px-4 pb-2">
-    <a
-      routerLink="/IISMuro/Dashboard"
+  <div class="px-4 py-2">
+        <a
+      routerLink="/Menu"
       routerLinkActive="bg-white/10 font-semibold"
       class="flex items-center gap-3 px-4 py-2 rounded hover:bg-white/10 transition"
     >
       <i class="pi pi-chart-bar"></i>
-      <span>Dashboard</span>
+      <span>Menú</span>
+    </a>
+  </div>
+  
+
+  <div class="border-b border-white/30 px-4 pb-2">
+        <a
+      routerLink="/IISMuro/Usuarios"
+      routerLinkActive="bg-white/10 font-semibold"
+      class="flex items-center gap-3 px-4 py-2 rounded hover:bg-white/10 transition"
+    >
+      <i class="pi pi-users"></i>
+      <span>Usuarios</span>
     </a>
   </div>
 
@@ -51,15 +63,6 @@
     </a> -->
 
     <a
-      routerLink="/IISMuro/Usuarios"
-      routerLinkActive="bg-white/10 font-semibold"
-      class="flex items-center gap-3 px-4 py-3 rounded hover:bg-white/10 transition"
-    >
-      <i class="pi pi-users"></i>
-      <span>Usuarios</span>
-    </a>
-
-    <a
       routerLink="/IISMuro/Plantilla-Integracion"
       routerLinkActive="bg-white/10 font-semibold"
       class="flex items-center gap-3 px-4 py-3 rounded hover:bg-white/10 transition"
@@ -74,17 +77,17 @@
       class="flex items-center gap-3 px-4 py-3 rounded hover:bg-white/10 transition"
     >
       <i class="pi pi-filter"></i>
-      <span>Transformación de Campos</span>
+      <span>Transformaciones</span>
     </a>
 
-    <a
+    <!-- <a
       routerLink="/IISMuro/Transformacion-Valores"
       routerLinkActive="bg-white/10 font-semibold"
       class="flex items-center gap-3 px-4 py-3 rounded hover:bg-white/10 transition"
     >
       <i class="pi pi-sync"></i>
       <span>Transformación de Valores</span>
-    </a>
+    </a> -->
 
     <a
       routerLink="/IISMuro/Colas"

@@ -1,9 +1,92 @@
-<div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6 border-b-4 border-[#1C3D67] p-4">
-  <h2 class="text-2xl font-bold uppercase tracking-wide pb-2 text-[#1c3d67] dark:text-white">
-    Transformación de Campos
-  </h2>
+<!-- Cabecera -->
+<div
+  class="flex items-center justify-between border-b border-gray-200 p-3 bg-white"
+>
+  <!-- Botón regresar -->
+  <button
+    *ngIf="activeTab === 'valores'"
+    class="flex items-center justify-center border rounded-md p-2 hover:bg-gray-100"
+    (click)="volver()"
+    title="Volver"
+  >
+    <i class="pi pi-arrow-left text-xl text-gray-700"></i>
+  </button>
+
+  <!-- Título -->
+  <div class="flex-1 px-4">
+    <h2 class="text-2xl font-bold text-gray-800">
+      {{ activeTab === "campos" ? "TRANSFORMACIONES / TRANSFORMACIÓN DE CAMPOS" : "TRANSFORMACIONES / TRANSFORMACIÓN DE VALORES" }}
+    </h2>
+    <p *ngIf="activeTab === 'campos'" class="text-sm text-gray-500">
+      Gestión de transformación de campos  
+    </p>
+    <p *ngIf="activeTab === 'valores'" class="text-sm text-gray-500">
+      Gestión de transformación de valores
+    </p>
+  </div>
+
+  <!-- Acciones -->
+  <div class="flex items-center space-x-2">
+    <p-splitButton
+      label="Acciones"
+      icon="pi pi-cog"
+      [model]="accionesDropdown"
+      class="p-button-outlined p-button-sm"
+    ></p-splitButton>
+    <p-button
+      label="Nuevo"
+      icon="pi pi-plus"
+      class="p-button-sm"
+      (click)="
+        activeTab === 'campos' ? Agregar() : agregarDesdeValores()
+      "
+    ></p-button>
+    <p-button
+      label="Limpiar"
+      [outlined]="true"
+      icon="pi pi-filter-slash"
+      (click)="dt.clear()"
+    ></p-button>
+    <p-iconfield iconPosition="left" class="w-64">
+      <p-inputicon>
+        <i class="pi pi-search"></i>
+      </p-inputicon>
+      <input
+        pInputText
+        (input)="onBuscarGlobal($event)"
+        placeholder="Buscar..."
+        class="w-full"
+      />
+    </p-iconfield>
+  </div>
+</div>
+<!-- Tabs -->
+<div class="flex space-x-6 border-b border-gray-200 px-6 pt-4">
+  <button
+    class="pb-4 border-b-2 transition-all duration-150 text-sm font-medium"
+    [ngClass]="{
+      'border-[#1c3d67] text-[#1c3d67]': activeTab === 'campos',
+      'border-transparent text-gray-500 hover:text-[#1c3d67] hover:border-[#1c3d67]':
+        activeTab !== 'campos'
+    }"
+    (click)="activeTab = 'campos'"
+  >
+    TRANSFORMACIÓN CAMPOS
+  </button>
+  <button
+    class="pb-4 border-b-2 transition-all duration-150 text-sm font-medium"
+    [ngClass]="{
+      'border-[#1c3d67] text-[#1c3d67]': activeTab === 'valores',
+      'border-transparent text-gray-500 hover:text-[#1c3d67] hover:border-[#1c3d67]':
+        activeTab !== 'valores'
+    }"
+    (click)="verTodasLosValores()"
+  >
+    TRANSFORMACIÓN VALORES
+  </button>
 </div>
 
+<div *ngIf="activeTab === 'campos'">
 <!-- Móvil: Buscador -->
 <div *ngIf="pantallaPequena" class="p-2">
   <p-iconfield iconPosition="left" class="w-full mb-4">
@@ -39,42 +122,6 @@
     [rowsPerPageOptions]="[10, 25, 50]"
     [globalFilterFields]="['ct_campo_origen', 'ct_campo_destino', 'ct_tipo_transformacion']"
   >
-    <ng-template #caption>
-      <div
-        class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 sm:gap-2 w-full px-2"
-      >
-        <div class="flex flex-wrap gap-2">
-          <p-button
-            label="Limpiar"
-            [outlined]="true"
-            icon="pi pi-filter-slash"
-            (click)="dt1.clear()"
-          ></p-button>
-        </div>
-        <div class="flex gap-2">
-          <button
-            pButton
-            icon="pi pi-plus"
-            title="Nuevo"
-            label="Nuevo"
-            (click)="Agregar()"
-          ></button>
-          <p-iconfield iconPosition="left" class="w-full sm:w-64">
-            <p-inputicon>
-              <i class="pi pi-search"></i>
-            </p-inputicon>
-            <input
-              pInputText
-              type="text"
-              (input)="filtrarGlobal($event)"
-              placeholder="Buscar..."
-              class="w-full"
-            />
-          </p-iconfield>
-        </div>
-      </div>
-    </ng-template>
-
     <ng-template #header>
       <tr>
         <th>Origen</th>
@@ -105,6 +152,12 @@
       <tr><td colspan="7">No hay registros.</td></tr>
     </ng-template>
   </p-table>
+</div>
+</div>
+<div *ngIf="activeTab === 'valores'">
+  <app-transformacion-valor [campoId]="
+      modoFiltradoPorSistema ? camposSeleccionado?.ct_id : null">
+  </app-transformacion-valor>
 </div>
 
 <!-- Diálogo Agregar -->
