@@ -32,6 +32,8 @@ import { PlantillaIntegracionS } from '../../core/services/mant/plantilla-integr
 import { PlantillaDestino } from '../plantilla-destino/plantilla-destino';
 import { Input, Output, EventEmitter } from '@angular/core';
 import { SimpleChanges } from '@angular/core';
+import { Endpoint } from '../../core/services/mant/endpoint/endpoint';
+import { EndpointI } from '../../core/interfaces/Endpoint';
 
 @Component({
   selector: 'app-plantillas',
@@ -62,13 +64,20 @@ export class Plantillas implements OnInit, OnChanges {
   @ViewChild('dt') dt!: Table;
   @ViewChild(PlantillaDestino) plantillasDComponent!: PlantillaDestino;
   @Input() tabFromParent: 'integracion' | 'destino' | null = null;
-  @Output() stepNavigate = new EventEmitter<string>(); 
-  @Output() stepProgress = new EventEmitter<number>(); 
+  @Output() stepNavigate = new EventEmitter<string>();
+  @Output() stepProgress = new EventEmitter<number>();
+  endpointService = inject(Endpoint);
 
+  endpoints: EndpointI[] = [];
+  endpointsOptions: { label: string; value: string | number }[] = [];
+  selectedEndpointId: string | number | null = null;
   activeTab: 'integracion' | 'destino' = 'integracion';
   plantillaIntegracionService = inject(PlantillaIntegracionS);
+  messageService = inject(MessageService);
+  confirmService = inject(ConfirmationService);
   cdRef = inject(ChangeDetectorRef);
   pantallaPequena = false;
+  editando: boolean = false;
   mostrarDialogoAgregar = false;
   registroExitoso = false;
   plantillaISeleccionado: Plantilla_IntegracionI | null = null;
@@ -76,10 +85,33 @@ export class Plantillas implements OnInit, OnChanges {
 
   plantillas: Plantilla_IntegracionI[] = [];
 
+  //
+  piDataPairs: Array<{ key: string; value: string }> = [];
+  newKVKey = '';
+  newKVValue = '';
+  editingKVIndex: number | null = null;
+  //
+  //
+  schemaPairs: Array<{ key: string; value: string }> = [];
+  newSchemaKey = '';
+  newSchemaValue = '';
+  editingSchemaIndex: number | null = null;
+  //
+
   opcionesTipoServicio = [
     { label: 'REST', value: 'REST' },
     { label: 'SOAP', value: 'SOAP' },
     { label: 'FTP', value: 'FTP' },
+  ];
+
+  opcionesValida = [
+    { label: 'Productor (P)', value: 'P' },
+    { label: 'Worker (W)', value: 'W' },
+  ];
+
+  opcionesTransforma = [
+    { label: 'Worker (W)', value: 'W' },
+    { label: 'Productor (P)', value: 'P' },
   ];
 
   accionesDropdown = [
@@ -101,13 +133,9 @@ export class Plantillas implements OnInit, OnChanges {
     },
   ];
 
-  nuevaPlantilla: Plantilla_IntegracionI = {
-    pi_id: '',
-    pi_codigo: '',
+  nuevaPlantilla: any = {
     pi_nombre: '',
     pi_descripcion: '',
-    pi_ind_estado: '',
-    pi_fecha_actividad: '',
     pi_tipo_servicio: '',
     pi_sist_orig_id: '',
     pi_data: '',
@@ -116,7 +144,6 @@ export class Plantillas implements OnInit, OnChanges {
     pi_url: '',
     pi_metodo_http: '',
     pi_sist_id: '',
-    pi_cola_id: '',
     pi_valida: '',
     pi_transforma: '',
   };
@@ -129,6 +156,31 @@ export class Plantillas implements OnInit, OnChanges {
     if (changes['tabFromParent'] && this.tabFromParent) {
       this.goTab(this.tabFromParent);
     }
+  }
+
+  private cargarEndpointsOptions(): void {
+    this.endpointService.getAllEndpoints().subscribe({
+      next: (res) => {
+        this.endpoints = res.result.data;
+        this.endpointsOptions = this.endpoints.map((e) => ({
+          label: `${e.se_id} - ${e.se_nombre}`,
+          value: e.se_id,
+        }));
+        this.cdRef.detectChanges();
+      },
+      error: (err) => console.error('Error cargando endpoints', err),
+    });
+  }
+
+  onEndpointSelect(endpointId: string | number): void {
+    const ep = this.endpoints.find(
+      (e) => String(e.se_id) === String(endpointId)
+    );
+    if (!ep) return;
+    this.nuevaPlantilla.pi_url = ep.se_url || '';
+    this.nuevaPlantilla.pi_metodo_http = ep.se_metodo_http || '';
+    this.nuevaPlantilla.pi_sist_orig_id = String(ep.se_id); // id del endpoint
+    this.nuevaPlantilla.pi_sist_id = String((ep as any).se_sistema_id ?? ''); // id del sistema dueño
   }
 
   cargarPlantillas(): void {
@@ -157,7 +209,22 @@ export class Plantillas implements OnInit, OnChanges {
   }
 
   showEditar(plantilla: Plantilla_IntegracionI): void {
-    console.log('Editar plantilla:', plantilla);
+    this.editando = true;
+    this.nuevaPlantilla = { ...plantilla };
+    this.mostrarDialogoAgregar = true;
+
+    // carga pares existentes
+    this.loadPairsFromPiData(this.nuevaPlantilla.pi_data || '{}');
+    this.loadPairsFromPiSchema(this.nuevaPlantilla.pi_schema || '{}');
+
+    // endpoints
+    this.cargarEndpointsOptions();
+    setTimeout(() => {
+      this.selectedEndpointId =
+        this.nuevaPlantilla.pi_sist_id ||
+        this.nuevaPlantilla.pi_sist_orig_id ||
+        null;
+    });
   }
 
   volver() {
@@ -191,13 +258,10 @@ export class Plantillas implements OnInit, OnChanges {
 
   AgregarPlantilla(): void {
     this.mostrarDialogoAgregar = true;
+    this.editando = false;
     this.nuevaPlantilla = {
-      pi_id: '',
-      pi_codigo: '',
       pi_nombre: '',
       pi_descripcion: '',
-      pi_ind_estado: '',
-      pi_fecha_actividad: '',
       pi_tipo_servicio: '',
       pi_sist_orig_id: '',
       pi_data: '',
@@ -206,10 +270,23 @@ export class Plantillas implements OnInit, OnChanges {
       pi_url: '',
       pi_metodo_http: '',
       pi_sist_id: '',
-      pi_cola_id: '',
       pi_valida: '',
       pi_transforma: '',
     };
+
+    // limpia pares
+    this.piDataPairs = [];
+    this.newKVKey = '';
+    this.newKVValue = '';
+    this.editingKVIndex = null;
+    this.schemaPairs = [];
+    this.newSchemaKey = '';
+    this.newSchemaValue = '';
+    this.editingSchemaIndex = null;
+
+    // endpoints
+    this.cargarEndpointsOptions();
+    this.selectedEndpointId = null;
   }
 
   cerrarDialogoAgregar(): void {
@@ -217,32 +294,234 @@ export class Plantillas implements OnInit, OnChanges {
     this.registroExitoso = false;
   }
 
-  guardarNuevaPlantilla(): void {
-    const nueva = { ...this.nuevaPlantilla };
-    nueva.pi_id = Date.now().toString();
-    nueva.pi_fecha_actividad = new Date().toISOString();
-    nueva.pi_codigo =
-      'PL-' +
-      Math.floor(Math.random() * 10000)
-        .toString()
-        .padStart(4, '0');
-    nueva.pi_ind_estado = 'Activo';
-    nueva.pi_valida = 'N';
-    nueva.pi_transforma = 'N';
-    nueva.pi_data = '{}';
-    nueva.pi_numreg_peticion = '0';
-    nueva.pi_schema = '{}';
-    nueva.pi_sist_id = '';
-    nueva.pi_cola_id = '';
+  guardar(): void {
+    if (
+      !this.nuevaPlantilla.pi_nombre ||
+      !this.nuevaPlantilla.pi_url ||
+      !this.nuevaPlantilla.pi_metodo_http
+    )
+      return;
 
-    this.plantillas.push(nueva);
-    this.mostrarDialogoAgregar = false;
-    this.registroExitoso = true;
+    const piDataJSON = this.pairsToJSONString();
+    const piSchemaJSON = this.schemaPairsToJSONString();
+
+    const payload: any = { ...this.nuevaPlantilla };
+    payload.pi_data = piDataJSON;
+    payload.pi_schema = piSchemaJSON;
+
+    // normaliza número si corresponde
+    if (
+      payload.pi_numreg_peticion !== null &&
+      payload.pi_numreg_peticion !== undefined &&
+      payload.pi_numreg_peticion !== ''
+    ) {
+      const n = Number(payload.pi_numreg_peticion);
+      if (!Number.isNaN(n)) payload.pi_numreg_peticion = n;
+    }
+
+    if (this.editando) {
+      if (payload.pi_id !== null && payload.pi_id !== undefined) {
+        payload.pi_id = isNaN(Number(payload.pi_id))
+          ? payload.pi_id
+          : Number(payload.pi_id);
+      }
+    } else {
+      payload.pi_ind_estado = 'A';
+      // si quieres mantener compatibilidad con tu backend antiguo que usaba 'N',
+      // solo aplica si el usuario no eligió nada en los selects:
+      if (!payload.pi_valida) payload.pi_valida = 'W'; // default sugerido
+      if (!payload.pi_transforma) payload.pi_transforma = 'W'; // default sugerido
+    }
+
+    const accion = this.editando ? 'U' : 'I';
+    this.plantillaIntegracionService
+      .plantillaIntegracionCrud(payload, accion)
+      .subscribe({
+        next: () => {
+          this.messageService.add({
+            severity: 'success',
+            summary: this.editando
+              ? 'Plantilla actualizada'
+              : 'Plantilla registrada',
+            detail: 'Operación exitosa',
+          });
+          this.mostrarDialogoAgregar = false;
+          this.registroExitoso = true;
+          this.cargarPlantillas();
+        },
+        error: (err) => {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'No se pudo guardar la plantilla',
+          });
+          console.error(err);
+        },
+      });
   }
 
+  eliminar(row: Plantilla_IntegracionI): void {
+    this.confirmService.confirm({
+      header: 'Confirmación',
+      message: `¿Deseas eliminar la plantilla "${row.pi_nombre}"?`,
+      icon: 'pi pi-exclamation-triangle',
+      accept: () => {
+        const payload: any = { pi_id: row.pi_id };
+        if (payload.pi_id && !isNaN(Number(payload.pi_id)))
+          payload.pi_id = Number(payload.pi_id);
+
+        this.plantillaIntegracionService
+          .plantillaIntegracionCrud(payload, 'D')
+          .subscribe({
+            next: () => {
+              this.messageService.add({
+                severity: 'success',
+                summary: 'Plantilla eliminada',
+                detail: 'Se eliminó correctamente.',
+              });
+              this.cargarPlantillas();
+            },
+            error: (err) => {
+              this.messageService.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'No se pudo eliminar la plantilla',
+              });
+              console.error(err);
+            },
+          });
+      },
+    });
+  }
   verTodasLasPlantillasD(): void {
     this.activeTab = 'destino';
     this.modoFiltradoPorSistema = false;
     this.plantillaISeleccionado = null;
   }
+
+  //
+  private loadPairsFromPiData(data: string | null | undefined) {
+    this.piDataPairs = [];
+    if (!data) return;
+    try {
+      const obj = JSON.parse(data);
+      // si guardas como objeto {k:v}
+      if (obj && typeof obj === 'object' && !Array.isArray(obj)) {
+        this.piDataPairs = Object.entries(obj).map(([key, value]) => ({
+          key,
+          value: String(value ?? ''),
+        }));
+      }
+      // si alguna vez lo guardaste como array de pares [{key,value}]
+      if (Array.isArray(obj)) {
+        this.piDataPairs = obj
+          .filter((x: any) => x && typeof x.key === 'string')
+          .map((x: any) => ({ key: x.key, value: String(x.value ?? '') }));
+      }
+    } catch {
+      /* ignore */
+    }
+  }
+
+  private pairsToJSONString(): string {
+    // Guardar como objeto { key: value }
+    const o: Record<string, string> = {};
+    for (const p of this.piDataPairs) o[p.key] = p.value;
+    return JSON.stringify(o);
+  }
+
+  addOrUpdateKV() {
+    const k = this.newKVKey?.trim();
+    const v = this.newKVValue ?? '';
+    if (!k) return;
+
+    if (this.editingKVIndex !== null) {
+      this.piDataPairs[this.editingKVIndex] = { key: k, value: v };
+      this.editingKVIndex = null;
+    } else {
+      // si existe la clave, la reemplazamos
+      const idx = this.piDataPairs.findIndex((p) => p.key === k);
+      if (idx >= 0) this.piDataPairs[idx] = { key: k, value: v };
+      else this.piDataPairs.push({ key: k, value: v });
+    }
+    this.newKVKey = '';
+    this.newKVValue = '';
+  }
+
+  editKV(i: number) {
+    const it = this.piDataPairs[i];
+    this.newKVKey = it.key;
+    this.newKVValue = it.value;
+    this.editingKVIndex = i;
+  }
+
+  removeKV(i: number) {
+    this.piDataPairs.splice(i, 1);
+    if (this.editingKVIndex === i) {
+      this.editingKVIndex = null;
+      this.newKVKey = '';
+      this.newKVValue = '';
+    }
+  }
+  //
+  private loadPairsFromPiSchema(data: string | null | undefined) {
+    this.schemaPairs = [];
+    if (!data) return;
+    try {
+      const obj = JSON.parse(data);
+      if (obj && typeof obj === 'object' && !Array.isArray(obj)) {
+        this.schemaPairs = Object.entries(obj).map(([key, value]) => ({
+          key,
+          value: String(value ?? ''),
+        }));
+      }
+      if (Array.isArray(obj)) {
+        this.schemaPairs = obj
+          .filter((x: any) => x && typeof x.key === 'string')
+          .map((x: any) => ({ key: x.key, value: String(x.value ?? '') }));
+      }
+    } catch {
+      /* ignore */
+    }
+  }
+
+  private schemaPairsToJSONString(): string {
+    const o: Record<string, string> = {};
+    for (const p of this.schemaPairs) o[p.key] = p.value;
+    return JSON.stringify(o);
+  }
+
+  addOrUpdateSchemaKV() {
+    const k = this.newSchemaKey?.trim();
+    const v = this.newSchemaValue ?? '';
+    if (!k) return;
+
+    if (this.editingSchemaIndex !== null) {
+      this.schemaPairs[this.editingSchemaIndex] = { key: k, value: v };
+      this.editingSchemaIndex = null;
+    } else {
+      const idx = this.schemaPairs.findIndex((p) => p.key === k);
+      if (idx >= 0) this.schemaPairs[idx] = { key: k, value: v };
+      else this.schemaPairs.push({ key: k, value: v });
+    }
+    this.newSchemaKey = '';
+    this.newSchemaValue = '';
+  }
+
+  editSchemaKV(i: number) {
+    const it = this.schemaPairs[i];
+    this.newSchemaKey = it.key;
+    this.newSchemaValue = it.value;
+    this.editingSchemaIndex = i;
+  }
+
+  removeSchemaKV(i: number) {
+    this.schemaPairs.splice(i, 1);
+    if (this.editingSchemaIndex === i) {
+      this.editingSchemaIndex = null;
+      this.newSchemaKey = '';
+      this.newSchemaValue = '';
+    }
+  }
+  //
 }

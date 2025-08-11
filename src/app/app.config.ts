@@ -6,6 +6,8 @@ import {
 import { provideRouter } from '@angular/router';
 
 import { routes } from './app.routes';
+import { MessageService } from 'primeng/api';
+import { ConfirmationService } from 'primeng/api';
 import {
   provideClientHydration,
   withEventReplay,
@@ -33,5 +35,7 @@ export const appConfig: ApplicationConfig = {
         },
       },
     }),
+    MessageService,
+    ConfirmationService,  
   ],
 };

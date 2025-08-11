@@ -29,6 +29,7 @@ export const environment = {
 
   get plantillaIntegracionApiUrl() { return `${this.apiBaseUrl}integration_templates/`; },
   get getAllPlantillaIntegracion() { return `${this.plantillaIntegracionApiUrl}get_all_integration_templates`; },
+  get plantillaIntegracionCrud() { return `${this.plantillaIntegracionApiUrl}crud_integration`; },
 
   get plantillaDestinoApiUrl() { return `${this.apiBaseUrl}integration_ends/`; },
   get getAllPlantillaDestino() { return `${this.plantillaDestinoApiUrl}get_all_integration_end`; },

@@ -185,13 +185,12 @@
     </p-table>
   </div>
 </div>
-<div *ngIf="activeTab === 'endpoints'">
+<div [hidden]="activeTab !== 'endpoints'">
   <app-endpoints
-    [sistemaId]="
-      modoFiltradoPorSistema ? sistemaSeleccionado?.sistema_id : null
-    "
-    [sistemasLista]="sistemas"
-  ></app-endpoints>
+    #endpointsCmp
+    [sistemaId]="modoFiltradoPorSistema ? sistemaSeleccionado?.sistema_id : null"
+    [sistemasLista]="sistemas">
+  </app-endpoints>
 </div>
 <p-toast></p-toast>
 <p-dialog
@@ -279,3 +278,9 @@
     </div>
   </ng-template>
 </p-confirmDialog>
+<app-endpoints
+  #endpointsCmp
+  [sistemaId]="null"
+  [sistemasLista]="sistemas"
+  style="display:none"
+></app-endpoints>

@@ -23,7 +23,13 @@ import { FormsModule } from '@angular/forms';
 import { SistemasS } from '../../core/services/mant/sistemas/sistemas';
 import { SplitButtonModule } from 'primeng/splitbutton';
 import { Endpoints } from '../endpoints/endpoints';
-import { EventEmitter, Output, Input, SimpleChanges, AfterViewInit } from '@angular/core';
+import {
+  EventEmitter,
+  Output,
+  Input,
+  SimpleChanges,
+  AfterViewInit,
+} from '@angular/core';
 
 @Component({
   selector: 'app-sistemas',
@@ -44,12 +50,11 @@ import { EventEmitter, Output, Input, SimpleChanges, AfterViewInit } from '@angu
     Endpoints,
     SplitButtonModule,
   ],
-  providers: [MessageService, ConfirmationService],
   templateUrl: './sistemas.html',
   styleUrl: './sistemas.css',
 })
-export class Sistemas implements OnInit, OnChanges, AfterViewInit  {
-  @ViewChild(Endpoints) endpointsComponent!: Endpoints;
+export class Sistemas implements OnInit, OnChanges, AfterViewInit {
+  @ViewChild('endpointsCmp', { static: true }) endpointsComponent!: Endpoints;
   @Output() stepNavigate = new EventEmitter<string>();
   @Output() stepProgress = new EventEmitter<number>();
   @Input() tabFromParent: 'systems' | 'endpoints' | null = null;
@@ -263,11 +268,8 @@ export class Sistemas implements OnInit, OnChanges, AfterViewInit  {
   }
 
   agregarDesdeEndpointsT(sistema_id: string): void {
-    if (this.endpointsComponent) {
-      this.endpointsComponent.AgregarEndpointT(sistema_id);
-    } else {
-      console.error('endpointsComponent no está inicializado.');
-    }
+    // NO cambiamos activeTab
+    this.endpointsComponent.AgregarEndpointT(sistema_id);
   }
 
   exportarDatos(): void {

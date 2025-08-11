@@ -44,7 +44,6 @@ import { Endpoint } from '../../core/services/mant/endpoint/endpoint';
     Toast,
     SelectModule,
   ],
-  providers: [MessageService, ConfirmationService],
   templateUrl: './endpoints.html',
   styleUrl: './endpoints.css',
 })
@@ -102,7 +101,7 @@ export class Endpoints implements OnInit {
   }
 
   get endpointsFiltrados(): any[] {
-    if (!this.sistemaId) return this.endpoint; // mostrar todos
+    if (!this.sistemaId) return this.endpoint; 
     return this.endpoint.filter(
       (endpoint) => endpoint.se_sistema_id === this.sistemaId
     );
@@ -127,10 +126,7 @@ export class Endpoints implements OnInit {
   }
 
   showEditar(endpoint: EndpointI): void {
-    // Llenamos el formulario con los datos del endpoint que se va a editar
-    this.nuevoEndpoint = { ...endpoint }; // Usamos el operador spread para copiar los datos del endpoint
-
-    // Abrimos el diálogo de agregar, pero en este caso será un diálogo de edición
+    this.nuevoEndpoint = { ...endpoint }; 
     this.mostrarDialogoAgregar = true;
   }
 
