@@ -34,6 +34,8 @@ import { Input, Output, EventEmitter } from '@angular/core';
 import { SimpleChanges } from '@angular/core';
 import { Endpoint } from '../../core/services/mant/endpoint/endpoint';
 import { EndpointI } from '../../core/interfaces/Endpoint';
+import { ColaS } from '../../core/services/mant/cola/cola';
+import { ColaI } from '../../core/interfaces/Cola';
 
 @Component({
   selector: 'app-plantillas',
@@ -67,10 +69,13 @@ export class Plantillas implements OnInit, OnChanges {
   @Output() stepNavigate = new EventEmitter<string>();
   @Output() stepProgress = new EventEmitter<number>();
   endpointService = inject(Endpoint);
-
+  colasService = inject(ColaS);
+  colas: ColaI[] = [];
+  colasOptions: { label: string; value: string | number }[] = [];
   endpoints: EndpointI[] = [];
   endpointsOptions: { label: string; value: string | number }[] = [];
   selectedEndpointId: string | number | null = null;
+  selectedColaId: string | number | null = null;
   activeTab: 'integracion' | 'destino' = 'integracion';
   plantillaIntegracionService = inject(PlantillaIntegracionS);
   messageService = inject(MessageService);
@@ -99,9 +104,8 @@ export class Plantillas implements OnInit, OnChanges {
   //
 
   opcionesTipoServicio = [
-    { label: 'REST', value: 'REST' },
-    { label: 'SOAP', value: 'SOAP' },
-    { label: 'FTP', value: 'FTP' },
+    { label: 'MANUAL', value: 'MANUAL' },
+    { label: 'ONLINE', value: 'ONLINE' },
   ];
 
   opcionesValida = [
@@ -134,6 +138,7 @@ export class Plantillas implements OnInit, OnChanges {
   ];
 
   nuevaPlantilla: any = {
+    pi_codigo: '',
     pi_nombre: '',
     pi_descripcion: '',
     pi_tipo_servicio: '',
@@ -156,6 +161,20 @@ export class Plantillas implements OnInit, OnChanges {
     if (changes['tabFromParent'] && this.tabFromParent) {
       this.goTab(this.tabFromParent);
     }
+  }
+
+  private cargarColasOptions(): void {
+    this.colasService.getAllColas().subscribe({
+      next: (res) => {
+        this.colas = res.result.data;
+        this.colasOptions = this.colas.map((e) => ({
+          label: `${e.cola_id} - ${e.cola_nombre}`,
+          value: e.cola_id,
+        }));
+        this.cdRef.detectChanges();
+      },
+      error: (err) => console.error('Error cargando colas', err),
+    });
   }
 
   private cargarEndpointsOptions(): void {
@@ -181,6 +200,11 @@ export class Plantillas implements OnInit, OnChanges {
     this.nuevaPlantilla.pi_metodo_http = ep.se_metodo_http || '';
     this.nuevaPlantilla.pi_sist_orig_id = String(ep.se_id); // id del endpoint
     this.nuevaPlantilla.pi_sist_id = String((ep as any).se_sistema_id ?? ''); // id del sistema dueño
+  }
+
+  onColaSelect(colaId: string | number): void {
+    this.selectedColaId = colaId;
+    this.nuevaPlantilla.pi_cola_id = String(colaId);
   }
 
   cargarPlantillas(): void {
@@ -219,6 +243,7 @@ export class Plantillas implements OnInit, OnChanges {
 
     // endpoints
     this.cargarEndpointsOptions();
+    this.cargarColasOptions();
     setTimeout(() => {
       this.selectedEndpointId =
         this.nuevaPlantilla.pi_sist_id ||
@@ -260,6 +285,7 @@ export class Plantillas implements OnInit, OnChanges {
     this.mostrarDialogoAgregar = true;
     this.editando = false;
     this.nuevaPlantilla = {
+      pi_codigo: '',
       pi_nombre: '',
       pi_descripcion: '',
       pi_tipo_servicio: '',
@@ -286,7 +312,9 @@ export class Plantillas implements OnInit, OnChanges {
 
     // endpoints
     this.cargarEndpointsOptions();
+    this.cargarColasOptions();
     this.selectedEndpointId = null;
+    this.selectedColaId = null;
   }
 
   cerrarDialogoAgregar(): void {
@@ -296,18 +324,16 @@ export class Plantillas implements OnInit, OnChanges {
 
   guardar(): void {
     if (
+      !this.nuevaPlantilla.pi_codigo ||
       !this.nuevaPlantilla.pi_nombre ||
       !this.nuevaPlantilla.pi_url ||
       !this.nuevaPlantilla.pi_metodo_http
     )
       return;
 
-    const piDataJSON = this.pairsToJSONString();
-    const piSchemaJSON = this.schemaPairsToJSONString();
-
     const payload: any = { ...this.nuevaPlantilla };
-    payload.pi_data = piDataJSON;
-    payload.pi_schema = piSchemaJSON;
+    payload.pi_data = this.pairsToObject();
+    payload.pi_schema = this.schemaPairsToObject();
 
     // normaliza número si corresponde
     if (
@@ -348,6 +374,9 @@ export class Plantillas implements OnInit, OnChanges {
           this.mostrarDialogoAgregar = false;
           this.registroExitoso = true;
           this.cargarPlantillas();
+          console.log('RAW:', JSON.stringify(payload));
+          console.log('pi_data:', JSON.stringify(payload.pi_data));
+          console.log('pi_schema:', JSON.stringify(payload.pi_schema));
         },
         error: (err) => {
           this.messageService.add({
@@ -400,20 +429,17 @@ export class Plantillas implements OnInit, OnChanges {
   }
 
   //
-  private loadPairsFromPiData(data: string | null | undefined) {
+  private loadPairsFromPiData(data: any) {
     this.piDataPairs = [];
-    if (!data) return;
+    if (data == null) return;
     try {
-      const obj = JSON.parse(data);
-      // si guardas como objeto {k:v}
+      const obj = typeof data === 'string' ? JSON.parse(data) : data;
       if (obj && typeof obj === 'object' && !Array.isArray(obj)) {
         this.piDataPairs = Object.entries(obj).map(([key, value]) => ({
           key,
           value: String(value ?? ''),
         }));
-      }
-      // si alguna vez lo guardaste como array de pares [{key,value}]
-      if (Array.isArray(obj)) {
+      } else if (Array.isArray(obj)) {
         this.piDataPairs = obj
           .filter((x: any) => x && typeof x.key === 'string')
           .map((x: any) => ({ key: x.key, value: String(x.value ?? '') }));
@@ -423,11 +449,10 @@ export class Plantillas implements OnInit, OnChanges {
     }
   }
 
-  private pairsToJSONString(): string {
-    // Guardar como objeto { key: value }
+  private pairsToObject(): Record<string, string> {
     const o: Record<string, string> = {};
     for (const p of this.piDataPairs) o[p.key] = p.value;
-    return JSON.stringify(o);
+    return o;
   }
 
   addOrUpdateKV() {
@@ -464,31 +489,30 @@ export class Plantillas implements OnInit, OnChanges {
     }
   }
   //
-  private loadPairsFromPiSchema(data: string | null | undefined) {
+  private loadPairsFromPiSchema(data: any) {
     this.schemaPairs = [];
-    if (!data) return;
+    if (data == null) return;
     try {
-      const obj = JSON.parse(data);
+      const obj = typeof data === 'string' ? JSON.parse(data) : data;
       if (obj && typeof obj === 'object' && !Array.isArray(obj)) {
         this.schemaPairs = Object.entries(obj).map(([key, value]) => ({
           key,
           value: String(value ?? ''),
         }));
-      }
-      if (Array.isArray(obj)) {
+      } else if (Array.isArray(obj)) {
         this.schemaPairs = obj
           .filter((x: any) => x && typeof x.key === 'string')
           .map((x: any) => ({ key: x.key, value: String(x.value ?? '') }));
       }
     } catch {
-      /* ignore */
+      /* Ignorar */
     }
   }
 
-  private schemaPairsToJSONString(): string {
+  private schemaPairsToObject(): Record<string, string> {
     const o: Record<string, string> = {};
     for (const p of this.schemaPairs) o[p.key] = p.value;
-    return JSON.stringify(o);
+    return o;
   }
 
   addOrUpdateSchemaKV() {
