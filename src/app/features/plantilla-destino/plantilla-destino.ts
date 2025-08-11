@@ -92,11 +92,11 @@ export class PlantillaDestino implements OnInit {
     pd_tipo_transformacion: '',
   };
 
-ngOnInit(): void {
-  this.cargarPlantillas();               // ya lo tenías (destino)
-  this.cargarPlantillasIntegracion();    // NUEVO
-  this.cargarSistemasOptions();          // NUEVO
-}
+  ngOnInit(): void {
+    this.cargarPlantillas(); // ya lo tenías (destino)
+    this.cargarPlantillasIntegracion(); // NUEVO
+    this.cargarSistemasOptions(); // NUEVO
+  }
 
   private cargarPlantillasIntegracion(): void {
     this.plantillaIntegracionService.getAllPlantillas().subscribe({
@@ -122,18 +122,18 @@ ngOnInit(): void {
   }
 
   private cargarSistemasOptions(): void {
-  this.sistemasService.getAllSistemas().subscribe({
-    next: (res) => {
-      this.sistemas = res.result.data;
-      this.sistemasOptions = this.sistemas.map(s => ({
-        label: `${s.sistema_id} - ${s.sistema_nombre}`,
-        value: String(s.sistema_id),
-      }));
-      this.cdRef.detectChanges();
-    },
-    error: (err) => console.error('Error cargando sistemas', err),
-  });
-}
+    this.sistemasService.getAllSistemas().subscribe({
+      next: (res) => {
+        this.sistemas = res.result.data;
+        this.sistemasOptions = this.sistemas.map((s) => ({
+          label: `${s.sistema_id} - ${s.sistema_nombre}`,
+          value: String(s.sistema_id),
+        }));
+        this.cdRef.detectChanges();
+      },
+      error: (err) => console.error('Error cargando sistemas', err),
+    });
+  }
 
   cargarPlantillas(): void {
     this.plantillaDestinoService.getAllPlantillas().subscribe({
@@ -270,5 +270,23 @@ ngOnInit(): void {
           });
       },
     });
+  }
+  public abrirAgregarPreconfigurado(
+    opts: {
+      planInteId?: string | number;
+      sistId?: string | number; // <- sistema_id que quieres pasar
+    } = {}
+  ): void {
+    this.mostrarDialogoAgregar = true;
+    this.editando = false;
+    this.limpiarFormulario();
+
+    // Estas listas ya se cargan en ngOnInit; si llegan después,
+    // el ngModel quedará seleccionado cuando existan las options.
+    if (opts.planInteId != null)
+      this.nuevo.pd_plan_inte_id = String(opts.planInteId);
+    if (opts.sistId != null) this.nuevo.pd_sist_id = String(opts.sistId);
+
+    this.cdRef.detectChanges();
   }
 }

@@ -66,6 +66,7 @@ export class Plantillas implements OnInit, OnChanges {
   @ViewChild('dt') dt!: Table;
   @ViewChild(PlantillaDestino) plantillasDComponent!: PlantillaDestino;
   @Input() tabFromParent: 'integracion' | 'destino' | null = null;
+  @ViewChild('pdCmp') pdCmp!: PlantillaDestino;
   @Output() stepNavigate = new EventEmitter<string>();
   @Output() stepProgress = new EventEmitter<number>();
   endpointService = inject(Endpoint);
@@ -566,5 +567,14 @@ export class Plantillas implements OnInit, OnChanges {
     const id = String(endpointId);
     this.cargarEndpointsOptions(id);
     this.cargarColasOptions();
+  }
+
+  agregarDestinoDesdeIntegracion(row: Plantilla_IntegracionI): void {
+    const planInteId = row.pi_id;
+    const sistemaId  = row.pi_sist_id || row.pi_sist_orig_id; // el que corresponda en tu modelo
+    this.pdCmp.abrirAgregarPreconfigurado({
+      planInteId: planInteId as any,
+      sistId: sistemaId as any
+    });
   }
 }
