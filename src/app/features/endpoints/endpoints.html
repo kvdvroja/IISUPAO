@@ -28,10 +28,23 @@
     <div><strong>Estado:</strong> {{ endpoint.se_ind_estado }}</div>
     <div class="flex justify-end mt-2">
       <p-button
+        icon="pi pi-plus"
+        severity="success"
+        rounded
+        (onClick)="crearPlantillaIntegracion(endpoint)"
+        [title]="'Nueva plantilla de integración'"
+      ></p-button>
+      <p-button
         icon="pi pi-pencil"
-        (onClick)="showEditar(endpoint)"
         severity="secondary"
         rounded
+        (onClick)="showEditar(endpoint)"
+      ></p-button>
+      <p-button
+        icon="pi pi-trash"
+        severity="danger"
+        rounded
+        (onClick)="eliminarEndpoint(endpoint)"
       ></p-button>
     </div>
   </div>
@@ -80,6 +93,13 @@
               severity="secondary"
               rounded
               (onClick)="showEditar(endpoint)"
+            ></p-button>
+            <p-button
+              icon="pi pi-plus"
+              severity="success"
+              rounded
+              (onClick)="crearPlantillaIntegracion(endpoint)"
+              [title]="'Nueva plantilla de integración'"
             ></p-button>
             <p-button
               icon="pi pi-trash"
@@ -208,3 +228,4 @@
     </div>
   </ng-template>
 </p-confirmDialog>
+<app-plantillas #plantCmp></app-plantillas>

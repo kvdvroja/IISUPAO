@@ -25,6 +25,8 @@ import { ChangeDetectorRef } from '@angular/core';
 import { inject } from '@angular/core';
 import { SistemasI } from '../../core/interfaces/Sistemas';
 import { Endpoint } from '../../core/services/mant/endpoint/endpoint';
+import { Output, EventEmitter } from '@angular/core';
+import { Plantillas } from '../plantillas/plantillas';
 
 @Component({
   selector: 'app-endpoints',
@@ -43,6 +45,7 @@ import { Endpoint } from '../../core/services/mant/endpoint/endpoint';
     Dialog,
     Toast,
     SelectModule,
+    Plantillas,
   ],
   templateUrl: './endpoints.html',
   styleUrl: './endpoints.css',
@@ -50,6 +53,7 @@ import { Endpoint } from '../../core/services/mant/endpoint/endpoint';
 export class Endpoints implements OnInit {
   private _sistemasLista: SistemasI[] = [];
   @ViewChild('dt') dt!: Table;
+  @ViewChild('plantCmp') plantCmp!: Plantillas;
   @Input() sistemaId!: string | null | undefined;
   @Input() set sistemasLista(value: SistemasI[]) {
     this._sistemasLista = value;
@@ -101,7 +105,7 @@ export class Endpoints implements OnInit {
   }
 
   get endpointsFiltrados(): any[] {
-    if (!this.sistemaId) return this.endpoint; 
+    if (!this.sistemaId) return this.endpoint;
     return this.endpoint.filter(
       (endpoint) => endpoint.se_sistema_id === this.sistemaId
     );
@@ -126,7 +130,7 @@ export class Endpoints implements OnInit {
   }
 
   showEditar(endpoint: EndpointI): void {
-    this.nuevoEndpoint = { ...endpoint }; 
+    this.nuevoEndpoint = { ...endpoint };
     this.mostrarDialogoAgregar = true;
   }
 
@@ -136,13 +140,13 @@ export class Endpoints implements OnInit {
 
   AgregarEndpointT(sistema_id: string): void {
     this.nuevoEndpoint.se_sistema_id = sistema_id;
-    this.mostrarDialogoAgregar = true; 
+    this.mostrarDialogoAgregar = true;
   }
 
   cerrarDialogoAgregar(): void {
     this.mostrarDialogoAgregar = false;
     this.registroExitoso = false;
-    this.limpiarFormulario(); // Limpiar formulario al cerrar
+    this.limpiarFormulario();
   }
 
   limpiarFormulario(): void {
@@ -169,7 +173,6 @@ export class Endpoints implements OnInit {
     this.nuevoEndpoint.se_usua_id = 'ADMIN';
     this.nuevoEndpoint.se_ind_estado = 'A';
 
-    // Si se está editando, pasamos la acción 'U' (Update), si no, 'I' (Insert)
     const action = this.nuevoEndpoint.se_id ? 'U' : 'I';
 
     this.endpointService.endpointCrud(this.nuevoEndpoint, action).subscribe({
@@ -225,4 +228,11 @@ export class Endpoints implements OnInit {
       },
     });
   }
+crearPlantillaIntegracion(ep: EndpointI): void {
+  if (!this.plantCmp) {
+    console.warn('plantCmp aún no está disponible');
+    return;
+  }
+  this.plantCmp.abrirAgregarDesdeEndpoint(ep.se_id);
+}
 }

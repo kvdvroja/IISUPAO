@@ -1,4 +1,3 @@
-
 <!-- Filtro en móvil -->
 <div *ngIf="pantallaPequena" class="p-2">
   <p-iconfield iconPosition="left" class="w-full mb-4">
@@ -36,7 +35,13 @@
         severity="secondary"
         rounded
       ></p-button>
-      <p-button  *ngIf="item.pd_ind_estado == 'A'" icon="pi pi-trash" severity="danger" rounded (onClick)="eliminar(item)"></p-button>
+      <p-button
+        *ngIf="item.pd_ind_estado == 'A'"
+        icon="pi pi-trash"
+        severity="danger"
+        rounded
+        (onClick)="eliminar(item)"
+      ></p-button>
     </div>
   </div>
 </div>
@@ -83,7 +88,13 @@
             severity="secondary"
             rounded
           ></p-button>
-          <p-button *ngIf="row.pd_ind_estado == 'A'" icon="pi pi-trash" severity="danger" rounded (onClick)="eliminar(row)"></p-button>
+          <p-button
+            *ngIf="row.pd_ind_estado == 'A'"
+            icon="pi pi-trash"
+            severity="danger"
+            rounded
+            (onClick)="eliminar(row)"
+          ></p-button>
         </td>
       </tr>
     </ng-template>
@@ -114,11 +125,14 @@
   <div class="flex flex-col gap-4">
     <p-inputgroup>
       <p-inputgroup-addon><i class="pi pi-code"></i></p-inputgroup-addon>
-      <input
-        pInputText
-        placeholder="Plan Integración ID"
+      <p-select
         [(ngModel)]="nuevo.pd_plan_inte_id"
-      />
+        [options]="plantillasIOptions"
+        optionLabel="label"
+        optionValue="value"
+        placeholder="Seleccionar Plantilla de Integración"
+        style="width: 100%"
+      ></p-select>
     </p-inputgroup>
 
     <p-inputgroup>
@@ -139,11 +153,14 @@
 
     <p-inputgroup>
       <p-inputgroup-addon><i class="pi pi-code"></i></p-inputgroup-addon>
-      <input
-        pInputText
-        placeholder="Sistema Id"
+      <p-select
         [(ngModel)]="nuevo.pd_sist_id"
-      />
+        [options]="sistemasOptions"
+        optionLabel="label"
+        optionValue="value"
+        placeholder="Seleccionar Sistema"
+        style="width: 100%"
+      ></p-select>
     </p-inputgroup>
 
     <p-inputgroup>

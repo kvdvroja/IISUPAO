@@ -177,14 +177,22 @@ export class Plantillas implements OnInit, OnChanges {
     });
   }
 
-  private cargarEndpointsOptions(): void {
+  private cargarEndpointsOptions(preselectId?: string): void {
     this.endpointService.getAllEndpoints().subscribe({
       next: (res) => {
         this.endpoints = res.result.data;
         this.endpointsOptions = this.endpoints.map((e) => ({
           label: `${e.se_id} - ${e.se_nombre}`,
-          value: e.se_id,
+          value: String(e.se_id),
         }));
+
+        if (preselectId) {
+          this.selectedEndpointId = String(preselectId);
+          this.onEndpointSelect(this.selectedEndpointId);
+        } else if (this.editando && this.nuevaPlantilla?.pi_sist_orig_id) {
+          this.selectedEndpointId = String(this.nuevaPlantilla.pi_sist_orig_id);
+        }
+
         this.cdRef.detectChanges();
       },
       error: (err) => console.error('Error cargando endpoints', err),
@@ -192,14 +200,15 @@ export class Plantillas implements OnInit, OnChanges {
   }
 
   onEndpointSelect(endpointId: string | number): void {
-    const ep = this.endpoints.find(
-      (e) => String(e.se_id) === String(endpointId)
-    );
+    const id = String(endpointId);
+    const ep = this.endpoints.find((e) => String(e.se_id) === id);
     if (!ep) return;
+
+    this.selectedEndpointId = id;
     this.nuevaPlantilla.pi_url = ep.se_url || '';
     this.nuevaPlantilla.pi_metodo_http = ep.se_metodo_http || '';
-    this.nuevaPlantilla.pi_sist_orig_id = String(ep.se_id); // id del endpoint
-    this.nuevaPlantilla.pi_sist_id = String((ep as any).se_sistema_id ?? ''); // id del sistema dueño
+    this.nuevaPlantilla.pi_sist_orig_id = String(ep.se_id);
+    this.nuevaPlantilla.pi_sist_id = String((ep as any).se_sistema_id ?? '');
   }
 
   onColaSelect(colaId: string | number): void {
@@ -237,19 +246,12 @@ export class Plantillas implements OnInit, OnChanges {
     this.nuevaPlantilla = { ...plantilla };
     this.mostrarDialogoAgregar = true;
 
-    // carga pares existentes
-    this.loadPairsFromPiData(this.nuevaPlantilla.pi_data || '{}');
-    this.loadPairsFromPiSchema(this.nuevaPlantilla.pi_schema || '{}');
+    this.clearAllDynamicFields();
+    this.loadPairsFromPiData(this.nuevaPlantilla.pi_data || {});
+    this.loadPairsFromPiSchema(this.nuevaPlantilla.pi_schema || {});
 
-    // endpoints
     this.cargarEndpointsOptions();
     this.cargarColasOptions();
-    setTimeout(() => {
-      this.selectedEndpointId =
-        this.nuevaPlantilla.pi_sist_id ||
-        this.nuevaPlantilla.pi_sist_orig_id ||
-        null;
-    });
   }
 
   volver() {
@@ -284,42 +286,21 @@ export class Plantillas implements OnInit, OnChanges {
   AgregarPlantilla(): void {
     this.mostrarDialogoAgregar = true;
     this.editando = false;
-    this.nuevaPlantilla = {
-      pi_codigo: '',
-      pi_nombre: '',
-      pi_descripcion: '',
-      pi_tipo_servicio: '',
-      pi_sist_orig_id: '',
-      pi_data: '',
-      pi_numreg_peticion: '',
-      pi_schema: '',
-      pi_url: '',
-      pi_metodo_http: '',
-      pi_sist_id: '',
-      pi_valida: '',
-      pi_transforma: '',
-    };
-
-    // limpia pares
-    this.piDataPairs = [];
-    this.newKVKey = '';
-    this.newKVValue = '';
-    this.editingKVIndex = null;
-    this.schemaPairs = [];
-    this.newSchemaKey = '';
-    this.newSchemaValue = '';
-    this.editingSchemaIndex = null;
-
-    // endpoints
-    this.cargarEndpointsOptions();
-    this.cargarColasOptions();
+    this.nuevaPlantilla = this.nuevaPlantillaBase();
+    this.clearAllDynamicFields();
     this.selectedEndpointId = null;
     this.selectedColaId = null;
+    this.cargarEndpointsOptions();
+    this.cargarColasOptions();
   }
 
   cerrarDialogoAgregar(): void {
     this.mostrarDialogoAgregar = false;
     this.registroExitoso = false;
+    this.clearAllDynamicFields();
+    this.nuevaPlantilla = this.nuevaPlantillaBase();
+    this.selectedEndpointId = null;
+    this.selectedColaId = null;
   }
 
   guardar(): void {
@@ -335,7 +316,6 @@ export class Plantillas implements OnInit, OnChanges {
     payload.pi_data = this.pairsToObject();
     payload.pi_schema = this.schemaPairsToObject();
 
-    // normaliza número si corresponde
     if (
       payload.pi_numreg_peticion !== null &&
       payload.pi_numreg_peticion !== undefined &&
@@ -353,10 +333,8 @@ export class Plantillas implements OnInit, OnChanges {
       }
     } else {
       payload.pi_ind_estado = 'A';
-      // si quieres mantener compatibilidad con tu backend antiguo que usaba 'N',
-      // solo aplica si el usuario no eligió nada en los selects:
-      if (!payload.pi_valida) payload.pi_valida = 'W'; // default sugerido
-      if (!payload.pi_transforma) payload.pi_transforma = 'W'; // default sugerido
+      if (!payload.pi_valida) payload.pi_valida = 'W';
+      if (!payload.pi_transforma) payload.pi_transforma = 'W';
     }
 
     const accion = this.editando ? 'U' : 'I';
@@ -431,6 +409,7 @@ export class Plantillas implements OnInit, OnChanges {
   //
   private loadPairsFromPiData(data: any) {
     this.piDataPairs = [];
+    this.resetKVUi();
     if (data == null) return;
     try {
       const obj = typeof data === 'string' ? JSON.parse(data) : data;
@@ -444,9 +423,7 @@ export class Plantillas implements OnInit, OnChanges {
           .filter((x: any) => x && typeof x.key === 'string')
           .map((x: any) => ({ key: x.key, value: String(x.value ?? '') }));
       }
-    } catch {
-      /* ignore */
-    }
+    } catch {}
   }
 
   private pairsToObject(): Record<string, string> {
@@ -464,7 +441,6 @@ export class Plantillas implements OnInit, OnChanges {
       this.piDataPairs[this.editingKVIndex] = { key: k, value: v };
       this.editingKVIndex = null;
     } else {
-      // si existe la clave, la reemplazamos
       const idx = this.piDataPairs.findIndex((p) => p.key === k);
       if (idx >= 0) this.piDataPairs[idx] = { key: k, value: v };
       else this.piDataPairs.push({ key: k, value: v });
@@ -491,6 +467,7 @@ export class Plantillas implements OnInit, OnChanges {
   //
   private loadPairsFromPiSchema(data: any) {
     this.schemaPairs = [];
+    this.resetSchemaUi();
     if (data == null) return;
     try {
       const obj = typeof data === 'string' ? JSON.parse(data) : data;
@@ -504,9 +481,7 @@ export class Plantillas implements OnInit, OnChanges {
           .filter((x: any) => x && typeof x.key === 'string')
           .map((x: any) => ({ key: x.key, value: String(x.value ?? '') }));
       }
-    } catch {
-      /* Ignorar */
-    }
+    } catch {}
   }
 
   private schemaPairsToObject(): Record<string, string> {
@@ -548,4 +523,48 @@ export class Plantillas implements OnInit, OnChanges {
     }
   }
   //
+  private resetKVUi(): void {
+    this.newKVKey = '';
+    this.newKVValue = '';
+    this.editingKVIndex = null;
+  }
+
+  private resetSchemaUi(): void {
+    this.newSchemaKey = '';
+    this.newSchemaValue = '';
+    this.editingSchemaIndex = null;
+  }
+
+  private clearAllDynamicFields(): void {
+    this.piDataPairs = [];
+    this.schemaPairs = [];
+    this.resetKVUi();
+    this.resetSchemaUi();
+  }
+
+  private nuevaPlantillaBase(): any {
+    return {
+      pi_codigo: '',
+      pi_nombre: '',
+      pi_descripcion: '',
+      pi_tipo_servicio: '',
+      pi_sist_orig_id: '',
+      pi_data: '',
+      pi_numreg_peticion: '',
+      pi_schema: '',
+      pi_url: '',
+      pi_metodo_http: '',
+      pi_sist_id: '',
+      pi_valida: '',
+      pi_transforma: '',
+      pi_cola_id: '',
+    };
+  }
+  public abrirAgregarDesdeEndpoint(endpointId: string | number): void {
+    this.activeTab = 'integracion';
+    this.AgregarPlantilla();
+    const id = String(endpointId);
+    this.cargarEndpointsOptions(id);
+    this.cargarColasOptions();
+  }
 }

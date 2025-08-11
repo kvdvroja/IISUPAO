@@ -18,6 +18,10 @@ import { IconField } from 'primeng/iconfield';
 import { Plantilla_DestinoI } from '../../core/interfaces/Plantilla_Destino';
 import { PlantillaDestinoS } from '../../core/services/mant/plantilla-destino/plantilla-destino';
 import { Input } from '@angular/core';
+import { Plantilla_IntegracionI } from '../../core/interfaces/Plantilla_Integracion';
+import { PlantillaIntegracionS } from '../../core/services/mant/plantilla-integracion/plantilla-integracion';
+import { SistemasI } from '../../core/interfaces/Sistemas';
+import { SistemasS } from '../../core/services/mant/sistemas/sistemas';
 
 @Component({
   selector: 'app-plantilla-destino',
@@ -44,11 +48,28 @@ import { Input } from '@angular/core';
 export class PlantillaDestino implements OnInit {
   @ViewChild('dt') dt!: Table;
   @Input() plantillaIId!: string | null | undefined;
+  @Input() set sistemasLista(value: SistemasI[] | null | undefined) {
+    if (!value) {
+      this.sistemasOptions = [];
+      return;
+    }
+    this.sistemasOptions = value.map((s) => ({
+      label: `${s.sistema_id} - ${s.sistema_nombre}`,
+      value: String(s.sistema_id),
+    }));
+  }
   plantillaDestinoService = inject(PlantillaDestinoS);
+  sistemasService = inject(SistemasS);
   cdRef = inject(ChangeDetectorRef);
   messageService = inject(MessageService);
   confirmService = inject(ConfirmationService);
+  plantillaIntegracionService = inject(PlantillaIntegracionS);
   pantallaPequena = false;
+  plantillasI: Plantilla_IntegracionI[] = [];
+  plantillasIOptions: { label: string; value: string | number }[] = [];
+  sistemasOptions: { label: string; value: string }[] = [];
+
+  sistemas: SistemasI[] = [];
   mostrarDialogoAgregar: boolean = false;
   plantillaDestinos: Plantilla_DestinoI[] = [];
   editando: boolean = false;
@@ -71,9 +92,48 @@ export class PlantillaDestino implements OnInit {
     pd_tipo_transformacion: '',
   };
 
-  ngOnInit(): void {
-    this.cargarPlantillas();
+ngOnInit(): void {
+  this.cargarPlantillas();               // ya lo tenías (destino)
+  this.cargarPlantillasIntegracion();    // NUEVO
+  this.cargarSistemasOptions();          // NUEVO
+}
+
+  private cargarPlantillasIntegracion(): void {
+    this.plantillaIntegracionService.getAllPlantillas().subscribe({
+      next: (res) => {
+        this.plantillasI = res.result.data;
+        this.plantillasIOptions = this.plantillasI.map((p) => ({
+          label: `${p.pi_codigo ?? p.pi_id} - ${p.pi_nombre} [${
+            p.pi_metodo_http
+          }]`,
+          value: String(p.pi_id), // Usamos pi_id como ID del plan de integración
+        }));
+
+        // Si viene un filtro desde el padre, puedes preseleccionar
+        if (!this.editando && this.plantillaIId) {
+          this.nuevo.pd_plan_inte_id = String(this.plantillaIId);
+        }
+
+        this.cdRef.detectChanges();
+      },
+      error: (err) =>
+        console.error('Error cargando plantillas integración', err),
+    });
   }
+
+  private cargarSistemasOptions(): void {
+  this.sistemasService.getAllSistemas().subscribe({
+    next: (res) => {
+      this.sistemas = res.result.data;
+      this.sistemasOptions = this.sistemas.map(s => ({
+        label: `${s.sistema_id} - ${s.sistema_nombre}`,
+        value: String(s.sistema_id),
+      }));
+      this.cdRef.detectChanges();
+    },
+    error: (err) => console.error('Error cargando sistemas', err),
+  });
+}
 
   cargarPlantillas(): void {
     this.plantillaDestinoService.getAllPlantillas().subscribe({
@@ -95,18 +155,20 @@ export class PlantillaDestino implements OnInit {
     this.dt.filterGlobal(valor, 'contains');
   }
 
+  Agregar(): void {
+    this.mostrarDialogoAgregar = true;
+    this.editando = false;
+    this.limpiarFormulario();
+    if (this.plantillaIId) {
+      this.nuevo.pd_plan_inte_id = String(this.plantillaIId);
+    }
+  }
+
   showEditar(row: Plantilla_DestinoI): void {
     this.editando = true;
     this.mostrarDialogoAgregar = true;
     this.nuevo = { ...row };
   }
-
-  Agregar(): void {
-    this.mostrarDialogoAgregar = true;
-    this.editando = false; // Se asegura de que se esté en modo "nuevo"
-    this.limpiarFormulario();
-  }
-
   cerrarDialogoAgregar(): void {
     this.mostrarDialogoAgregar = false;
   }

@@ -121,7 +121,7 @@
       <div><strong>URL:</strong> {{ plantilla.pi_url }}</div>
       <div><strong>Método HTTP:</strong> {{ plantilla.pi_metodo_http }}</div>
       <div>
-        <strong>Fecha Actividad:</strong> {{ plantilla.pi_fecha_actividad }}
+        <strong>Fecha Actividad:</strong> {{ plantilla.pi_fecha_actividad | date : "dd MMM yyyy, HH:mm" }}
       </div>
       <div class="flex justify-end mt-2">
         <p-button
@@ -170,7 +170,7 @@
           <td>{{ plantilla.pi_sist_orig_id }}</td>
           <td>{{ plantilla.pi_url }}</td>
           <td>{{ plantilla.pi_metodo_http }}</td>
-          <td>{{ plantilla.pi_fecha_actividad }}</td>
+          <td>{{ plantilla.pi_fecha_actividad | date : "dd MMM yyyy, HH:mm" }}</td>
           <td>
             <div class="flex gap-2 justify-center">
               <p-button
