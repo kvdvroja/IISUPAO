@@ -1,77 +1,126 @@
-import { Component, OnChanges, OnInit, inject } from '@angular/core';
-import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { MessageService } from 'primeng/api';
-import { TableModule } from 'primeng/table';
-import { FloatLabelModule } from 'primeng/floatlabel';
-import { InputTextModule } from 'primeng/inputtext';
-import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
-import { InputGroupModule } from 'primeng/inputgroup';
-import { Table } from 'primeng/table';
-import { InputIcon } from 'primeng/inputicon';
-import { ChangeDetectorRef } from '@angular/core';
-import { IconField } from 'primeng/iconfield';
-import { RouterModule } from '@angular/router';
+import {
+  Component,
+  OnInit,
+  OnChanges,
+  AfterViewInit,
+  ViewChild,
+  inject,
+  SimpleChanges,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Table, TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
-import { NgFor } from '@angular/common';
+import { InputTextModule } from 'primeng/inputtext';
+import { InputGroupModule } from 'primeng/inputgroup';
+import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
+import { InputIcon } from 'primeng/inputicon';
+import { IconField } from 'primeng/iconfield';
 import { Dialog } from 'primeng/dialog';
 import { Toast } from 'primeng/toast';
-import { ViewChild } from '@angular/core';
-import { ConfirmationService } from 'primeng/api';
-import { SistemasI } from '../../core/interfaces/Sistemas';
-import { FormsModule } from '@angular/forms';
-import { SistemasS } from '../../core/services/mant/sistemas/sistemas';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { SplitButtonModule } from 'primeng/splitbutton';
+import { MessageService, ConfirmationService } from 'primeng/api';
+import { FormsModule } from '@angular/forms';
+
+import { SistemasI } from '../../core/interfaces/Sistemas';
+import { SistemasS } from '../../core/services/mant/sistemas/sistemas';
+
 import { Endpoints } from '../endpoints/endpoints';
-import {
-  EventEmitter,
-  Output,
-  Input,
-  SimpleChanges,
-  AfterViewInit,
-} from '@angular/core';
+import { Plantillas } from '../plantillas/plantillas';
+import { TransformacionCampos } from '../transformacion-campos/transformacion-campos';
+import { TableRowSelectEvent } from 'primeng/table';
+
+type StepKey = 'endpoints' | 'integracion' | 'destino' | 'campos' | 'valores';
 
 @Component({
   selector: 'app-sistemas',
+  standalone: true,
   imports: [
-    ConfirmDialogModule,
+    CommonModule,
     TableModule,
     ButtonModule,
-    RouterModule,
-    CommonModule,
-    FormsModule,
-    InputIcon,
-    IconField,
     InputTextModule,
     InputGroupModule,
     InputGroupAddonModule,
+    InputIcon,
+    IconField,
     Dialog,
     Toast,
-    Endpoints,
+    ConfirmDialogModule,
     SplitButtonModule,
+    FormsModule,
+    Endpoints,
+    Plantillas,
+    TransformacionCampos,
   ],
   templateUrl: './sistemas.html',
   styleUrl: './sistemas.css',
 })
 export class Sistemas implements OnInit, OnChanges, AfterViewInit {
-  @ViewChild('endpointsCmp', { static: true }) endpointsComponent!: Endpoints;
-  @Output() stepNavigate = new EventEmitter<string>();
-  @Output() stepProgress = new EventEmitter<number>();
-  @Input() tabFromParent: 'systems' | 'endpoints' | null = null;
-  sistemasService = inject(SistemasS);
-  cdRef = inject(ChangeDetectorRef);
-  messageService = inject(MessageService);
-  confirmService = inject(ConfirmationService);
   @ViewChild('dt') dt!: Table;
-  pantallaPequena = false;
-  mostrarSoloPendientes: boolean = false;
-  mostrarDialogoAgregar: boolean = false;
-  registroExitoso: boolean = false;
-  sistemas!: SistemasI[];
-  editando: boolean = false;
-  activeTab: 'systems' | 'endpoints' = 'systems';
-  sistemaSeleccionado: SistemasI | null = null;
-  modoFiltradoPorSistema: boolean = false;
+  @ViewChild('endpointsCmp', { static: false }) endpointsComponent!: Endpoints;
+
+  // Modo de la vista
+  modo: 'lista' | 'detalle' = 'lista';
+
+  // Pasos internos (solo en detalle)
+  steps = [
+    {
+      key: 'endpoints' as StepKey,
+      title: 'ENDPOINTS',
+      desc: 'Gestión de endpoints del sistema seleccionado',
+      icon: '🔗',
+    },
+    {
+      key: 'integracion' as StepKey,
+      title: 'PLANTILLA INTEGRACIÓN',
+      desc: 'Definir plantilla de integración',
+      icon: '🔄',
+    },
+    {
+      key: 'destino' as StepKey,
+      title: 'PLANTILLA DESTINO',
+      desc: 'Mapear campos de destino',
+      icon: '📤',
+    },
+    {
+      key: 'campos' as StepKey,
+      title: 'TRANSFORMACIÓN DE CAMPOS',
+      desc: 'Transformar campos',
+      icon: '⚙️',
+    },
+    {
+      key: 'valores' as StepKey,
+      title: 'TRANSFORMACIÓN DE VALORES',
+      desc: 'Transformar valores',
+      icon: '🔧',
+    },
+  ];
+  currentIndex = 0;
+  get currentStep(): StepKey {
+    return this.steps[this.currentIndex].key;
+  }
+  get tituloStepActual(): string {
+    return this.steps[this.currentIndex].title;
+  }
+  get descripcionStepActual(): string {
+    return this.steps[this.currentIndex].desc;
+  }
+
+  // Pills visibles (todas en detalle)
+  get pills() {
+    return this.steps;
+  }
+
+  // Data
+  sistemas: SistemasI[] = [];
+  selectedSystem: SistemasI | null = null;
+
+  // UI
+  mostrarDialogoAgregar = false;
+  registroExitoso = false;
+  editando = false;
+
   nuevoSistema: any = {
     sistema_id: '',
     sistema_nombre: '',
@@ -79,17 +128,12 @@ export class Sistemas implements OnInit, OnChanges, AfterViewInit {
     sistema_usua_id: '',
     sistema_ind_estado: '',
   };
+
   accionesDropdown = [
     {
       label: 'Refrescar',
       icon: 'pi pi-refresh',
-      command: () => {
-        if (this.activeTab === 'systems') {
-          this.cargarSistemas();
-        } else if (this.activeTab === 'endpoints') {
-          this.endpointsComponent?.cargarEndpoints();
-        }
-      },
+      command: () => this.onRefrescar(),
     },
     {
       label: 'Exportar',
@@ -97,31 +141,60 @@ export class Sistemas implements OnInit, OnChanges, AfterViewInit {
       command: () => this.exportarDatos(),
     },
   ];
+
+  sistemasService = inject(SistemasS);
+  messageService = inject(MessageService);
+  confirmService = inject(ConfirmationService);
+
+onRowSelectedEvent(ev: TableRowSelectEvent): void {
+  const sistema = ev.data as SistemasI | undefined;
+  if (!sistema) return;
+  this.entrarADetalle(sistema);
+}
+
   ngOnInit(): void {
     this.cargarSistemas();
   }
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['tabFromParent'] && this.tabFromParent) {
-      // navega internamente cuando el padre cambie de step
-      this.goTab(this.tabFromParent);
-    }
-  }
+  ngOnChanges(_: SimpleChanges): void {}
+  ngAfterViewInit(): void {}
 
-  get sistemasFiltradas(): any[] {
+  // ===== Lista =====
+  get sistemasFiltradas(): SistemasI[] {
     return this.sistemas;
   }
 
-  filtrarGlobal(event: Event) {
-    const valor = (event.target as HTMLInputElement).value;
-    this.dt?.filterGlobal(valor, 'contains');
+  onBuscarGlobal(event: Event) {
+    const value = (event.target as HTMLInputElement).value || '';
+    if (this.modo === 'lista') this.dt?.filterGlobal(value, 'contains');
+    else {
+      // en detalle: filtra la tabla del hijo Endpoints si aplica
+      this.endpointsComponent?.filtrarDesdePadre?.(value);
+    }
   }
-  onBuscarGlobal(event: Event): void {
-    const input = (event.target as HTMLInputElement).value;
 
-    if (this.activeTab === 'systems') {
-      this.dt.filterGlobal(input, 'contains');
-    } else if (this.activeTab === 'endpoints') {
-      this.endpointsComponent?.filtrarDesdePadre(input);
+  exportarDatos() {
+    // Implementar lógica de exportación según sea necesario
+    this.messageService.add({
+      severity: 'info',
+      summary: 'Exportar',
+      detail: 'Funcionalidad de exportación no implementada aún.',
+    });
+  }
+
+  onRefrescar() {
+    if (this.modo === 'lista') this.cargarSistemas();
+    else {
+      if (this.currentStep === 'endpoints')
+        this.endpointsComponent?.cargarEndpoints();
+      // otros steps pueden tener sus propios refrescos
+    }
+  }
+
+  onLimpiar() {
+    if (this.modo === 'lista') this.dt?.clear();
+    else {
+      if (this.currentStep === 'endpoints')
+        this.endpointsComponent?.limpiarFormulario?.();
     }
   }
 
@@ -129,7 +202,6 @@ export class Sistemas implements OnInit, OnChanges, AfterViewInit {
     this.sistemasService.getAllSistemas().subscribe({
       next: (res) => {
         this.sistemas = res.result.data;
-        this.cdRef.detectChanges();
       },
       error: (err) => console.error('Error al cargar sistemas', err),
     });
@@ -141,27 +213,10 @@ export class Sistemas implements OnInit, OnChanges, AfterViewInit {
     this.limpiarFormulario();
   }
 
-  mapToPayload(sistema: any): any {
-    return {
-      system_id: sistema.sistema_id,
-      system_name: sistema.sistema_nombre,
-      system_description: sistema.sistema_descripcion,
-      system_status: sistema.sistema_ind_estado,
-      user_id: sistema.sistema_usua_id,
-    };
-  }
-
-  volver() {
-    this.activeTab = 'systems';
-    this.stepNavigate.emit('SISTEMAS');
-    this.sistemaSeleccionado = null;
-    this.modoFiltradoPorSistema = false;
-  }
-
-  showEditar(sistema: SistemasI): void {
+  showEditar(s: SistemasI): void {
     this.editando = true;
     this.mostrarDialogoAgregar = true;
-    this.nuevoSistema = { ...sistema };
+    this.nuevoSistema = { ...s };
   }
 
   cerrarDialogoAgregar(): void {
@@ -180,44 +235,14 @@ export class Sistemas implements OnInit, OnChanges, AfterViewInit {
     };
   }
 
-  goTab(
-    tab: 'systems' | 'endpoints',
-    opts?: { pct?: number; byStep?: boolean }
-  ) {
-    this.activeTab = tab;
-
-    // avisa al padre qué paso debe mostrarse en el menú instructivo
-    this.stepNavigate.emit(tab === 'endpoints' ? 'endpoints' : 'SISTEMAS');
-
-    // (opcional) si pasas un porcentaje, súbelo
-    if (opts?.pct !== undefined) {
-      this.stepProgress.emit(opts.pct); // ej. 40, 60, 80...
-    }
-  }
-
-  volverASistemas(): void {
-    this.activeTab = 'systems';
-    this.modoFiltradoPorSistema = false;
-    this.sistemaSeleccionado = null;
-  }
-
-  verEndpoints(sistema: SistemasI): void {
-    this.sistemaSeleccionado = sistema;
-    this.activeTab = 'endpoints';
-    this.modoFiltradoPorSistema = true;
-  }
-  verTodosLosEndpoints(): void {
-    this.activeTab = 'endpoints';
-    this.stepNavigate.emit('endpoints');
-    this.modoFiltradoPorSistema = false;
-    this.sistemaSeleccionado = null;
-  }
-
-  abrirModalAgregarEndpoint(sistema: SistemasI): void {
-    this.sistemaSeleccionado = sistema;
-    this.activeTab = 'endpoints';
-    this.stepNavigate.emit('endpoints');
-    this.modoFiltradoPorSistema = true;
+  mapToPayload(s: any) {
+    return {
+      system_id: s.sistema_id,
+      system_name: s.sistema_nombre,
+      system_description: s.sistema_descripcion,
+      system_status: s.sistema_ind_estado,
+      user_id: s.sistema_usua_id,
+    };
   }
 
   guardarNuevoSistema(): void {
@@ -226,10 +251,8 @@ export class Sistemas implements OnInit, OnChanges, AfterViewInit {
       !this.nuevoSistema.sistema_descripcion
     )
       return;
-
     this.nuevoSistema.sistema_usua_id = 'ADMIN';
     this.nuevoSistema.sistema_ind_estado = 'A';
-
     const accion = this.editando ? 'U' : 'I';
     const payload = this.mapToPayload(this.nuevoSistema);
 
@@ -243,48 +266,22 @@ export class Sistemas implements OnInit, OnChanges, AfterViewInit {
         this.cerrarDialogoAgregar();
         this.cargarSistemas();
       },
-      error: (err) => {
+      error: () =>
         this.messageService.add({
           severity: 'error',
           summary: 'Error',
           detail: 'No se pudo guardar el sistema',
-        });
-        console.error(err);
-      },
+        }),
     });
   }
 
-  ngAfterViewInit(): void {
-    if (this.endpointsComponent) {
-    } else {
-      console.error('endpointsComponent no está inicializado.');
-    }
-  }
-
-  agregarDesdeEndpoints(): void {
-    this.endpointsComponent.AgregarEndpoint();
-  }
-
-  agregarDesdeEndpointsT(sistema_id: string): void {
-    // NO cambiamos activeTab
-    this.endpointsComponent.AgregarEndpointT(sistema_id);
-  }
-
-  exportarDatos(): void {
-    console.log('Exportando datos...');
-  }
-
-  eliminarSistema(sistema: SistemasI): void {
+  eliminarSistema(s: SistemasI): void {
     this.confirmService.confirm({
-      message: `¿Deseas eliminar el sistema "${sistema.sistema_nombre}"?`,
+      message: `¿Deseas eliminar el sistema "${s.sistema_nombre}"?`,
       header: 'Confirmación',
       icon: 'pi pi-exclamation-triangle',
       accept: () => {
-        const payload = {
-          system_id: sistema.sistema_id,
-          user_id: 'ADMIN',
-        };
-
+        const payload = { system_id: s.sistema_id, user_id: 'ADMIN' };
         this.sistemasService.sistemasCrud(payload as any, 'D').subscribe({
           next: () => {
             this.messageService.add({
@@ -294,16 +291,58 @@ export class Sistemas implements OnInit, OnChanges, AfterViewInit {
             });
             this.cargarSistemas();
           },
-          error: (err) => {
+          error: () =>
             this.messageService.add({
               severity: 'error',
               summary: 'Error',
               detail: 'No se pudo eliminar el sistema',
-            });
-            console.error(err);
-          },
+            }),
         });
       },
     });
+  }
+
+  // ===== Detalle / Steps internos =====
+  entrarADetalle(s: SistemasI) {
+    this.selectedSystem = s;
+    this.modo = 'detalle';
+    this.currentIndex = 0; // abre en ENDPOINTS
+  }
+
+  volverALaLista() {
+    this.modo = 'lista';
+    this.selectedSystem = null;
+    this.currentIndex = 0;
+  }
+
+  goStep(key: StepKey) {
+    const idx = this.steps.findIndex((st) => st.key === key);
+    if (idx >= 0) this.currentIndex = idx;
+  }
+  nextStep() {
+    this.currentIndex = Math.min(this.currentIndex + 1, this.steps.length - 1);
+  }
+  prevStep() {
+    this.currentIndex = Math.max(this.currentIndex - 1, 0);
+  }
+
+  onNuevoEnStepActual() {
+    if (this.currentStep === 'endpoints')
+      this.endpointsComponent?.AgregarEndpoint?.();
+    // para otros steps, abre el modal correspondiente si aplica
+  }
+
+  // Quick helper para “Agregar Endpoint” desde la lista
+  agregarDesdeEndpointsT(sistema_id: string) {
+    // si ya estás en detalle de otro sistema, lo cambiamos:
+    if (!this.selectedSystem || this.selectedSystem.sistema_id !== sistema_id) {
+      const s = this.sistemas.find((x) => x.sistema_id === sistema_id);
+      if (s) this.entrarADetalle(s);
+    }
+    this.currentIndex = 0; // endpoints
+    setTimeout(
+      () => this.endpointsComponent?.AgregarEndpointT?.(sistema_id),
+      0
+    );
   }
 }
