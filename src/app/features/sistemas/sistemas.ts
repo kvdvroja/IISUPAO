@@ -255,9 +255,7 @@ export class Sistemas implements OnInit, OnChanges, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    // Verifica si el componente Endpoints ha sido inicializado correctamente
     if (this.endpointsComponent) {
-      console.log('endpointsComponent está inicializado correctamente');
     } else {
       console.error('endpointsComponent no está inicializado.');
     }

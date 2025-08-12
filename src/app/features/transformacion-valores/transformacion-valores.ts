@@ -22,6 +22,7 @@ import { FormsModule } from '@angular/forms';
 import { Input } from '@angular/core';
 import { SelectModule } from 'primeng/select';
 import { TransformacionValorS } from '../../core/services/mant/transformacion-valor/transformacion-valor';
+import { TransformacionCampoS } from '../../core/services/mant/transformacion-campo/transformacion-campo';
 
 @Component({
   selector: 'app-transformacion-valor',
@@ -41,6 +42,7 @@ import { TransformacionValorS } from '../../core/services/mant/transformacion-va
     Dialog,
     Toast,
     ConfirmDialogModule,
+    SelectModule,
   ],
   providers: [ConfirmationService, MessageService],
 })
@@ -48,10 +50,14 @@ export class TransformacionValores implements OnInit {
   @ViewChild('dt') dt!: Table;
   @Input() campoId!: string | null | undefined;
   transformacionValoresService = inject(TransformacionValorS);
+  transformacionCamposService = inject(TransformacionCampoS);
   cdRef = inject(ChangeDetectorRef);
   messageService = inject(MessageService);
   confirmService = inject(ConfirmationService);
   pantallaPequena = false;
+  camposOptions: Array<{ label: string; value: number | string }> = [];
+  private camposMap = new Map<number | string, string>();
+
   mostrarDialogoAgregar = false;
 
   valores: Transformacion_ValorI[] = [];
@@ -66,7 +72,40 @@ export class TransformacionValores implements OnInit {
   }
 
   ngOnInit(): void {
+    this.cargarCamposTransformacion();
     this.cargarData();
+  }
+
+  cargarCamposTransformacion(): void {
+    // Ajusta este método al servicio real que tengas para "Campos de Transformación".
+    // Si lo expone tu mismo servicio, úsalo. Si tienes otro (p.ej. TransformacionCampoS), cámbialo aquí.
+    this.transformacionCamposService.getAllTransformacionCampos().subscribe({
+      next: (resp) => {
+        const data = resp.result?.data ?? [];
+        // Asumiendo que cada item tiene ct_id y ct_campo_destino (ajusta según tu API)
+        this.camposOptions = data.map((c: any) => ({
+          value: c.ct_id,
+          label: `${c.ct_id} - ${c.ct_campo_destino}`,
+        }));
+        // Crea el mapa para mostrar label por id
+        this.camposMap.clear();
+        this.camposOptions.forEach((o) => this.camposMap.set(o.value, o.label));
+        this.cdRef.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error cargando Campos de Transformación', err);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'No se pudo cargar la lista de Campos de Transformación',
+        });
+      },
+    });
+  }
+
+  getCampoLabel(id: number | string | null | undefined): string {
+    if (id == null) return '';
+    return this.camposMap.get(id) ?? String(id);
   }
 
   cargarData(): void {

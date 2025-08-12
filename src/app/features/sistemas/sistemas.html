@@ -3,15 +3,15 @@
   class="flex items-center justify-between border-b border-gray-200 p-3 bg-white"
 >
   <!-- Botón regresar -->
+  @if (activeTab === 'endpoints') {
   <button
-    *ngIf="activeTab === 'endpoints'"
     class="flex items-center justify-center border rounded-md p-2 hover:bg-gray-100"
     (click)="volver()"
     title="Volver"
   >
     <i class="pi pi-arrow-left text-xl text-gray-700"></i>
   </button>
-
+  }
   <!-- Título -->
   <div class="flex-1 px-4">
     <h2 class="text-2xl font-bold text-gray-800">
@@ -188,8 +188,11 @@
 <div [hidden]="activeTab !== 'endpoints'">
   <app-endpoints
     #endpointsCmp
-    [sistemaId]="modoFiltradoPorSistema ? sistemaSeleccionado?.sistema_id : null"
-    [sistemasLista]="sistemas">
+    [sistemaId]="
+      modoFiltradoPorSistema ? sistemaSeleccionado?.sistema_id : null
+    "
+    [sistemasLista]="sistemas"
+  >
   </app-endpoints>
 </div>
 <p-toast></p-toast>
@@ -282,5 +285,5 @@
   #endpointsCmp
   [sistemaId]="null"
   [sistemasLista]="sistemas"
-  style="display:none"
+  style="display: none"
 ></app-endpoints>
