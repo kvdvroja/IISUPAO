@@ -22,6 +22,7 @@ import { Plantilla_IntegracionI } from '../../core/interfaces/Plantilla_Integrac
 import { PlantillaIntegracionS } from '../../core/services/mant/plantilla-integracion/plantilla-integracion';
 import { SistemasI } from '../../core/interfaces/Sistemas';
 import { SistemasS } from '../../core/services/mant/sistemas/sistemas';
+import { TransformacionCampos } from '../transformacion-campos/transformacion-campos';
 
 @Component({
   selector: 'app-plantilla-destino',
@@ -42,11 +43,13 @@ import { SistemasS } from '../../core/services/mant/sistemas/sistemas';
     InputIcon,
     SelectModule,
     IconField,
+    TransformacionCampos,
   ],
   providers: [MessageService, ConfirmationService],
 })
 export class PlantillaDestino implements OnInit {
   @ViewChild('dt') dt!: Table;
+  @ViewChild('transfCmp') transfCmp!: TransformacionCampos;
   @Input() plantillaIId!: string | null | undefined;
   @Input() set sistemasLista(value: SistemasI[] | null | undefined) {
     if (!value) {
@@ -93,9 +96,9 @@ export class PlantillaDestino implements OnInit {
   };
 
   ngOnInit(): void {
-    this.cargarPlantillas(); // ya lo tenías (destino)
-    this.cargarPlantillasIntegracion(); // NUEVO
-    this.cargarSistemasOptions(); // NUEVO
+    this.cargarPlantillas();
+    this.cargarPlantillasIntegracion();
+    this.cargarSistemasOptions();
   }
 
   private cargarPlantillasIntegracion(): void {
@@ -106,10 +109,8 @@ export class PlantillaDestino implements OnInit {
           label: `${p.pi_codigo ?? p.pi_id} - ${p.pi_nombre} [${
             p.pi_metodo_http
           }]`,
-          value: String(p.pi_id), // Usamos pi_id como ID del plan de integración
+          value: String(p.pi_id),
         }));
-
-        // Si viene un filtro desde el padre, puedes preseleccionar
         if (!this.editando && this.plantillaIId) {
           this.nuevo.pd_plan_inte_id = String(this.plantillaIId);
         }
@@ -246,7 +247,7 @@ export class PlantillaDestino implements OnInit {
       header: 'Confirmación',
       icon: 'pi pi-exclamation-triangle',
       accept: () => {
-        const payload = { pd_id: row.pd_id }; // Solo se necesita el ID para eliminar
+        const payload = { pd_id: row.pd_id };
 
         this.plantillaDestinoService
           .plantillaDestinoCrud(payload as any, 'D')
@@ -274,19 +275,21 @@ export class PlantillaDestino implements OnInit {
   public abrirAgregarPreconfigurado(
     opts: {
       planInteId?: string | number;
-      sistId?: string | number; // <- sistema_id que quieres pasar
+      sistId?: string | number;
     } = {}
   ): void {
     this.mostrarDialogoAgregar = true;
     this.editando = false;
     this.limpiarFormulario();
-
-    // Estas listas ya se cargan en ngOnInit; si llegan después,
-    // el ngModel quedará seleccionado cuando existan las options.
     if (opts.planInteId != null)
       this.nuevo.pd_plan_inte_id = String(opts.planInteId);
     if (opts.sistId != null) this.nuevo.pd_sist_id = String(opts.sistId);
 
     this.cdRef.detectChanges();
+  }
+
+  agregarTransformacionCampos(row: Plantilla_DestinoI): void {
+    if (!row?.pd_id) return;
+    this.transfCmp?.abrirAgregarPreconfigurado({ pdId: row.pd_id });
   }
 }

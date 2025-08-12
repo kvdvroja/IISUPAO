@@ -15,10 +15,14 @@
   <!-- Título -->
   <div class="flex-1 px-4">
     <h2 class="text-2xl font-bold text-gray-800">
-      {{ activeTab === "campos" ? "TRANSFORMACIONES / TRANSFORMACIÓN DE CAMPOS" : "TRANSFORMACIONES / TRANSFORMACIÓN DE VALORES" }}
+      {{
+        activeTab === "campos"
+          ? "TRANSFORMACIONES / TRANSFORMACIÓN DE CAMPOS"
+          : "TRANSFORMACIONES / TRANSFORMACIÓN DE VALORES"
+      }}
     </h2>
     <p *ngIf="activeTab === 'campos'" class="text-sm text-gray-500">
-      Gestión de transformación de campos  
+      Gestión de transformación de campos
     </p>
     <p *ngIf="activeTab === 'valores'" class="text-sm text-gray-500">
       Gestión de transformación de valores
@@ -37,9 +41,7 @@
       label="Nuevo"
       icon="pi pi-plus"
       class="p-button-sm"
-      (click)="
-        activeTab === 'campos' ? Agregar() : agregarDesdeValores()
-      "
+      (click)="activeTab === 'campos' ? Agregar() : agregarDesdeValores()"
     ></p-button>
     <p-button
       label="Limpiar"
@@ -87,76 +89,100 @@
 </div>
 
 <div *ngIf="activeTab === 'campos'">
-<!-- Móvil: Buscador -->
-<div *ngIf="pantallaPequena" class="p-2">
-  <p-iconfield iconPosition="left" class="w-full mb-4">
-    <p-inputicon><i class="pi pi-search"></i></p-inputicon>
-    <input pInputText (input)="filtrarGlobal($event)" placeholder="Buscar..." class="w-full" />
-  </p-iconfield>
-</div>
+  <!-- Móvil: Buscador -->
+  <div *ngIf="pantallaPequena" class="p-2">
+    <p-iconfield iconPosition="left" class="w-full mb-4">
+      <p-inputicon><i class="pi pi-search"></i></p-inputicon>
+      <input
+        pInputText
+        (input)="filtrarGlobal($event)"
+        placeholder="Buscar..."
+        class="w-full"
+      />
+    </p-iconfield>
+  </div>
 
-<!-- Móvil: Lista -->
-<div *ngIf="pantallaPequena" class="flex flex-col gap-4">
-  <div *ngFor="let campo of datosFiltrados" class="bg-white p-4 rounded shadow border">
-    <div><strong>ID:</strong> {{ campo.ct_id }}</div>
-    <div><strong>Origen:</strong> {{ campo.ct_campo_origen }}</div>
-    <div><strong>Destino:</strong> {{ campo.ct_campo_destino }}</div>
-    <div><strong>Tipo:</strong> {{ campo.ct_tipo_transformacion }}</div>
-    <div><strong>Validación:</strong> {{ campo.ct_validacion }}</div>
-    <div><strong>Obligatorio:</strong> {{ campo.ct_obligatorio }}</div>
-    <div><strong>PD ID:</strong> {{ campo.pd_id }}</div>
-    <div class="flex justify-end mt-2">
-      <p-button icon="pi pi-pencil" (onClick)="showEditar(campo)" severity="secondary" rounded></p-button>
+  <!-- Móvil: Lista -->
+  <div *ngIf="pantallaPequena" class="flex flex-col gap-4">
+    <div
+      *ngFor="let campo of datosFiltrados"
+      class="bg-white p-4 rounded shadow border"
+    >
+      <div><strong>ID:</strong> {{ campo.ct_id }}</div>
+      <div><strong>Origen:</strong> {{ campo.ct_campo_origen }}</div>
+      <div><strong>Destino:</strong> {{ campo.ct_campo_destino }}</div>
+      <div><strong>Tipo:</strong> {{ campo.ct_tipo_transformacion }}</div>
+      <div><strong>Fecha Actividad:</strong> {{ campo.ct_fecha_actividad }}</div>
+      <div><strong>Obligatorio:</strong> {{ campo.ct_obligatorio }}</div>
+      <div class="flex justify-end mt-2">
+        <p-button
+          icon="pi pi-pencil"
+          (onClick)="showEditar(campo)"
+          severity="secondary"
+          rounded
+        ></p-button>
+      </div>
     </div>
   </div>
-</div>
 
-<!-- Escritorio: Tabla -->
-<div *ngIf="!pantallaPequena" class="p-2 text-center text-gray-600">
-  <p-table
-    #dt1
-    [value]="datosFiltrados"
-    dataKey="ct_id"
-    [paginator]="true"
-    [rows]="10"
-    [rowsPerPageOptions]="[10, 25, 50]"
-    [globalFilterFields]="['ct_campo_origen', 'ct_campo_destino', 'ct_tipo_transformacion']"
-  >
-    <ng-template #header>
-      <tr>
-        <th>Origen</th>
-        <th>Destino</th>
-        <th>Transformación</th>
-        <th>Validación</th>
-        <th>Obligatorio</th>
-        <th>PD ID</th>
-        <th>Acciones</th>
-      </tr>
-    </ng-template>
+  <!-- Escritorio: Tabla -->
+  <div *ngIf="!pantallaPequena" class="p-2 text-center text-gray-600">
+    <p-table
+      #dt1
+      [value]="datosFiltrados"
+      dataKey="ct_id"
+      [paginator]="true"
+      [rows]="10"
+      [rowsPerPageOptions]="[10, 25, 50]"
+      [globalFilterFields]="[
+        'ct_campo_origen',
+        'ct_campo_destino',
+        'ct_tipo_transformacion'
+      ]"
+    >
+      <ng-template #header>
+        <tr>
+          <th>Id</th>
+          <th>Origen</th>
+          <th>Destino</th>
+          <th>Transformación</th>
+          <th>Fecha Actividad</th>
+          <th>Obligatorio</th>
+          <th>Acciones</th>
+        </tr>
+      </ng-template>
 
-    <ng-template #body let-row>
-      <tr>
-        <td>{{ row.ct_campo_origen }}</td>
-        <td>{{ row.ct_campo_destino }}</td>
-        <td>{{ row.ct_tipo_transformacion }}</td>
-        <td>{{ row.ct_validacion }}</td>
-        <td>{{ row.ct_obligatorio }}</td>
-        <td>{{ row.pd_id }}</td>
-        <td>
-          <p-button icon="pi pi-pencil" (onClick)="showEditar(row)" severity="secondary" rounded></p-button>
-        </td>
-      </tr>
-    </ng-template>
+      <ng-template #body let-row>
+        <tr>
+          <td>{{ row.ct_id }}</td>
+          <td>{{ row.ct_campo_origen }}</td>
+          <td>{{ row.ct_campo_destino }}</td>
+          <td>{{ row.ct_tipo_transformacion }}</td>
+          <td>{{ row.ct_fecha_actividad | date : "dd MMM yyyy, HH:mm" }}</td>
+          <td>{{ row.ct_obligatorio }}</td>
+          <td>
+            <p-button
+              icon="pi pi-pencil"
+              (onClick)="showEditar(row)"
+              severity="secondary"
+              rounded
+            ></p-button>
+          </td>
+        </tr>
+      </ng-template>
 
-    <ng-template #emptymessage>
-      <tr><td colspan="7">No hay registros.</td></tr>
-    </ng-template>
-  </p-table>
-</div>
+      <ng-template #emptymessage>
+        <tr>
+          <td colspan="7">No hay registros.</td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
 </div>
 <div *ngIf="activeTab === 'valores'">
-  <app-transformacion-valor [campoId]="
-      modoFiltradoPorSistema ? camposSeleccionado?.ct_id : null">
+  <app-transformacion-valor
+    [campoId]="modoFiltradoPorSistema ? camposSeleccionado?.ct_id : null"
+  >
   </app-transformacion-valor>
 </div>
 
@@ -164,47 +190,192 @@
 <p-dialog
   [(visible)]="mostrarDialogoAgregar"
   header="Agregar Transformación de Campo"
-  [style]="{ width: '40rem' }"
+  [style]="{ width: '44rem' }"
   [breakpoints]="{ '960px': '90vw' }"
   modal
   [dismissableMask]="true"
+  appendTo="body"
   (visibleChange)="cerrarDialogoAgregar()"
 >
   <div class="flex flex-col gap-4">
+    <!-- Campo Origen -->
     <p-inputgroup>
-      <p-inputgroup-addon><i class="pi pi-arrow-right-arrow-left"></i></p-inputgroup-addon>
-      <input pInputText placeholder="Campo Origen" [(ngModel)]="nuevoCampo.ct_campo_origen" />
+      <p-inputgroup-addon
+        ><i class="pi pi-arrow-right-arrow-left"></i
+      ></p-inputgroup-addon>
+      <input
+        pInputText
+        placeholder="Campo Origen"
+        [(ngModel)]="nuevoCampo.ct_campo_origen"
+      />
     </p-inputgroup>
 
+    <!-- Campo Destino -->
     <p-inputgroup>
       <p-inputgroup-addon><i class="pi pi-arrow-right"></i></p-inputgroup-addon>
-      <input pInputText placeholder="Campo Destino" [(ngModel)]="nuevoCampo.ct_campo_destino" />
+      <input
+        pInputText
+        placeholder="Campo Destino"
+        [(ngModel)]="nuevoCampo.ct_campo_destino"
+      />
     </p-inputgroup>
 
-    <p-inputgroup>
-      <p-inputgroup-addon><i class="pi pi-cog"></i></p-inputgroup-addon>
-      <input pInputText placeholder="Tipo de Transformación" [(ngModel)]="nuevoCampo.ct_tipo_transformacion" />
-    </p-inputgroup>
+    <!-- Tipo Transformación -->
+    <div class="flex flex-col">
+      <label class="font-semibold text-sm">Tipo de Transformación</label>
+      <p-select
+        [(ngModel)]="nuevoCampo.ct_tipo_transformacion"
+        [options]="tipoTransfOptions"
+        optionLabel="label"
+        optionValue="value"
+        placeholder="Seleccione"
+        class="w-full"
+      ></p-select>
+    </div>
 
-    <p-inputgroup>
-      <p-inputgroup-addon><i class="pi pi-check-circle"></i></p-inputgroup-addon>
-      <input pInputText placeholder="Validación" [(ngModel)]="nuevoCampo.ct_validacion" />
-    </p-inputgroup>
+    <!-- Validación (JSON via pares key/value) -->
+    <div class="flex flex-col gap-2 pt-2">
+      <label class="font-semibold text-sm">Validación (ct_validacion)</label>
 
-    <p-inputgroup>
-      <p-inputgroup-addon><i class="pi pi-exclamation-triangle"></i></p-inputgroup-addon>
-      <input pInputText placeholder="Obligatorio (S/N)" [(ngModel)]="nuevoCampo.ct_obligatorio" />
-    </p-inputgroup>
+      <div class="flex grid-cols-1 md:grid-cols-12 gap-2">
+        <p-inputgroup class="md:col-span-5">
+          <p-inputgroup-addon><i class="pi pi-key"></i></p-inputgroup-addon>
+          <input pInputText placeholder="Clave (key)" [(ngModel)]="newValKey" />
+        </p-inputgroup>
 
-    <p-inputgroup>
-      <p-inputgroup-addon><i class="pi pi-database"></i></p-inputgroup-addon>
-      <input pInputText placeholder="PD ID" [(ngModel)]="nuevoCampo.pd_id" />
-    </p-inputgroup>
+        <p-inputgroup class="md:col-span-6">
+          <p-inputgroup-addon><i class="pi pi-pencil"></i></p-inputgroup-addon>
+          <input
+            pInputText
+            placeholder="Valor (value)"
+            [(ngModel)]="newValValue"
+          />
+        </p-inputgroup>
+
+        <div class="md:col-span-1 flex items-center">
+          <p-button
+            [label]="editingValIndex !== null ? 'Actualizar' : 'Agregar'"
+            icon="pi pi-plus"
+            (click)="addOrUpdateValidacionKV()"
+            [disabled]="!newValKey"
+          ></p-button>
+        </div>
+      </div>
+
+      <p-table
+        [value]="validacionPairs"
+        [paginator]="false"
+        [style]="{ 'max-height': '200px', overflow: 'auto' }"
+      >
+        <ng-template #header>
+          <tr>
+            <th style="width: 40%">Clave</th>
+            <th>Valor</th>
+            <th style="width: 120px">Acciones</th>
+          </tr>
+        </ng-template>
+
+        <ng-template #body let-row let-i="rowIndex">
+          <tr>
+            <td class="text-left break-words">{{ row.key }}</td>
+            <td class="text-left break-words">{{ row.value }}</td>
+            <td class="text-center">
+              <div class="flex gap-2 justify-center">
+                <p-button
+                  icon="pi pi-pencil"
+                  severity="secondary"
+                  rounded
+                  (onClick)="editValidacionKV(i)"
+                ></p-button>
+                <p-button
+                  icon="pi pi-trash"
+                  severity="danger"
+                  rounded
+                  (onClick)="removeValidacionKV(i)"
+                ></p-button>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+
+        <ng-template #emptymessage>
+          <tr>
+            <td colspan="3">Sin reglas de validación.</td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+
+    <!-- Obligatorio -->
+    <div class="flex flex-col">
+      <label class="font-semibold text-sm">Obligatorio</label>
+      <p-select
+        [(ngModel)]="nuevoCampo.ct_obligatorio"
+        [options]="obligatorioOptions"
+        optionLabel="label"
+        optionValue="value"
+        placeholder="Seleccione"
+        class="w-full"
+      ></p-select>
+    </div>
+
+    <!-- PD ID (Plantilla Destino) -->
+    <div class="flex flex-col">
+      <label class="font-semibold text-sm">Plantilla Destino (pd_id)</label>
+      <p-select
+        [(ngModel)]="nuevoCampo.pd_id"
+        [options]="pdOptions"
+        optionLabel="label"
+        optionValue="value"
+        placeholder="Seleccione"
+        class="w-full"
+      ></p-select>
+    </div>
 
     <div class="flex justify-end gap-2 pt-4">
-      <p-button label="Cancelar" icon="pi pi-times" (click)="cerrarDialogoAgregar()" outlined></p-button>
-      <p-button label="Guardar" icon="pi pi-check" (click)="guardarNuevo()"></p-button>
+      <p-button
+        label="Cancelar"
+        icon="pi pi-times"
+        (click)="cerrarDialogoAgregar()"
+        outlined
+      ></p-button>
+      <p-button
+        label="Guardar"
+        icon="pi pi-check"
+        (click)="guardarNuevo()"
+      ></p-button>
     </div>
   </div>
 </p-dialog>
+
 <p-toast></p-toast>
+
+<p-confirmDialog #cd>
+  <ng-template
+    #headless
+    let-message
+    let-onAccept="onAccept"
+    let-onReject="onReject"
+  >
+    <div
+      class="flex flex-col items-center p-6 bg-white dark:bg-surface-900 rounded"
+    >
+      <i class="pi pi-exclamation-triangle text-orange-500 text-4xl mb-3"></i>
+      <div class="text-lg font-semibold mb-2">{{ message.header }}</div>
+      <p class="text-center">{{ message.message }}</p>
+      <div class="flex justify-center gap-3 mt-4">
+        <p-button
+          label="SI"
+          (onClick)="onAccept()"
+          styleClass="w-32"
+        ></p-button>
+        <p-button
+          label="NO"
+          [outlined]="true"
+          (onClick)="onReject()"
+          styleClass="w-32"
+        ></p-button>
+      </div>
+    </div>
+  </ng-template>
+</p-confirmDialog>

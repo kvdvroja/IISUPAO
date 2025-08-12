@@ -137,6 +137,14 @@
           (onClick)="agregarDestinoDesdeIntegracion(plantilla)"
           [title]="'Agregar Plantilla Destino'"
         ></p-button>
+        @if (plantilla.pi_ind_estado === 'A') {
+        <p-button
+          icon="pi pi-trash"
+          severity="danger"
+          rounded
+          (onClick)="eliminar(plantilla)"
+        ></p-button>
+        }
       </div>
     </div>
   </div>
@@ -194,6 +202,14 @@
                 (onClick)="agregarDestinoDesdeIntegracion(plantilla)"
                 [title]="'Agregar Plantilla Destino'"
               ></p-button>
+              @if (plantilla.pi_ind_estado === 'A') {
+              <p-button
+                icon="pi pi-trash"
+                severity="danger"
+                rounded
+                (onClick)="eliminar(plantilla)"
+              ></p-button>
+              }
             </div>
           </td>
         </tr>
@@ -575,4 +591,4 @@
     </div>
   </ng-template>
 </p-confirmDialog>
-<app-plantilla-destino #pdCmp></app-plantilla-destino>
+<app-plantilla-destino #pdCmp style="display: none"></app-plantilla-destino>

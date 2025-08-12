@@ -37,6 +37,7 @@ export const environment = {
 
   get transformacionCampospiUrl() { return `${this.apiBaseUrl}transformable_fields/`; },
   get getAlltransformacionCampos() { return `${this.transformacionCampospiUrl}get_all_transformable_field`; },
+  get transformacionCamposCrudUrl() { return `${this.transformacionCampospiUrl}crud_transformable`; },
 
   get transformacionValorespiUrl() { return `${this.apiBaseUrl}transformable_value/`; },
   get getAlltransformacionValores() { return `${this.transformacionValorespiUrl}get_all_transformable_value`; },

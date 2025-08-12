@@ -36,12 +36,19 @@
         rounded
       ></p-button>
       <p-button
-        *ngIf="item.pd_ind_estado == 'A'"
+        icon="pi pi-plus"
+        (onClick)="agregarTransformacionCampos(item)"
+        severity="success"
+        rounded
+      ></p-button>
+      @if (item.pd_ind_estado === 'A') {
+      <p-button
         icon="pi pi-trash"
         severity="danger"
         rounded
         (onClick)="eliminar(item)"
       ></p-button>
+      }
     </div>
   </div>
 </div>
@@ -88,6 +95,14 @@
             severity="secondary"
             rounded
           ></p-button>
+
+          <p-button
+            icon="pi pi-plus"
+            (onClick)="agregarTransformacionCampos(row)"
+            severity="success"
+            rounded
+          ></p-button>
+
           <p-button
             *ngIf="row.pd_ind_estado == 'A'"
             icon="pi pi-trash"
@@ -241,3 +256,7 @@
     </div>
   </ng-template>
 </p-confirmDialog>
+<app-transformacion-campos
+  #transfCmp
+  style="display: none"
+></app-transformacion-campos>
