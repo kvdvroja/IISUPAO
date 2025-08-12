@@ -56,6 +56,7 @@ import { Plantilla_DestinoI } from '../../core/interfaces/Plantilla_Destino';
 export class TransformacionCampos implements OnInit, OnChanges {
   @ViewChild('dt') dt!: Table;
   @ViewChild(TransformacionValores) valoresComponent!: TransformacionValores;
+  
   @Input() tabFromParent: 'campos' | 'valores' | null = null;
   @Output() stepNavigate = new EventEmitter<string>();
   @Output() stepProgress = new EventEmitter<number>();
@@ -361,4 +362,9 @@ export class TransformacionCampos implements OnInit, OnChanges {
     }
     this.cdRef.detectChanges();
   }
+
+abrirDialogoValores(): void {
+  this.valoresComponent?.abrirAgregar();
+}
+  
 }

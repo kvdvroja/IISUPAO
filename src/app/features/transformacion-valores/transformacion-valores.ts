@@ -213,4 +213,14 @@ export class TransformacionValores implements OnInit {
       },
     });
   }
+
+  abrirAgregar(opts?: { vt_camp_tran_id?: string | number }): void {
+    this.nuevoValor = {
+      vt_camp_tran_id: opts?.vt_camp_tran_id ?? '',
+      vt_valor_origen: '',
+      vt_valor_destino: '',
+    };
+    this.mostrarDialogoAgregar = true;
+    this.cdRef.detectChanges();
+  }
 }
