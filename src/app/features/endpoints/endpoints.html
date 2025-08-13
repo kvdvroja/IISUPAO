@@ -207,18 +207,32 @@
   </p-table>
 </div>
 <div *ngIf="selectedEndpoint" class="px-6 pt-6" id="plantillasPorEndpoint">
-  <div class="rounded-lg border bg-white">
-    <div class="p-5 border-b flex items-center justify-between">
+  <div class="bg-white flex flex-col gap-4">
+    <div class="p-5 shadow-lg flex items-center justify-between">
       <div>
         <div class="flex items-center gap-2 text-lg font-semibold">
-          <span class="text-blue-600">{{ selectedEndpoint.se_nombre }}</span>
+          <span class="text-blue-600 uppercase">{{ selectedEndpoint.se_nombre }}</span>
           <span class="px-2 py-0.5 text-xs rounded-full border text-gray-700">
             ID: {{ selectedEndpoint.se_id }}
           </span>
         </div>
-        <p class="mt-1 text-gray-700 truncate">
-          {{ selectedEndpoint.se_url }} • {{ selectedEndpoint.se_metodo_http }}
-        </p>
+        <div class="mt-1 text-gray-700 flex flex-col">
+          <div class="flex gap-2">
+            <span class="font-semibold">URL:</span>
+            <span class="bg-gray-100 font-mono px-4 rounded-lg">
+              {{ selectedEndpoint.se_url }}
+            </span>
+          </div>
+          <div class="mt-1 flex gap-2">
+            <span class="font-semibold">Método:</span>
+            <span
+              class="bg-black text-white font-mono px-4 rounded-lg"
+            >
+              {{ selectedEndpoint.se_metodo_http }}
+            </span>
+          </div>
+        </div>
+
         <p class="text-sm text-gray-500">
           Sistema: {{ selectedEndpoint.se_sistema_id }} • Estado:
           {{ selectedEndpoint.se_ind_estado || "A" }}
