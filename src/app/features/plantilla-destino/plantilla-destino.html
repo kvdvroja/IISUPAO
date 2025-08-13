@@ -1,3 +1,45 @@
+<div
+  class="flex items-center justify-between border-b border-gray-200 p-3 bg-white"
+>
+  <div class="flex-1">
+    <h2 class="text-2xl font-bold text-gray-800">PLANTILLA DESTINO</h2>
+    <p class="text-sm text-gray-500">Gestión de plantillas destino</p>
+  </div>
+
+  <div class="flex items-center space-x-2">
+    <p-splitButton
+      label="Acciones"
+      icon="pi pi-cog"
+      [model]="accionesDropdown"
+      class="p-button-outlined p-button-sm"
+    ></p-splitButton>
+
+    <p-button
+      label="Nuevo"
+      icon="pi pi-plus"
+      class="p-button-sm"
+      (click)="Agregar()"
+    ></p-button>
+
+    <p-button
+      label="Limpiar"
+      [outlined]="true"
+      icon="pi pi-filter-slash"
+      (click)="dt.clear()"
+      class="p-button-sm"
+    ></p-button>
+
+    <p-iconfield iconPosition="left" class="w-64">
+      <p-inputicon><i class="pi pi-search"></i></p-inputicon>
+      <input
+        pInputText
+        (input)="onBuscarGlobal($event)"
+        placeholder="Buscar..."
+        class="w-full"
+      />
+    </p-iconfield>
+  </div>
+</div>
 <!-- Filtro en móvil -->
 <div *ngIf="pantallaPequena" class="p-2">
   <p-iconfield iconPosition="left" class="w-full mb-4">
@@ -29,26 +71,43 @@
     </div>
     <div><strong>Estado:</strong> {{ item.pd_ind_estado }}</div>
     <div class="flex justify-end mt-2">
-      <p-button
-        icon="pi pi-pencil"
-        (onClick)="showEditar(item)"
-        severity="secondary"
-        rounded
-      ></p-button>
-      <p-button
-        icon="pi pi-plus"
-        (onClick)="agregarTransformacionCampos(item)"
-        severity="success"
-        rounded
-      ></p-button>
-      @if (item.pd_ind_estado === 'A') {
-      <p-button
-        icon="pi pi-trash"
-        severity="danger"
-        rounded
-        (onClick)="eliminar(item)"
-      ></p-button>
-      }
+      <button
+        pButton
+        type="button"
+        [text]="true"
+        [rounded]="true"
+        [severity]="'secondary'"
+        class="btn-icon"
+        pTooltip="Editar"
+        (click)="$event.stopPropagation(); showEditar(item)"
+      >
+        <i class="pi pi-pencil"></i>
+      </button>
+      <button
+        pButton
+        type="button"
+        [text]="true"
+        [rounded]="true"
+        [severity]="'success'"
+        class="btn-icon"
+        pTooltip="Agregar Plantilla de Campos"
+        (click)="$event.stopPropagation(); agregarTransformacionCampos(item)"
+      >
+        <i class="pi pi-plus"></i>
+      </button>
+
+      <button
+        pButton
+        type="button"
+        [text]="true"
+        [rounded]="true"
+        [severity]="'danger'"
+        class="btn-icon"
+        pTooltip="Eliminar"
+        (click)="$event.stopPropagation(); eliminar(item)"
+      >
+        <i class="pi pi-trash"></i>
+      </button>
     </div>
   </div>
 </div>

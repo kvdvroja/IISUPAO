@@ -25,18 +25,30 @@
     <div><strong>Valor Origen:</strong> {{ valor.vt_valor_origen }}</div>
     <div><strong>Valor Destino:</strong> {{ valor.vt_valor_destino }}</div>
     <div class="flex justify-end mt-2">
-      <p-button
-        icon="pi pi-pencil"
-        (onClick)="editar(valor)"
-        severity="secondary"
-        rounded
-      ></p-button>
-      <p-button
-        icon="pi pi-trash"
-        severity="danger"
-        rounded
-        (onClick)="eliminar(valor)"
-      ></p-button>
+      <button
+        pButton
+        type="button"
+        [text]="true"
+        [rounded]="true"
+        [severity]="'secondary'"
+        class="btn-icon"
+        pTooltip="Editar"
+        (click)="$event.stopPropagation(); editar(valor)"
+      >
+        <i class="pi pi-pencil"></i>
+      </button>
+      <button
+        pButton
+        type="button"
+        [text]="true"
+        [rounded]="true"
+        [severity]="'danger'"
+        class="btn-icon"
+        pTooltip="Eliminar"
+        (click)="$event.stopPropagation(); eliminar(valor)"
+      >
+        <i class="pi pi-trash"></i>
+      </button>
     </div>
   </div>
 </div>

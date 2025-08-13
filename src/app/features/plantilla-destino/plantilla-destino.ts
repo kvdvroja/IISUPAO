@@ -21,6 +21,7 @@ import { Input } from '@angular/core';
 import { Plantilla_IntegracionI } from '../../core/interfaces/Plantilla_Integracion';
 import { PlantillaIntegracionS } from '../../core/services/mant/plantilla-integracion/plantilla-integracion';
 import { SistemasI } from '../../core/interfaces/Sistemas';
+import { SplitButtonModule } from 'primeng/splitbutton';
 import { SistemasS } from '../../core/services/mant/sistemas/sistemas';
 import { TransformacionCampos } from '../transformacion-campos/transformacion-campos';
 
@@ -44,7 +45,8 @@ import { TransformacionCampos } from '../transformacion-campos/transformacion-ca
     SelectModule,
     IconField,
     TransformacionCampos,
-  ]
+    SplitButtonModule,
+  ],
 })
 export class PlantillaDestino implements OnInit {
   @ViewChild('dt') dt!: Table;
@@ -82,6 +84,19 @@ export class PlantillaDestino implements OnInit {
     { label: 'Custom', value: 'CUSTOM' },
   ];
 
+  accionesDropdown = [
+    {
+      label: 'Refrescar',
+      icon: 'pi pi-refresh',
+      command: () => this.cargarPlantillas(),
+    },
+    {
+      label: 'Exportar',
+      icon: 'pi pi-download',
+      command: () => this.expordarDatos(),
+    },
+  ];
+
   nuevo: any = {
     pd_plan_inte_id: '',
     pd_priodridad: '',
@@ -99,6 +114,13 @@ export class PlantillaDestino implements OnInit {
     this.cargarPlantillasIntegracion();
     this.cargarSistemasOptions();
   }
+
+  onBuscarGlobal(event: Event): void {
+    const input = (event.target as HTMLInputElement).value;
+    this.dt.filterGlobal(input, 'contains');
+  }
+
+  expordarDatos(): void {}
 
   private cargarPlantillasIntegracion(): void {
     this.plantillaIntegracionService.getAllPlantillas().subscribe({

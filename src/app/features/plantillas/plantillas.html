@@ -1,35 +1,11 @@
-<!-- Cabecera -->
 <div
   class="flex items-center justify-between border-b border-gray-200 p-3 bg-white"
 >
-  <!-- Botón regresar -->
-  <button
-    *ngIf="activeTab === 'destino'"
-    class="flex items-center justify-center border rounded-md p-2 hover:bg-gray-100"
-    (click)="volver()"
-    title="Volver"
-  >
-    <i class="pi pi-arrow-left text-xl text-gray-700"></i>
-  </button>
-
-  <!-- Título -->
-  <div class="flex-1 px-4">
-    <h2 class="text-2xl font-bold text-gray-800">
-      {{
-        activeTab === "integracion"
-          ? "PLANTILLA INTEGRACION"
-          : "PLANTILLA DESTINO"
-      }}
-    </h2>
-    <p *ngIf="activeTab === 'integracion'" class="text-sm text-gray-500">
-      Gestión de plantillas de integración
-    </p>
-    <p *ngIf="activeTab === 'destino'" class="text-sm text-gray-500">
-      Gestión de plantillas de destino
-    </p>
+  <div class="flex-1">
+    <h2 class="text-2xl font-bold text-gray-800">PLANTILLA INTEGRACIÓN</h2>
+    <p class="text-sm text-gray-500">Gestión de plantillas de integración</p>
   </div>
 
-  <!-- Acciones -->
   <div class="flex items-center space-x-2">
     <p-splitButton
       label="Acciones"
@@ -37,24 +13,24 @@
       [model]="accionesDropdown"
       class="p-button-outlined p-button-sm"
     ></p-splitButton>
+
     <p-button
       label="Nuevo"
       icon="pi pi-plus"
       class="p-button-sm"
-      (click)="
-        activeTab === 'integracion' ? AgregarPlantilla() : agregarDesdeDestino()
-      "
+      (click)="AgregarPlantilla()"
     ></p-button>
+
     <p-button
       label="Limpiar"
       [outlined]="true"
       icon="pi pi-filter-slash"
       (click)="dt.clear()"
+      class="p-button-sm"
     ></p-button>
+
     <p-iconfield iconPosition="left" class="w-64">
-      <p-inputicon>
-        <i class="pi pi-search"></i>
-      </p-inputicon>
+      <p-inputicon><i class="pi pi-search"></i></p-inputicon>
       <input
         pInputText
         (input)="onBuscarGlobal($event)"
@@ -64,171 +40,136 @@
     </p-iconfield>
   </div>
 </div>
-<!-- Tabs -->
-<div class="flex space-x-6 border-b border-gray-200 px-6 pt-4">
-  <button
-    class="pb-4 border-b-2 transition-all duration-150 text-sm font-medium"
-    [ngClass]="{
-      'border-[#1c3d67] text-[#1c3d67]': activeTab === 'integracion',
-      'border-transparent text-gray-500 hover:text-[#1c3d67] hover:border-[#1c3d67]':
-        activeTab !== 'integracion'
-    }"
-    (click)="activeTab = 'integracion'"
-  >
-    PLANTILLA INTEGRACION
-  </button>
-  <button
-    class="pb-4 border-b-2 transition-all duration-150 text-sm font-medium"
-    [ngClass]="{
-      'border-[#1c3d67] text-[#1c3d67]': activeTab === 'destino',
-      'border-transparent text-gray-500 hover:text-[#1c3d67] hover:border-[#1c3d67]':
-        activeTab !== 'destino'
-    }"
-    (click)="verTodasLasPlantillasD()"
-  >
-    PLANTILLA DESTINO
-  </button>
-</div>
-<div *ngIf="activeTab === 'integracion'">
-  <div *ngIf="pantallaPequena" class="p-2">
-    <p-iconfield iconPosition="left" class="w-full mb-4">
-      <p-inputicon>
-        <i class="pi pi-search"></i>
-      </p-inputicon>
-      <input
-        pInputText
-        type="text"
-        (input)="filtrarGlobal($event)"
-        placeholder="Buscar Plantilla..."
-        class="w-full"
-      />
-    </p-iconfield>
-  </div>
 
-  <div *ngIf="pantallaPequena" class="flex flex-col gap-4">
+<!-- Tabs -->
+<div *ngIf="pantallaPequena" class="p-2">
+  <p-iconfield iconPosition="left" class="w-full mb-4">
+    <p-inputicon><i class="pi pi-search"></i></p-inputicon>
+    <input
+      pInputText
+      type="text"
+      (input)="filtrarGlobal($event)"
+      placeholder="Buscar Plantilla..."
+      class="w-full"
+    />
+  </p-iconfield>
+
+  <div class="flex flex-col gap-4">
     <div
       *ngFor="let plantilla of plantillasFiltradas"
       class="bg-white p-4 rounded shadow border"
     >
-      <div><strong>ID:</strong> {{ plantilla.pi_id }}</div>
       <div><strong>Código:</strong> {{ plantilla.pi_codigo }}</div>
       <div><strong>Nombre:</strong> {{ plantilla.pi_nombre }}</div>
-      <div><strong>Descripción:</strong> {{ plantilla.pi_descripcion }}</div>
       <div><strong>Servicio:</strong> {{ plantilla.pi_tipo_servicio }}</div>
-      <div>
-        <strong>Sistema Origen:</strong> {{ plantilla.pi_sist_orig_id }}
-      </div>
       <div><strong>URL:</strong> {{ plantilla.pi_url }}</div>
-      <div><strong>Método HTTP:</strong> {{ plantilla.pi_metodo_http }}</div>
-      <div>
-        <strong>Fecha Actividad:</strong>
-        {{ plantilla.pi_fecha_actividad | date : "dd MMM yyyy, HH:mm" }}
-      </div>
-      <div class="flex justify-end mt-2">
-        <p-button
-          icon="pi pi-pencil"
-          (onClick)="showEditar(plantilla)"
-          severity="secondary"
-          rounded
-        ></p-button>
-        <p-button
-          icon="pi pi-plus"
-          severity="success"
-          (onClick)="agregarDestinoDesdeIntegracion(plantilla)"
-          [title]="'Agregar Plantilla Destino'"
-        ></p-button>
-        @if (plantilla.pi_ind_estado === 'A') {
-        <p-button
-          icon="pi pi-trash"
-          severity="danger"
-          rounded
-          (onClick)="eliminar(plantilla)"
-        ></p-button>
-        }
+      <div class="flex justify-end mt-2 gap-2">
+        <button
+          pButton
+          type="button"
+          [text]="true"
+          [rounded]="true"
+          [severity]="'secondary'"
+          class="btn-icon"
+          pTooltip="Editar"
+          (click)="$event.stopPropagation(); showEditar(plantilla)"
+        >
+          <i class="pi pi-pencil"></i>
+        </button>
+        <!-- único botón para agregar Plantilla Destino -->
+        <button
+          pButton
+          type="button"
+          [text]="true"
+          [rounded]="true"
+          [severity]="'success'"
+          class="btn-icon"
+          pTooltip="Agregar Plantilla Destino"
+          (click)="
+            $event.stopPropagation(); agregarDestinoDesdeIntegracion(plantilla)
+          "
+        >
+          <i class="pi pi-plus"></i>
+        </button>
+        <button
+          pButton
+          type="button"
+          [text]="true"
+          [rounded]="true"
+          [severity]="'danger'"
+          class="btn-icon"
+          pTooltip="Eliminar"
+          (click)="$event.stopPropagation(); eliminar(plantilla)"
+        >
+          <i class="pi pi-trash"></i>
+        </button>
       </div>
     </div>
   </div>
-
-  <div *ngIf="!pantallaPequena" class="p-2 text-center text-gray-600">
-    <p-table
-      #dt
-      [value]="plantillasFiltradas"
-      dataKey="pi_id"
-      [paginator]="true"
-      [rows]="10"
-      [rowsPerPageOptions]="[10, 25, 50]"
-      [globalFilterFields]="[
-        'pi_codigo',
-        'pi_nombre',
-        'pi_tipo_servicio',
-        'pi_url'
-      ]"
-    >
-      <ng-template #header>
-        <tr>
-          <th>Código</th>
-          <th>Nombre</th>
-          <th>Servicio</th>
-          <th>Sistema Origen</th>
-          <th>URL</th>
-          <th>Método</th>
-          <th>Fecha</th>
-          <th>Acciones</th>
-        </tr>
-      </ng-template>
-
-      <ng-template #body let-plantilla>
-        <tr>
-          <td>{{ plantilla.pi_codigo }}</td>
-          <td>{{ plantilla.pi_nombre }}</td>
-          <td>{{ plantilla.pi_tipo_servicio }}</td>
-          <td>{{ plantilla.pi_sist_orig_id }}</td>
-          <td>{{ plantilla.pi_url }}</td>
-          <td>{{ plantilla.pi_metodo_http }}</td>
-          <td>
-            {{ plantilla.pi_fecha_actividad | date : "dd MMM yyyy, HH:mm" }}
-          </td>
-          <td>
-            <div class="flex gap-2 justify-center">
-              <p-button
-                icon="pi pi-pencil"
-                severity="secondary"
-                rounded
-                (onClick)="showEditar(plantilla)"
-              ></p-button>
-              <p-button
-                icon="pi pi-plus"
-                severity="success"
-                (onClick)="agregarDestinoDesdeIntegracion(plantilla)"
-                [title]="'Agregar Plantilla Destino'"
-              ></p-button>
-              @if (plantilla.pi_ind_estado === 'A') {
-              <p-button
-                icon="pi pi-trash"
-                severity="danger"
-                rounded
-                (onClick)="eliminar(plantilla)"
-              ></p-button>
-              }
-            </div>
-          </td>
-        </tr>
-      </ng-template>
-
-      <ng-template #emptymessage>
-        <tr>
-          <td colspan="8">No se encontraron registros.</td>
-        </tr>
-      </ng-template>
-    </p-table>
-  </div>
 </div>
-<div *ngIf="activeTab === 'destino'">
-  <app-plantilla-destino
-    [plantillaIId]="
-      modoFiltradoPorSistema ? plantillaISeleccionado?.pi_id : null
-    "
-  ></app-plantilla-destino>
+
+<div *ngIf="!pantallaPequena" class="p-2 text-center text-gray-600">
+  <p-table
+    #dt
+    [value]="plantillasFiltradas"
+    dataKey="pi_id"
+    [paginator]="true"
+    [rows]="10"
+    [rowsPerPageOptions]="[10, 25, 50]"
+    [globalFilterFields]="[
+      'pi_codigo',
+      'pi_nombre',
+      'pi_tipo_servicio',
+      'pi_url'
+    ]"
+  >
+    <ng-template #header>
+      <tr>
+        <th>Código</th>
+        <th>Nombre</th>
+        <th>Servicio</th>
+        <th>URL</th>
+        <th>Método</th>
+        <th>Fecha</th>
+        <th>Acciones</th>
+      </tr>
+    </ng-template>
+
+    <ng-template #body let-plantilla>
+      <tr>
+        <td>{{ plantilla.pi_codigo }}</td>
+        <td>{{ plantilla.pi_nombre }}</td>
+        <td>{{ plantilla.pi_tipo_servicio }}</td>
+        <td>{{ plantilla.pi_url }}</td>
+        <td>{{ plantilla.pi_metodo_http }}</td>
+        <td>
+          {{ plantilla.pi_fecha_actividad | date : "dd MMM yyyy, HH:mm" }}
+        </td>
+        <td>
+          <div class="flex gap-2 justify-center">
+            <p-button
+              icon="pi pi-pencil"
+              severity="secondary"
+              rounded
+              (onClick)="showEditar(plantilla)"
+            ></p-button>
+            <p-button
+              icon="pi pi-plus"
+              severity="success"
+              [title]="'Agregar Plantilla Destino'"
+              (onClick)="agregarDestinoDesdeIntegracion(plantilla)"
+            ></p-button>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template #emptymessage>
+      <tr>
+        <td colspan="7">No se encontraron registros.</td>
+      </tr>
+    </ng-template>
+  </p-table>
 </div>
 <p-toast></p-toast>
 

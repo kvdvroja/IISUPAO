@@ -117,17 +117,45 @@
       </div>
       <div><strong>Obligatorio:</strong> {{ campo.ct_obligatorio }}</div>
       <div class="flex justify-end mt-2">
-        <p-button
-          icon="pi pi-pencil"
-          (onClick)="showEditar(campo)"
-          severity="secondary"
-          rounded
-        ></p-button>
-        <p-button
-          label="Agregar valor"
-          icon="pi pi-plus"
-          (onClick)="abrirDialogoValores()"
-        ></p-button>
+        <button
+          pButton
+          type="button"
+          [text]="true"
+          [rounded]="true"
+          [severity]="'secondary'"
+          class="btn-icon"
+          pTooltip="Editar"
+          (click)="$event.stopPropagation(); showEditar(campo)"
+        >
+          <i class="pi pi-pencil"></i>
+        </button>
+        <button
+          pButton
+          type="button"
+          [text]="true"
+          [rounded]="true"
+          [severity]="'success'"
+          class="btn-icon"
+          pTooltip="Agregar Endpoint"
+          (click)="
+            $event.stopPropagation(); abrirDialogoValores()
+          "
+        >
+          <i class="pi pi-plus"></i>
+        </button>
+
+        <button
+          pButton
+          type="button"
+          [text]="true"
+          [rounded]="true"
+          [severity]="'danger'"
+          class="btn-icon"
+          pTooltip="Eliminar"
+          (click)="$event.stopPropagation(); eliminar()"
+        >
+          <i class="pi pi-trash"></i>
+        </button>
       </div>
     </div>
   </div>

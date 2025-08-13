@@ -101,7 +101,7 @@
           *ngFor="let p of pills"
           type="button"
           (click)="goStep(p.key)"
-          class="inline-flex items-center gap-2 rounded-md border border-gray-300 px-3 py-1.5 text-sm"
+          class="inline-flex items-center gap-2 rounded-md border border-gray-300 px-3 py-1.5 text-sm cursor-pointer"
           [ngClass]="
             currentStep === p.key
               ? 'bg-black text-white border-transparent'
@@ -115,30 +115,7 @@
     </div>
   </div>
   }
-
-  <!-- ======= SUBNAV (rayita azul bajo tabs) ======= -->
-  @if (modo === 'lista') {
-  <div class="px-6 py-3 border-b bg-gray-50">
-    <div class="flex gap-6">
-      <button
-        class="text-blue-600 border-b-2 border-blue-600 pb-2 font-medium text-sm"
-      >
-        SISTEMAS
-      </button>
-    </div>
-  </div>
-  } @if (modo === 'detalle') {
-  <div class="px-6 py-3 border-b bg-gray-50">
-    <div class="flex gap-6">
-      <button
-        class="text-blue-600 border-b-2 border-blue-600 pb-2 font-medium text-sm"
-      >
-        {{ tituloStepActual }}
-      </button>
-    </div>
-  </div>
-  }
-
+  
   <!-- ======= CONTENIDO: LISTA O DETALLE ======= -->
   @if (modo === 'lista') {
   <div class="p-2 text-gray-600">
@@ -321,7 +298,8 @@
       </ng-container>
 
       <ng-container *ngSwitchCase="'destino'">
-        <app-plantillas [tabFromParent]="'destino'"></app-plantillas>
+        <app-plantilla-destino #pdCmp [sistemasLista]="sistemas">
+        </app-plantilla-destino>
       </ng-container>
 
       <ng-container *ngSwitchCase="'campos'">

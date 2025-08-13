@@ -29,6 +29,7 @@ import { Endpoints } from '../endpoints/endpoints';
 import { Plantillas } from '../plantillas/plantillas';
 import { TransformacionCampos } from '../transformacion-campos/transformacion-campos';
 import { TableRowSelectEvent } from 'primeng/table';
+import { PlantillaDestino } from '../plantilla-destino/plantilla-destino';
 
 type StepKey = 'endpoints' | 'integracion' | 'destino' | 'campos' | 'valores';
 
@@ -51,6 +52,7 @@ type StepKey = 'endpoints' | 'integracion' | 'destino' | 'campos' | 'valores';
     FormsModule,
     Endpoints,
     Plantillas,
+    PlantillaDestino,
     TransformacionCampos,
   ],
   templateUrl: './sistemas.html',

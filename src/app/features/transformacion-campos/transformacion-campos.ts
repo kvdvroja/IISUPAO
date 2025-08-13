@@ -365,5 +365,7 @@ export class TransformacionCampos implements OnInit, OnChanges {
 abrirDialogoValores(): void {
   this.valoresComponent?.abrirAgregar();
 }
+
+eliminar(): void {}
   
 }
