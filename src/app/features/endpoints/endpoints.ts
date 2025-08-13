@@ -64,6 +64,7 @@ export class Endpoints implements OnInit {
       value: s.sistema_id,
     }));
   }
+  selectedEndpoint: EndpointI | null = null;
   endpointService = inject(Endpoint);
   cdRef = inject(ChangeDetectorRef);
   messageService = inject(MessageService);
@@ -121,9 +122,7 @@ export class Endpoints implements OnInit {
     this.dt.filterGlobal(input.value, 'contains');
   }
 
-  exportarDatos() {
-    
-  }
+  exportarDatos() {}
 
   get endpointsFiltrados(): any[] {
     if (!this.sistemaId) return this.endpoint;
@@ -260,5 +259,20 @@ export class Endpoints implements OnInit {
       return;
     }
     this.plantCmp.abrirAgregarDesdeEndpoint(ep.se_id);
+  }
+
+  onEndpointSelected(ep: EndpointI) {
+    this.selectedEndpoint = ep;
+    setTimeout(
+      () =>
+        document
+          .getElementById('plantillasPorEndpoint')
+          ?.scrollIntoView({ behavior: 'smooth' }),
+      0
+    );
+  }
+
+  limpiarSeleccion() {
+    this.selectedEndpoint = null;
   }
 }

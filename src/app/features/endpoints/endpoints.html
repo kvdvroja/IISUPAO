@@ -1,17 +1,30 @@
 <div
-  class="flex items-center justify-between border-b border-gray-200 p-3 bg-white"
+  class="flex rounded items-center justify-between border-b border-gray-200 p-3 bg-white"
 >
   <!-- Título -->
-  <div class="flex-1 px-4">
-    <h2 class="text-2xl font-bold text-gray-800">
-      ENDPOINTS
-    </h2>
-    <p class="text-sm text-gray-500">
-      Gestión de endpoints
-    </p>
+  <div class="flex-1 flex">
+    @if (selectedEndpoint) {
+    <button
+      pButton
+      type="button"
+      [text]="true"
+      class="h-8 w-8 flex items-center justify-center"
+      (click)="limpiarSeleccion()"
+      title="Volver"
+    >
+      <i class="pi pi-chevron-left"></i>
+    </button>
+    }
+    <div class="px-2">
+      <h2 class="text-xl font-bold text-gray-800">
+        {{ !selectedEndpoint ? "ENDPOINTS" : "ENDPOINT SELECCIONADO" }}
+      </h2>
+      <p class="text-sm text-gray-500">Gestión de endpoints</p>
+    </div>
   </div>
 
   <!-- Acciones -->
+  @if (!selectedEndpoint) {
   <div class="flex items-center space-x-2">
     <p-splitButton
       label="Acciones"
@@ -43,8 +56,9 @@
       />
     </p-iconfield>
   </div>
+  }
 </div>
-<div *ngIf="pantallaPequena" class="p-2">
+<div *ngIf="pantallaPequena && !selectedEndpoint" class="p-2">
   <p-iconfield iconPosition="left" class="w-full mb-4">
     <p-inputicon>
       <i class="pi pi-search"></i>
@@ -58,7 +72,7 @@
     />
   </p-iconfield>
 </div>
-<div *ngIf="pantallaPequena" class="flex flex-col gap-4">
+<div *ngIf="pantallaPequena && !selectedEndpoint" class="flex flex-col gap-4">
   <div
     *ngFor="let endpoint of endpointsFiltrados"
     class="bg-white p-4 rounded shadow border"
@@ -95,11 +109,19 @@
     </div>
   </div>
 </div>
-<div *ngIf="!pantallaPequena" class="p-2 text-center text-gray-600">
+<div
+  *ngIf="!pantallaPequena && !selectedEndpoint"
+  class="p-2 text-center text-gray-600"
+>
   <p-table
     #dt
     [value]="endpointsFiltrados"
     dataKey="se_id"
+    selectionMode="single"
+    [(selection)]="selectedEndpoint"
+    [metaKeySelection]="false"
+    rowHover
+    (onRowSelect)="onEndpointSelected($event.data)"
     [paginator]="true"
     [rows]="10"
     [rowsPerPageOptions]="[10, 25, 50]"
@@ -124,7 +146,7 @@
     </ng-template>
 
     <ng-template #body let-endpoint>
-      <tr>
+      <tr [pSelectableRow]="endpoint">
         <td>{{ endpoint.se_id }}</td>
         <td>{{ endpoint.se_sistema_id }}</td>
         <td>{{ endpoint.se_nombre }}</td>
@@ -183,6 +205,42 @@
       </tr>
     </ng-template>
   </p-table>
+</div>
+<div *ngIf="selectedEndpoint" class="px-6 pt-6" id="plantillasPorEndpoint">
+  <div class="rounded-lg border bg-white">
+    <div class="p-5 border-b flex items-center justify-between">
+      <div>
+        <div class="flex items-center gap-2 text-lg font-semibold">
+          <span class="text-blue-600">{{ selectedEndpoint.se_nombre }}</span>
+          <span class="px-2 py-0.5 text-xs rounded-full border text-gray-700">
+            ID: {{ selectedEndpoint.se_id }}
+          </span>
+        </div>
+        <p class="mt-1 text-gray-700 truncate">
+          {{ selectedEndpoint.se_url }} • {{ selectedEndpoint.se_metodo_http }}
+        </p>
+        <p class="text-sm text-gray-500">
+          Sistema: {{ selectedEndpoint.se_sistema_id }} • Estado:
+          {{ selectedEndpoint.se_ind_estado || "A" }}
+        </p>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <p-button
+          label="Nueva plantilla"
+          icon="pi pi-plus"
+          severity="success"
+          (click)="crearPlantillaIntegracion(selectedEndpoint)"
+        ></p-button>
+      </div>
+    </div>
+
+    <!-- NUEVO: Plantillas Integración filtradas por este endpoint -->
+    <div class="p-5">
+      <app-plantillas [endpointIdFilter]="selectedEndpoint.se_id">
+      </app-plantillas>
+    </div>
+  </div>
 </div>
 <p-toast></p-toast>
 <p-dialog

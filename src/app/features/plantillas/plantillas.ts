@@ -65,6 +65,7 @@ export class Plantillas implements OnInit, OnChanges {
   @ViewChild('dt') dt!: Table;
   @ViewChild(PlantillaDestino) plantillasDComponent!: PlantillaDestino;
   @Input() tabFromParent: 'integracion' | 'destino' | null = null;
+  @Input() endpointIdFilter: string | number | null = null;
   @ViewChild('pdCmp') pdCmp!: PlantillaDestino;
   @Output() stepNavigate = new EventEmitter<string>();
   @Output() stepProgress = new EventEmitter<number>();
@@ -158,6 +159,10 @@ export class Plantillas implements OnInit, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
+    // Si el filtro cambia y ya tenemos data, solo recalcula el getter (no hace falta recargar)
+    if (changes['endpointIdFilter']) {
+      // opcional: this.dt?.clear(); // limpiar filtros de tabla al cambiar el endpoint
+    }
     if (changes['tabFromParent'] && this.tabFromParent) {
       this.goTab(this.tabFromParent);
     }
@@ -238,7 +243,11 @@ export class Plantillas implements OnInit, OnChanges {
   }
 
   get plantillasFiltradas(): Plantilla_IntegracionI[] {
-    return this.plantillas;
+    if (this.endpointIdFilter == null || this.endpointIdFilter === '') {
+      return this.plantillas;
+    }
+    const id = String(this.endpointIdFilter);
+    return this.plantillas.filter((p) => String(p.pi_sist_orig_id) === id);
   }
 
   showEditar(plantilla: Plantilla_IntegracionI): void {
@@ -570,10 +579,10 @@ export class Plantillas implements OnInit, OnChanges {
 
   agregarDestinoDesdeIntegracion(row: Plantilla_IntegracionI): void {
     const planInteId = row.pi_id;
-    const sistemaId  = row.pi_sist_id || row.pi_sist_orig_id; // el que corresponda en tu modelo
+    const sistemaId = row.pi_sist_id || row.pi_sist_orig_id; // el que corresponda en tu modelo
     this.pdCmp.abrirAgregarPreconfigurado({
       planInteId: planInteId as any,
-      sistId: sistemaId as any
+      sistId: sistemaId as any,
     });
   }
 }

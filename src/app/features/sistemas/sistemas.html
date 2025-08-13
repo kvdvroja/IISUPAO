@@ -95,7 +95,7 @@
     </div>
 
     <!-- Pills / jerarquía (sin cambios) -->
-    <div class="rounded-lg my-4 bg-white shadow-2xl">
+    <!-- <div class="rounded-lg my-4 bg-white shadow-2xl">
       <div class="px-4 py-4 flex flex-wrap gap-2">
         <button
           *ngFor="let p of pills"
@@ -112,10 +112,10 @@
           {{ p.title }}
         </button>
       </div>
-    </div>
+    </div> -->
   </div>
   }
-  
+
   <!-- ======= CONTENIDO: LISTA O DETALLE ======= -->
   @if (modo === 'lista') {
   <div class="p-2 text-gray-600">
@@ -283,7 +283,7 @@
 
   <!-- DETALLE: render del step actual -->
   @if (modo === 'detalle') {
-  <div class="p-2">
+  <div class="py-2">
     <ng-container [ngSwitch]="currentStep">
       <ng-container *ngSwitchCase="'endpoints'">
         <app-endpoints
