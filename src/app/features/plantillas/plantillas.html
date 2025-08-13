@@ -1,6 +1,5 @@
-<div
-  class="flex items-center justify-between border-b border-gray-200 p-3 bg-white"
->
+<div *ngIf="!selectedPlantilla; else headerConSeleccion"
+     class="flex items-center justify-between border-b border-gray-200 p-3 bg-white">
   <div class="flex-1">
     <h2 class="text-2xl font-bold text-gray-800">PLANTILLA INTEGRACIÓN</h2>
     <p class="text-sm text-gray-500">Gestión de plantillas de integración</p>
@@ -12,42 +11,83 @@
   </div>
 
   <div class="flex items-center space-x-2">
-    <p-splitButton
-      label="Acciones"
-      icon="pi pi-cog"
-      [model]="accionesDropdown"
-      class="p-button-outlined p-button-sm"
-    ></p-splitButton>
+    <p-splitButton label="Acciones" icon="pi pi-cog"
+      [model]="accionesDropdown" class="p-button-outlined p-button-sm"></p-splitButton>
 
-    <!-- <p-button
-      label="Nuevo"
-      icon="pi pi-plus"
-      class="p-button-sm"
-      (click)="AgregarPlantilla()"
-    ></p-button> -->
-
-    <p-button
-      label="Limpiar"
-      [outlined]="true"
-      icon="pi pi-filter-slash"
-      (click)="dt.clear()"
-      class="p-button-sm"
-    ></p-button>
+    <p-button label="Limpiar" [outlined]="true" icon="pi pi-filter-slash"
+      (click)="dt.clear()" class="p-button-sm"></p-button>
 
     <p-iconfield iconPosition="left" class="w-64">
       <p-inputicon><i class="pi pi-search"></i></p-inputicon>
-      <input
-        pInputText
-        (input)="onBuscarGlobal($event)"
-        placeholder="Buscar..."
-        class="w-full"
-      />
+      <input pInputText (input)="onBuscarGlobal($event)" placeholder="Buscar..." class="w-full"/>
     </p-iconfield>
   </div>
 </div>
 
+<!-- HEADER cuando SÍ hay plantilla seleccionada -->
+<ng-template #headerConSeleccion>
+  <div class="flex items-center justify-between border-b border-gray-200 p-3 bg-white">
+    <div class="flex items-center gap-2">
+      <p-button icon="pi pi-arrow-left" [text]="true"
+        (onClick)="limpiarSeleccionPlantilla()" pTooltip="Volver a plantillas"></p-button>
+      <div>
+        <h2 class="text-2xl font-bold text-gray-800">PLANTILLA DE INTEGRACIÓN SELECCIONADA</h2>
+        <p class="text-sm text-gray-500">Plantillas destino asociadas</p>
+      </div>
+    </div>
+
+    <div class="flex items-center space-x-2">
+      <p-splitButton label="Acciones" icon="pi pi-cog"
+        [model]="accionesDropdown" class="p-button-outlined p-button-sm"></p-splitButton>
+      <p-button label="Nuevo destino" icon="pi pi-plus" class="p-button-sm"
+        (onClick)="pdCmp?.abrirAgregarPreconfigurado({
+          planInteId: selectedPlantilla?.pi_id,
+          sistId: selectedPlantilla?.pi_sist_id || selectedPlantilla?.pi_sist_orig_id
+        })"></p-button>
+    </div>
+  </div>
+</ng-template>
+
+<div *ngIf="selectedPlantilla" class="px-6 pt-6" id="destinosPorPlantilla">
+  <div class="rounded-lg border bg-white">
+    <div class="p-5 border-b bg-blue-50 flex items-center justify-between">
+      <div>
+        <div class="flex items-center gap-2 text-lg font-semibold">
+          <span class="text-blue-600">{{ selectedPlantilla.pi_nombre }}</span>
+          <span class="px-2 py-0.5 text-xs rounded-full border text-gray-700">
+            {{ selectedPlantilla.pi_codigo || ('ID:'+selectedPlantilla.pi_id) }}
+          </span>
+        </div>
+        <p class="mt-1 text-gray-700 truncate">
+          <code class="px-2 py-0.5 rounded bg-white/70">{{ selectedPlantilla.pi_url }}</code>
+          • <span class="px-2 py-0.5 text-xs rounded-full border">{{ selectedPlantilla.pi_metodo_http }}</span>
+        </p>
+        <p class="text-sm text-gray-600">
+          Servicio: <span class="px-2 py-0.5 text-xs rounded-full border">{{ selectedPlantilla.pi_tipo_servicio }}</span>
+          • Estado: <span class="px-2 py-0.5 text-xs rounded-full border">{{ selectedPlantilla.pi_ind_estado || 'A' }}</span>
+        </p>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <p-button label="Nuevo destino" icon="pi pi-plus" severity="success"
+          (click)="pdCmp?.abrirAgregarPreconfigurado({
+            planInteId: selectedPlantilla.pi_id,
+            sistId: selectedPlantilla.pi_sist_id || selectedPlantilla.pi_sist_orig_id
+          })"></p-button>
+        <p-button label="Quitar selección" icon="pi pi-times" [outlined]="true"
+          (click)="limpiarSeleccionPlantilla()"></p-button>
+      </div>
+    </div>
+
+    <div class="p-5">
+      <!-- pasa el ID de la plantilla para filtrar destinos -->
+      <app-plantilla-destino #pdCmp [plantillaIId]="selectedPlantilla.pi_id"></app-plantilla-destino>
+    </div>
+  </div>
+</div>
+
 <!-- Tabs -->
-<div *ngIf="pantallaPequena" class="p-2">
+<div *ngIf="pantallaPequena && !selectedPlantilla" class="p-2">
   <p-iconfield iconPosition="left" class="w-full mb-4">
     <p-inputicon><i class="pi pi-search"></i></p-inputicon>
     <input
@@ -113,21 +153,20 @@
   </div>
 </div>
 
-<div *ngIf="!pantallaPequena" class="p-2 text-center text-gray-600">
+<div *ngIf="!pantallaPequena && !selectedPlantilla" class="p-2 text-center text-gray-600">
   <p-table
     #dt
     [value]="plantillasFiltradas"
     dataKey="pi_id"
+    selectionMode="single"
+    [(selection)]="selectedPlantilla"
+    [metaKeySelection]="false"
+    rowHover
+    (onRowSelect)="onPlantillaSelected($event.data)"
     [paginator]="true"
     [rows]="10"
     [rowsPerPageOptions]="[10, 25, 50]"
-    [globalFilterFields]="[
-      'pi_codigo',
-      'pi_nombre',
-      'pi_tipo_servicio',
-      'pi_url'
-    ]"
-  >
+    [globalFilterFields]="['pi_codigo','pi_nombre','pi_tipo_servicio','pi_url']">
     <ng-template #header>
       <tr>
         <th>Código</th>
@@ -141,7 +180,7 @@
     </ng-template>
 
     <ng-template #body let-plantilla>
-      <tr>
+      <tr [pSelectableRow]="plantilla">
         <td>{{ plantilla.pi_codigo }}</td>
         <td>{{ plantilla.pi_nombre }}</td>
         <td>{{ plantilla.pi_tipo_servicio }}</td>

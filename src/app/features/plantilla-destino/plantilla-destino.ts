@@ -51,7 +51,7 @@ import { TransformacionCampos } from '../transformacion-campos/transformacion-ca
 export class PlantillaDestino implements OnInit {
   @ViewChild('dt') dt!: Table;
   @ViewChild('transfCmp') transfCmp!: TransformacionCampos;
-  @Input() plantillaIId!: string | null | undefined;
+  @Input() plantillaIId!: string | number | null | undefined;
   @Input() set sistemasLista(value: SistemasI[] | null | undefined) {
     if (!value) {
       this.sistemasOptions = [];
@@ -169,7 +169,13 @@ export class PlantillaDestino implements OnInit {
     });
   }
   get datosFiltrados(): Plantilla_DestinoI[] {
-    return this.plantillaDestinos;
+    if (this.plantillaIId == null || this.plantillaIId === '') {
+      return this.plantillaDestinos;
+    }
+    const id = String(this.plantillaIId);
+    return this.plantillaDestinos.filter(
+      (d) => String(d.pd_plan_inte_id) === id
+    );
   }
 
   filtrarGlobal(event: Event) {

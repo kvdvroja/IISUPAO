@@ -72,6 +72,7 @@ export class Plantillas implements OnInit, OnChanges {
   endpointService = inject(Endpoint);
   colasService = inject(ColaS);
   colas: ColaI[] = [];
+  selectedPlantilla: Plantilla_IntegracionI | null = null;
   colasOptions: { label: string; value: string | number }[] = [];
   endpoints: EndpointI[] = [];
   endpointsOptions: { label: string; value: string | number }[] = [];
@@ -158,10 +159,22 @@ export class Plantillas implements OnInit, OnChanges {
     this.cargarPlantillas();
   }
 
+onPlantillaSelected(
+  data: Plantilla_IntegracionI | Plantilla_IntegracionI[] | undefined
+): void {
+  if (!data || Array.isArray(data)) return;
+  this.selectedPlantilla = data;
+  setTimeout(() =>
+    document.getElementById('destinosPorPlantilla')
+      ?.scrollIntoView({ behavior: 'smooth' }), 0);
+}
+
+  limpiarSeleccionPlantilla() {
+    this.selectedPlantilla = null;
+  }
+
   ngOnChanges(changes: SimpleChanges): void {
-    // Si el filtro cambia y ya tenemos data, solo recalcula el getter (no hace falta recargar)
     if (changes['endpointIdFilter']) {
-      // opcional: this.dt?.clear(); // limpiar filtros de tabla al cambiar el endpoint
     }
     if (changes['tabFromParent'] && this.tabFromParent) {
       this.goTab(this.tabFromParent);
