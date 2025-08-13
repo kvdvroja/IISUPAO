@@ -60,10 +60,8 @@ export class Sistemas implements OnInit, OnChanges, AfterViewInit {
   @ViewChild('dt') dt!: Table;
   @ViewChild('endpointsCmp', { static: false }) endpointsComponent!: Endpoints;
 
-  // Modo de la vista
   modo: 'lista' | 'detalle' = 'lista';
 
-  // Pasos internos (solo en detalle)
   steps = [
     {
       key: 'endpoints' as StepKey,
@@ -107,16 +105,13 @@ export class Sistemas implements OnInit, OnChanges, AfterViewInit {
     return this.steps[this.currentIndex].desc;
   }
 
-  // Pills visibles (todas en detalle)
   get pills() {
     return this.steps;
   }
 
-  // Data
   sistemas: SistemasI[] = [];
   selectedSystem: SistemasI | null = null;
 
-  // UI
   mostrarDialogoAgregar = false;
   registroExitoso = false;
   editando = false;
@@ -158,7 +153,6 @@ onRowSelectedEvent(ev: TableRowSelectEvent): void {
   ngOnChanges(_: SimpleChanges): void {}
   ngAfterViewInit(): void {}
 
-  // ===== Lista =====
   get sistemasFiltradas(): SistemasI[] {
     return this.sistemas;
   }
@@ -167,13 +161,11 @@ onRowSelectedEvent(ev: TableRowSelectEvent): void {
     const value = (event.target as HTMLInputElement).value || '';
     if (this.modo === 'lista') this.dt?.filterGlobal(value, 'contains');
     else {
-      // en detalle: filtra la tabla del hijo Endpoints si aplica
       this.endpointsComponent?.filtrarDesdePadre?.(value);
     }
   }
 
   exportarDatos() {
-    // Implementar lógica de exportación según sea necesario
     this.messageService.add({
       severity: 'info',
       summary: 'Exportar',
@@ -186,7 +178,6 @@ onRowSelectedEvent(ev: TableRowSelectEvent): void {
     else {
       if (this.currentStep === 'endpoints')
         this.endpointsComponent?.cargarEndpoints();
-      // otros steps pueden tener sus propios refrescos
     }
   }
 
@@ -306,7 +297,7 @@ onRowSelectedEvent(ev: TableRowSelectEvent): void {
   entrarADetalle(s: SistemasI) {
     this.selectedSystem = s;
     this.modo = 'detalle';
-    this.currentIndex = 0; // abre en ENDPOINTS
+    this.currentIndex = 0;
   }
 
   volverALaLista() {
@@ -329,12 +320,9 @@ onRowSelectedEvent(ev: TableRowSelectEvent): void {
   onNuevoEnStepActual() {
     if (this.currentStep === 'endpoints')
       this.endpointsComponent?.AgregarEndpoint?.();
-    // para otros steps, abre el modal correspondiente si aplica
   }
 
-  // Quick helper para “Agregar Endpoint” desde la lista
   agregarDesdeEndpointsT(sistema_id: string) {
-    // si ya estás en detalle de otro sistema, lo cambiamos:
     if (!this.selectedSystem || this.selectedSystem.sistema_id !== sistema_id) {
       const s = this.sistemas.find((x) => x.sistema_id === sistema_id);
       if (s) this.entrarADetalle(s);

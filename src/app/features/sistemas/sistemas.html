@@ -46,47 +46,51 @@
   </div>
 
   <!-- ======= TARJETA + PILLS (solo en DETALLE) ======= -->
-   @if (modo === 'detalle' && selectedSystem) {
+  @if (modo === 'detalle' && selectedSystem) {
   <div>
     <!-- Tarjeta del sistema -->
-    <div class="rounded-lg bg-white shadow-2xl">
-      <div class="p-5">
-        <div class="flex items-center gap-3 text-lg font-semibold">
-          <button
-            pButton
-            type="button"
-            [text]="true"
-            class="h-8 w-8 flex items-center justify-center"
-            (click)="volverALaLista()"
-            title="Volver"
-          >
-            <i class="pi pi-chevron-left"></i>
-          </button>
+    <div class="rounded-lg bg-white shadow-2xl flex flex-row p-4">
+      <button
+        pButton
+        type="button"
+        [text]="true"
+        class="h-8 w-8 flex items-center justify-center"
+        (click)="volverALaLista()"
+        title="Volver"
+      >
+        <i class="pi pi-chevron-left"></i>
+      </button>
+      <div class="flex flex-col">
+        <div class="px-2">
+          <div class="flex items-center gap-3 text-xl font-semibold">
+            <span class="text-blue-600">{{
+              selectedSystem.sistema_nombre
+            }}</span>
+            <span class="px-2 py-0.5 text-xs rounded-full border text-gray-700">
+              {{ selectedSystem.sistema_id }}
+            </span>
+          </div>
 
-          <span class="text-blue-600">{{ selectedSystem.sistema_nombre }}</span>
-          <span class="px-2 py-0.5 text-xs rounded-full border text-gray-700">
-            {{ selectedSystem.sistema_id }}
-          </span>
+          <p class="mt-1 text-gray-700">
+            {{ selectedSystem.sistema_descripcion }}
+          </p>
         </div>
 
-        <p class="mt-1 text-gray-700">
-          {{ selectedSystem.sistema_descripcion }}
-        </p>
-      </div>
-
-      <div class="pb-5 px-5 text-sm text-gray-600 flex items-center gap-6">
-        <span
-          >Estado:
-          <span class="px-2 py-0.5 rounded-full border">
-            {{ selectedSystem.sistema_ind_estado || "A" }}
+        <div class="py-2 px-2 text-sm text-gray-600 flex items-center gap-6">
+          <span
+            >Estado:
+            <span class="px-2 py-0.5 rounded-full border">
+              {{ selectedSystem.sistema_ind_estado || "A" }}
+            </span>
           </span>
-        </span>
-        <span>
-          Última Actividad:
-          {{
-            selectedSystem.sistema_fecha_actividad | date : "dd MMM yyyy, HH:mm"
-          }}
-        </span>
+          <span>
+            Última Actividad:
+            {{
+              selectedSystem.sistema_fecha_actividad
+                | date : "dd MMM yyyy, HH:mm"
+            }}
+          </span>
+        </div>
       </div>
     </div>
 
@@ -109,7 +113,8 @@
         </button>
       </div>
     </div>
-  </div>}
+  </div>
+  }
 
   <!-- ======= SUBNAV (rayita azul bajo tabs) ======= -->
   @if (modo === 'lista') {
