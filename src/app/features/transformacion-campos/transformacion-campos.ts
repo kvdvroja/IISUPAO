@@ -49,7 +49,6 @@ import { Plantilla_DestinoI } from '../../core/interfaces/Plantilla_Destino';
     TransformacionValores,
     SelectModule,
   ],
-  providers: [MessageService, ConfirmationService],
   templateUrl: './transformacion-campos.html',
   styleUrl: './transformacion-campos.css',
 })

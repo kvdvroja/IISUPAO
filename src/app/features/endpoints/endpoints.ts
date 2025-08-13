@@ -26,6 +26,7 @@ import { inject } from '@angular/core';
 import { SistemasI } from '../../core/interfaces/Sistemas';
 import { Endpoint } from '../../core/services/mant/endpoint/endpoint';
 import { Output, EventEmitter } from '@angular/core';
+import { SplitButtonModule } from 'primeng/splitbutton';
 import { Plantillas } from '../plantillas/plantillas';
 
 @Component({
@@ -46,6 +47,7 @@ import { Plantillas } from '../plantillas/plantillas';
     Toast,
     SelectModule,
     Plantillas,
+    SplitButtonModule,
   ],
   templateUrl: './endpoints.html',
   styleUrl: './endpoints.css',
@@ -95,6 +97,21 @@ export class Endpoints implements OnInit {
     se_usua_id: '',
     se_ind_estado: '',
   };
+
+  accionesDropdown = [
+    {
+      label: 'Refrescar',
+      icon: 'pi pi-refresh',
+      command: () => {
+        this.cargarEndpoints;
+      },
+    },
+    {
+      label: 'Exportar',
+      icon: 'pi pi-download',
+      command: () => this.exportarDatos(),
+    },
+  ];
   ngOnInit(): void {
     this.cargarEndpoints();
   }
@@ -102,6 +119,10 @@ export class Endpoints implements OnInit {
   filtrarGlobal(event: Event) {
     const input = event.target as HTMLInputElement;
     this.dt.filterGlobal(input.value, 'contains');
+  }
+
+  exportarDatos() {
+    
   }
 
   get endpointsFiltrados(): any[] {
@@ -115,6 +136,11 @@ export class Endpoints implements OnInit {
     if (this.dt) {
       this.dt.filterGlobal(valor, 'contains');
     }
+  }
+
+  onBuscarGlobal(event: Event): void {
+    const input = (event.target as HTMLInputElement).value;
+    this.dt.filterGlobal(input, 'contains');
   }
 
   cargarEndpoints(): void {
@@ -228,11 +254,11 @@ export class Endpoints implements OnInit {
       },
     });
   }
-crearPlantillaIntegracion(ep: EndpointI): void {
-  if (!this.plantCmp) {
-    console.warn('plantCmp aún no está disponible');
-    return;
+  crearPlantillaIntegracion(ep: EndpointI): void {
+    if (!this.plantCmp) {
+      console.warn('plantCmp aún no está disponible');
+      return;
+    }
+    this.plantCmp.abrirAgregarDesdeEndpoint(ep.se_id);
   }
-  this.plantCmp.abrirAgregarDesdeEndpoint(ep.se_id);
-}
 }

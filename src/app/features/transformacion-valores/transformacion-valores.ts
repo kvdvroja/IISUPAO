@@ -43,8 +43,7 @@ import { TransformacionCampoS } from '../../core/services/mant/transformacion-ca
     Toast,
     ConfirmDialogModule,
     SelectModule,
-  ],
-  providers: [ConfirmationService, MessageService],
+  ]
 })
 export class TransformacionValores implements OnInit {
   @ViewChild('dt') dt!: Table;

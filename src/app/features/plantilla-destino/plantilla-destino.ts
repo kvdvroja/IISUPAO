@@ -44,8 +44,7 @@ import { TransformacionCampos } from '../transformacion-campos/transformacion-ca
     SelectModule,
     IconField,
     TransformacionCampos,
-  ],
-  providers: [MessageService, ConfirmationService],
+  ]
 })
 export class PlantillaDestino implements OnInit {
   @ViewChild('dt') dt!: Table;

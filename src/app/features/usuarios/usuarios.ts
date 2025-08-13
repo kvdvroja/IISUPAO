@@ -42,7 +42,6 @@ import { SelectModule } from 'primeng/select';
     Toast,
     SelectModule,
   ],
-  providers: [MessageService, ConfirmationService],
   templateUrl: './usuarios.html',
   styleUrl: './usuarios.css',
 })

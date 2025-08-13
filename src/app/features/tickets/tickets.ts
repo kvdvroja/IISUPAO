@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
-import { RouterModule } from '@angular/router';
+import { RouterLink, RouterModule } from '@angular/router';
 import { Sidebar } from '../../shared/components/sidebar/sidebar';
 import { Navbar } from '../../shared/components/navbar/navbar';
 import { CommonModule } from '@angular/common';
@@ -11,7 +11,6 @@ import { TagModule } from 'primeng/tag';
 import { TicketI } from '../../core/interfaces/Ticket';
 import { Router } from '@angular/router';
 import { TicketsS } from '../../core/services/tickets/tickets';
-import { PaginatorModule } from 'primeng/paginator';
 
 @Component({
   selector: 'app-tickets',
@@ -24,8 +23,7 @@ import { PaginatorModule } from 'primeng/paginator';
     SelectModule,
     TableModule,
     TagModule,
-    FormsModule,
-    PaginatorModule,
+    FormsModule
   ],
   templateUrl: './tickets.html',
   styleUrl: './tickets.css',
@@ -39,8 +37,8 @@ export class Tickets implements OnInit {
   searchTerm = '';
   estadoFiltro = null;
   prioridadFiltro = null;
-  rows: number = 10; 
-  first: number = 0; 
+  rows: number = 10;
+  first: number = 0;
 
   estadoOptions = [
     { label: 'Todos los estados', value: null },
@@ -72,28 +70,51 @@ export class Tickets implements OnInit {
     });
   }
 
+  formatEstado(estado?: string): string {
+    return (estado ?? '').split('_').join(' ').trim() || 'SIN ESTADO';
+  }
+
+  // Si tu prioridad es número (1–5) o string (“ALTA/MEDIA/BAJA”), manejamos ambos
+  formatPrioridad(prio: string | number | null | undefined): string {
+    if (prio == null) return 'SIN PRIORIDAD';
+    if (typeof prio === 'number') return `PRIORIDAD ${prio}`;
+    return prio.toString().toUpperCase();
+  }
+
   getEstadoCount(estado: string): number {
-    return this.tickets.filter((t) => t.ticket_estado === estado).length;
+    return this.tickets.filter((t) => t.ticket_ind_estado === estado).length;
   }
 
-  getEstadoColor(estado: string): string {
-    return (
-      {
-        abierto: 'danger',
-        en_proceso: 'warning',
-        cerrado: 'success',
-      }[estado] || 'info'
-    );
+  getEstadoColor(estado?: string): string {
+    const e = (estado ?? '').toLowerCase();
+    const map: Record<string, string> = {
+      pendiente: 'warning',
+      cancelado: 'danger',
+      cerrado: 'success',
+      abierto: 'info',
+      en_proceso: 'info',
+    };
+    return map[e] ?? 'info';
   }
 
-  getPrioridadColor(prioridad: string): string {
-    return (
-      {
-        alta: 'danger',
-        media: 'info',
-        baja: 'success',
-      }[prioridad] || 'secondary'
-    );
+  getPrioridadColor(prio: string | number | null | undefined): string {
+    if (prio == null) return 'info';
+
+    // Si es número 1–5 (ajusta a tu criterio)
+    if (typeof prio === 'number') {
+      if (prio <= 2) return 'danger'; // alta
+      if (prio === 3) return 'warning'; // media
+      return 'success'; // baja
+    }
+
+    // Si llega como texto
+    const p = prio.toString().toLowerCase();
+    const map: Record<string, string> = {
+      alta: 'danger',
+      media: 'warning',
+      baja: 'success',
+    };
+    return map[p] ?? 'info';
   }
 
   filteredTickets() {
@@ -109,7 +130,7 @@ export class Tickets implements OnInit {
         .includes(this.searchTerm.toLowerCase());
 
       const matchesEstado =
-        !this.estadoFiltro || t.ticket_estado === this.estadoFiltro;
+        !this.estadoFiltro || t.ticket_ind_estado === this.estadoFiltro;
       const matchesPrioridad =
         !this.prioridadFiltro || t.ticket_prioridad === this.prioridadFiltro;
 
@@ -121,7 +142,7 @@ export class Tickets implements OnInit {
   }
 
   onPageChange(event: any): void {
-    this.first = event.first; 
+    this.first = event.first;
     this.rows = event.rows;
     this.cargarTickets();
   }

@@ -58,7 +58,6 @@ import { ColaI } from '../../core/interfaces/Cola';
     SplitButtonModule,
     PlantillaDestino,
   ],
-  providers: [MessageService, ConfirmationService],
   templateUrl: './plantillas.html',
   styleUrl: './plantillas.css',
 })

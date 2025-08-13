@@ -8,7 +8,7 @@ export interface TicketI {
   ticket_cant_registrado: string;
   ticket_cant_receptor: string;
   ticket_fecha_culminación: string;
-  ticket_estado: string;
+  ticket_ind_estado: string;
   ticket_nombre: string;
   ticket_fecha_inicio: string;
   ticket_observacion: string;

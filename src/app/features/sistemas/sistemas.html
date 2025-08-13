@@ -1,6 +1,9 @@
 <!-- ======= ENCABEZADO ======= -->
-<div class="bg-white border rounded-t-lg">
-  <div class="flex items-center justify-between" [ngClass]="{ 'p-4 border-b': modo === 'lista' }">
+<div class="bg-white rounded-t-lg">
+  <div
+    class="flex items-center justify-between"
+    [ngClass]="{ 'p-4 border-b': modo === 'lista' }"
+  >
     <!-- Título y subtítulo dinámicos -->
     <div class="flex items-center gap-2" *ngIf="modo === 'lista'">
       <h2 class="text-xl font-semibold">SISTEMAS</h2>
@@ -43,11 +46,11 @@
   </div>
 
   <!-- ======= TARJETA + PILLS (solo en DETALLE) ======= -->
-  <!-- ======= TARJETA + PILLS (solo en DETALLE) ======= -->
-  <div *ngIf="modo === 'detalle' && selectedSystem" class="px-6 pt-6">
+   @if (modo === 'detalle' && selectedSystem) {
+  <div>
     <!-- Tarjeta del sistema -->
-    <div class="rounded-lg border bg-white">
-      <div class="p-5 border-b">
+    <div class="rounded-lg bg-white shadow-2xl">
+      <div class="p-5">
         <div class="flex items-center gap-3 text-lg font-semibold">
           <button
             pButton
@@ -71,7 +74,7 @@
         </p>
       </div>
 
-      <div class="p-5 text-sm text-gray-600 flex items-center gap-6">
+      <div class="pb-5 px-5 text-sm text-gray-600 flex items-center gap-6">
         <span
           >Estado:
           <span class="px-2 py-0.5 rounded-full border">
@@ -88,13 +91,13 @@
     </div>
 
     <!-- Pills / jerarquía (sin cambios) -->
-    <div class="border rounded-lg mt-6 bg-white">
+    <div class="rounded-lg my-4 bg-white shadow-2xl">
       <div class="px-4 py-4 flex flex-wrap gap-2">
         <button
           *ngFor="let p of pills"
           type="button"
           (click)="goStep(p.key)"
-          class="inline-flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm"
+          class="inline-flex items-center gap-2 rounded-md border border-gray-300 px-3 py-1.5 text-sm"
           [ngClass]="
             currentStep === p.key
               ? 'bg-black text-white border-transparent'
@@ -106,10 +109,11 @@
         </button>
       </div>
     </div>
-  </div>
+  </div>}
 
   <!-- ======= SUBNAV (rayita azul bajo tabs) ======= -->
-  <div class="px-6 py-3 border-b bg-gray-50" *ngIf="modo === 'lista'">
+  @if (modo === 'lista') {
+  <div class="px-6 py-3 border-b bg-gray-50">
     <div class="flex gap-6">
       <button
         class="text-blue-600 border-b-2 border-blue-600 pb-2 font-medium text-sm"
@@ -118,7 +122,8 @@
       </button>
     </div>
   </div>
-  <div class="px-6 py-3 border-b bg-gray-50" *ngIf="modo === 'detalle'">
+  } @if (modo === 'detalle') {
+  <div class="px-6 py-3 border-b bg-gray-50">
     <div class="flex gap-6">
       <button
         class="text-blue-600 border-b-2 border-blue-600 pb-2 font-medium text-sm"
@@ -127,9 +132,11 @@
       </button>
     </div>
   </div>
+  }
 
   <!-- ======= CONTENIDO: LISTA O DETALLE ======= -->
-  <div class="p-2 text-gray-600" *ngIf="modo === 'lista'">
+  @if (modo === 'lista') {
+  <div class="p-2 text-gray-600">
     <!-- Tabla de sistemas -->
     <p-table
       #dt
@@ -290,9 +297,11 @@
       </ng-template>
     </p-table>
   </div>
+  }
 
   <!-- DETALLE: render del step actual -->
-  <div class="p-2" *ngIf="modo === 'detalle'">
+  @if (modo === 'detalle') {
+  <div class="p-2">
     <ng-container [ngSwitch]="currentStep">
       <ng-container *ngSwitchCase="'endpoints'">
         <app-endpoints
@@ -323,6 +332,7 @@
       </ng-container>
     </ng-container>
   </div>
+  }
 </div>
 
 <!-- ======= Barra de progreso INFERIOR: SOLO EN DETALLE ======= -->

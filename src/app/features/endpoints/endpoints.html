@@ -1,3 +1,49 @@
+<div
+  class="flex items-center justify-between border-b border-gray-200 p-3 bg-white"
+>
+  <!-- Título -->
+  <div class="flex-1 px-4">
+    <h2 class="text-2xl font-bold text-gray-800">
+      Endpoints
+    </h2>
+    <p class="text-sm text-gray-500">
+      Gestión de endpoints
+    </p>
+  </div>
+
+  <!-- Acciones -->
+  <div class="flex items-center space-x-2">
+    <p-splitButton
+      label="Acciones"
+      icon="pi pi-cog"
+      [model]="accionesDropdown"
+      class="p-button-outlined p-button-sm"
+    ></p-splitButton>
+    <p-button
+      label="Nuevo"
+      icon="pi pi-plus"
+      class="p-button-sm"
+      (onClick)="AgregarEndpoint()"
+    ></p-button>
+    <p-button
+      label="Limpiar"
+      [outlined]="true"
+      icon="pi pi-filter-slash"
+      (click)="dt.clear()"
+    ></p-button>
+    <p-iconfield iconPosition="left" class="w-64">
+      <p-inputicon>
+        <i class="pi pi-search"></i>
+      </p-inputicon>
+      <input
+        pInputText
+        (input)="onBuscarGlobal($event)"
+        placeholder="Buscar..."
+        class="w-full"
+      />
+    </p-iconfield>
+  </div>
+</div>
 <div *ngIf="pantallaPequena" class="p-2">
   <p-iconfield iconPosition="left" class="w-full mb-4">
     <p-inputicon>
@@ -88,24 +134,44 @@
         <td>{{ endpoint.se_ind_estado }}</td>
         <td>
           <div class="flex gap-2 justify-center">
-            <p-button
-              icon="pi pi-pencil"
-              severity="secondary"
-              rounded
-              (onClick)="showEditar(endpoint)"
-            ></p-button>
-            <p-button
-              icon="pi pi-plus"
-              severity="success"
-              (onClick)="crearPlantillaIntegracion(endpoint)"
-              [title]="'Nueva plantilla de integración'"
-            ></p-button>
-            <p-button
-              icon="pi pi-trash"
-              severity="danger"
-              rounded
-              (onClick)="eliminarEndpoint(endpoint)"
-            ></p-button>
+            <button
+              pButton
+              type="button"
+              [text]="true"
+              [rounded]="true"
+              [severity]="'secondary'"
+              class="btn-icon"
+              pTooltip="Editar"
+              (click)="$event.stopPropagation(); showEditar(endpoint)"
+            >
+              <i class="pi pi-pencil"></i>
+            </button>
+            <button
+              pButton
+              type="button"
+              [text]="true"
+              [rounded]="true"
+              [severity]="'success'"
+              class="btn-icon"
+              pTooltip="Agregar Plantilla de Integración"
+              (click)="
+                $event.stopPropagation(); crearPlantillaIntegracion(endpoint)
+              "
+            >
+              <i class="pi pi-plus"></i>
+            </button>
+            <button
+              pButton
+              type="button"
+              [text]="true"
+              [rounded]="true"
+              [severity]="'danger'"
+              class="btn-icon"
+              pTooltip="Eliminar"
+              (click)="$event.stopPropagation(); eliminarEndpoint(endpoint)"
+            >
+              <i class="pi pi-trash"></i>
+            </button>
           </div>
         </td>
       </tr>
@@ -227,4 +293,4 @@
     </div>
   </ng-template>
 </p-confirmDialog>
-<app-plantillas #plantCmp style="display:none"></app-plantillas>
+<app-plantillas #plantCmp style="display: none"></app-plantillas>
