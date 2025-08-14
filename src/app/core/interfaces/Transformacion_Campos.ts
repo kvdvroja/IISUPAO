@@ -7,5 +7,5 @@ export interface Transformacion_CamposI {
   ct_obligatorio: string;
   ct_usua_id: string;
   ct_fecha_actividad: string;
-  pd_id: string;
+  pd_id: number;
 }

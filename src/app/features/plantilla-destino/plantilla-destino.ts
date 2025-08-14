@@ -350,6 +350,7 @@ export class PlantillaDestino implements OnInit {
 
   agregarTransformacionCampos(row: Plantilla_DestinoI): void {
     if (!row?.pd_id) return;
+    this.selectedDestino = row; // asegura render del hijo + pdId
     setTimeout(() => {
       document
         .getElementById('camposPorDestino')
@@ -360,7 +361,6 @@ export class PlantillaDestino implements OnInit {
 
   abrirDialogoNuevoCampo(): void {
     if (!this.selectedDestino?.pd_id) return;
-    // Asegura el render del hijo antes de abrir el diálogo
     setTimeout(() => {
       this.transfCmp?.abrirAgregarPreconfigurado({
         pdId: this.selectedDestino!.pd_id,
@@ -420,6 +420,7 @@ export class PlantillaDestino implements OnInit {
   ) {
     if (!data || Array.isArray(data)) return;
     this.selectedDestino = data;
+    console.log('Destino seleccionado:', data);
     setTimeout(
       () =>
         document
@@ -428,6 +429,12 @@ export class PlantillaDestino implements OnInit {
       0
     );
   }
+
+  get pdIdAsNumber(): number | null {
+  return this.selectedDestino?.pd_id != null
+    ? Number(this.selectedDestino.pd_id)
+    : null;
+}
 
   limpiarSeleccionDestino() {
     this.selectedDestino = null;

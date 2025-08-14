@@ -56,7 +56,6 @@ export class TransformacionCampos implements OnInit, OnChanges {
   @ViewChild('dt') dt!: Table;
   @ViewChild(TransformacionValores) valoresComponent!: TransformacionValores;
   @Input() pdId: string | number | null = null;
-  @Input() tabFromParent: 'campos' | 'valores' | null = null;
   @Output() stepNavigate = new EventEmitter<string>();
   @Output() stepProgress = new EventEmitter<number>();
   transformacionCamposService = inject(TransformacionCampoS);
@@ -103,7 +102,7 @@ export class TransformacionCampos implements OnInit, OnChanges {
       label: 'Refrescar',
       icon: 'pi pi-refresh',
       command: () => {
-          this.cargarData();
+        this.cargarData();
       },
     },
     {
@@ -115,7 +114,7 @@ export class TransformacionCampos implements OnInit, OnChanges {
 
   ngOnInit(): void {
     this.cargarData();
-    this.cargarPlantillasDestinoOptions(); // <--- NUEVO
+    this.cargarPlantillasDestinoOptions();
   }
 
   private cargarPlantillasDestinoOptions(): void {
@@ -133,23 +132,13 @@ export class TransformacionCampos implements OnInit, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['tabFromParent'] && this.tabFromParent) {
-      this.goTab(this.tabFromParent);
-    }
     // si cambia el pdId y estás mostrando el diálogo, podrías re-preseleccionar
     if (changes['pdId'] && this.pdId) {
       // si el diálogo de agregar está abierto, bloquear pd_id al nuevo pdId
       if (this.mostrarDialogoAgregar) {
-        this.nuevoCampo.pd_id = String(this.pdId);
+        this.nuevoCampo.pd_id = Number(this.pdId);
       }
     }
-  }
-
-  goTab(tab: 'campos' | 'valores', opts?: { pct?: number }) {
-    this.stepNavigate.emit(
-      tab === 'campos' ? 'TRANSFORMACION_CAMPOS' : 'TRANSFORMACION_VALORES'
-    );
-    if (opts?.pct !== undefined) this.stepProgress.emit(opts.pct);
   }
 
   exportarDatos(): void {}
@@ -172,12 +161,10 @@ export class TransformacionCampos implements OnInit, OnChanges {
     });
   }
 
-  get datosFiltrados(): Transformacion_CamposI[] {
-    if (this.pdId == null || this.pdId === '') return this.campos;
-    const id = String(this.pdId);
-    return this.campos.filter((c) => String((c as any).pd_id) === id);
+  get datosFiltrados(): any[] {
+    console.log('Filtrando sobre:', this.campos);
+    return this.campos.filter((c) => Number(c.pd_id) == 45);
   }
-
 
   filtrarGlobal(event: Event) {
     const valor = (event.target as HTMLInputElement).value;
@@ -215,7 +202,6 @@ export class TransformacionCampos implements OnInit, OnChanges {
   }
 
   guardarNuevo(): void {
-    // Validaciones mínimas
     if (
       !this.nuevoCampo.ct_campo_origen?.trim() ||
       !this.nuevoCampo.ct_campo_destino?.trim() ||
@@ -225,17 +211,12 @@ export class TransformacionCampos implements OnInit, OnChanges {
       return;
     }
 
-    // Construye ct_validacion a partir de los pares
     const validacionObj = this.validacionPairsToObject();
-    // Si tu backend espera objeto, déjalo como objeto; si espera string, usa JSON.stringify(validacionObj)
     this.nuevoCampo.ct_validacion = Object.keys(validacionObj).length
       ? (validacionObj as any)
       : {};
 
-    // Prepara payload sin mutar el form original
     const payload: any = { ...this.nuevoCampo };
-
-    // Normaliza IDs numéricos si el backend los espera como number
     if (
       payload.pd_id !== null &&
       payload.pd_id !== undefined &&
@@ -362,9 +343,6 @@ export class TransformacionCampos implements OnInit, OnChanges {
   abrirDialogoValores(): void {
     this.valoresComponent?.abrirAgregar();
   }
-  
-
-  
 
   eliminar(): void {}
 }

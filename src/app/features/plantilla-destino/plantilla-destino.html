@@ -241,23 +241,24 @@
             selectedDestino.pd_url
           }}</code>
           •
-          <span class="px-2 py-0.5 text-xs rounded-full border">{{
+          <span class="bg-black text-white font-mono px-4 rounded-lg">{{
             selectedDestino.pd_metodo_http
           }}</span>
         </p>
         <p class="text-sm text-gray-600">
           Plan Integración:
-          <span class="px-2 py-0.5 text-xs rounded-full border">{{
+          <span class="bg-black text-white font-mono px-4 rounded-lg">{{
             selectedDestino.pd_plan_inte_id
           }}</span>
           • Estado:
-          <span class="px-2 py-0.5 text-xs rounded-full border">{{
+          <span class="px-2 py-0.5 text-xs rounded-lg bg-gray-500 text-white">{{
             selectedDestino.pd_ind_estado || "A"
           }}</span>
           • Prioridad:
-          <span class="px-2 py-0.5 text-xs rounded-full border">{{
-            selectedDestino.pd_priodridad
-          }}</span>
+          <span
+            class="px-2 py-0.5 text-xs rounded-lg border bg-white text-black"
+            >{{ selectedDestino.pd_priodridad }}</span
+          >
         </p>
       </div>
 
@@ -271,17 +272,15 @@
       </div>
     </div>
 
-    <!-- Tabla hija: Transformación de Campos filtrada por pd_id -->
-    <div class="p-5">
+    <div *ngIf="selectedDestino" class="py-5" id="camposPorDestino">
       <app-transformacion-campos
         #transfCmp
-        [pdId]="selectedDestino.pd_id"
+        [pdId]="pdIdAsNumber"
       ></app-transformacion-campos>
     </div>
   </div>
 </div>
 
-<!-- Diálogo Agregar -->
 <p-dialog
   [(visible)]="mostrarDialogoAgregar"
   header="Agregar Plantilla Destino"
@@ -428,4 +427,3 @@
     </div>
   </ng-template>
 </p-confirmDialog>
-<app-transformacion-campos #transfCmp style="display:none"></app-transformacion-campos>

@@ -2,15 +2,13 @@
 <div
   class="flex items-center justify-between border-b border-gray-200 p-3 bg-white"
 >
-  <!-- Título -->
-  <div class="flex-1 px-4">
+  <div class="flex-1">
     <h2 class="text-2xl font-bold text-gray-800">
       TRANSFORMACIÓN DE CAMPOS
     </h2>
     <p class="text-sm text-gray-500">Gestión de transformación de campos</p>
   </div>
 
-  <!-- Acciones -->
   <div class="flex items-center space-x-2">
     <p-splitButton
       label="Acciones"
@@ -110,7 +108,7 @@
   <!-- Escritorio: Tabla -->
   <div *ngIf="!pantallaPequena" class="p-2 text-center text-gray-600">
     <p-table
-      #dt1
+      #dt
       [value]="datosFiltrados"
       dataKey="ct_id"
       [paginator]="true"

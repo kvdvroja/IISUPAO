@@ -67,7 +67,7 @@ export class TransformacionValores implements OnInit {
   };
 
   get valoresFiltrados(): Transformacion_ValorI[] {
-    return this.valores;
+    return this.valores ;
   }
 
   ngOnInit(): void {
