@@ -161,9 +161,10 @@ export class TransformacionCampos implements OnInit, OnChanges {
     });
   }
 
-  get datosFiltrados(): any[] {
-    console.log('Filtrando sobre:', this.campos);
-    return this.campos.filter((c) => Number(c.pd_id) == 45);
+  get datosFiltrados(): Transformacion_CamposI[] {
+    const pid = Number(this.pdId);
+    if (Number.isNaN(pid)) return this.campos; // si aún no hay selección
+    return this.campos.filter((c) => Number((c as any).pd_id) === pid);
   }
 
   filtrarGlobal(event: Event) {

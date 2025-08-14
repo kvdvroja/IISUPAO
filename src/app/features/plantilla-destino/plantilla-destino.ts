@@ -350,7 +350,7 @@ export class PlantillaDestino implements OnInit {
 
   agregarTransformacionCampos(row: Plantilla_DestinoI): void {
     if (!row?.pd_id) return;
-    this.selectedDestino = row; // asegura render del hijo + pdId
+    // this.selectedDestino = row; // asegura render del hijo + pdId
     setTimeout(() => {
       document
         .getElementById('camposPorDestino')
