@@ -292,27 +292,6 @@
           [sistemasLista]="sistemas"
         ></app-endpoints>
       </ng-container>
-
-      <ng-container *ngSwitchCase="'integracion'">
-        <app-plantillas [tabFromParent]="'integracion'"></app-plantillas>
-      </ng-container>
-
-      <ng-container *ngSwitchCase="'destino'">
-        <app-plantilla-destino #pdCmp [sistemasLista]="sistemas">
-        </app-plantilla-destino>
-      </ng-container>
-
-      <ng-container *ngSwitchCase="'campos'">
-        <app-transformacion-campos
-          [tabFromParent]="'campos'"
-        ></app-transformacion-campos>
-      </ng-container>
-
-      <ng-container *ngSwitchCase="'valores'">
-        <app-transformacion-campos
-          [tabFromParent]="'valores'"
-        ></app-transformacion-campos>
-      </ng-container>
     </ng-container>
   </div>
   }

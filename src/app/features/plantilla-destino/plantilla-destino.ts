@@ -24,6 +24,8 @@ import { SistemasI } from '../../core/interfaces/Sistemas';
 import { SplitButtonModule } from 'primeng/splitbutton';
 import { SistemasS } from '../../core/services/mant/sistemas/sistemas';
 import { TransformacionCampos } from '../transformacion-campos/transformacion-campos';
+import { Endpoint } from '../../core/services/mant/endpoint/endpoint';
+import { EndpointI } from '../../core/interfaces/Endpoint';
 
 @Component({
   selector: 'app-plantilla-destino',
@@ -66,8 +68,10 @@ export class PlantillaDestino implements OnInit {
   sistemasService = inject(SistemasS);
   cdRef = inject(ChangeDetectorRef);
   messageService = inject(MessageService);
+  endpointService = inject(Endpoint);
   confirmService = inject(ConfirmationService);
   plantillaIntegracionService = inject(PlantillaIntegracionS);
+  selectedDestino: Plantilla_DestinoI | null = null;
   pantallaPequena = false;
   plantillasI: Plantilla_IntegracionI[] = [];
   plantillasIOptions: { label: string; value: string | number }[] = [];
@@ -77,6 +81,24 @@ export class PlantillaDestino implements OnInit {
   mostrarDialogoAgregar: boolean = false;
   plantillaDestinos: Plantilla_DestinoI[] = [];
   editando: boolean = false;
+
+  endpoints: EndpointI[] = [];
+  endpointsOptions: { label: string; value: number }[] = [];
+
+  prioridadOptions = [
+    { label: '1', value: 1 },
+    { label: '2', value: 2 },
+    { label: '3', value: 3 },
+    { label: '4', value: 4 },
+    { label: '5', value: 5 },
+  ];
+
+  httpMethodOptions = [
+    { label: 'POST', value: 'POST' },
+    { label: 'GET', value: 'GET' },
+    { label: 'DELETE', value: 'DELETE' },
+    { label: 'UPDATE', value: 'UPDATE' },
+  ];
 
   transformacionOptions = [
     { label: 'Directa', value: 'DIRECTA' },
@@ -100,7 +122,6 @@ export class PlantillaDestino implements OnInit {
   nuevo: any = {
     pd_plan_inte_id: '',
     pd_priodridad: '',
-    pd_ind_estado: '',
     pd_sist_dest_id: '',
     pd_schema: '',
     pd_sist_id: '',
@@ -196,6 +217,10 @@ export class PlantillaDestino implements OnInit {
     this.editando = true;
     this.mostrarDialogoAgregar = true;
     this.nuevo = { ...row };
+
+    if (this.nuevo.pd_sist_id) {
+      this.onSistemaChange(String(this.nuevo.pd_sist_id));
+    }
   }
   cerrarDialogoAgregar(): void {
     this.mostrarDialogoAgregar = false;
@@ -209,10 +234,8 @@ export class PlantillaDestino implements OnInit {
 
   limpiarFormulario(): void {
     this.nuevo = {
-      pd_id: '',
       pd_plan_inte_id: '',
       pd_priodridad: '',
-      pd_ind_estado: 'A',
       pd_sist_dest_id: '',
       pd_schema: '',
       pd_sist_id: '',
@@ -231,20 +254,27 @@ export class PlantillaDestino implements OnInit {
       !this.nuevo.pd_tipo_transformacion
     )
       return;
-    console.log('Nuevo objeto:', this.nuevo);
-    if (!this.editando) {
-      this.nuevo.pd_id = null;
+
+    const payload: any = { ...this.nuevo };
+
+    // normalizo tipos numéricos
+    if (payload.pd_priodridad !== '' && payload.pd_priodridad != null) {
+      const n = Number(payload.pd_priodridad);
+      if (!Number.isNaN(n)) payload.pd_priodridad = n;
+    }
+    if (payload.pd_sist_dest_id !== '' && payload.pd_sist_dest_id != null) {
+      const n = Number(payload.pd_sist_dest_id);
+      if (!Number.isNaN(n)) payload.pd_sist_dest_id = n;
     }
 
-    if (this.editando && this.nuevo.pd_id) {
-      this.nuevo.pd_id = Number(this.nuevo.pd_id);
+    if (this.editando && payload.pd_id) {
+      payload.pd_id = Number(payload.pd_id);
     }
 
     const accion = this.editando ? 'U' : 'I';
-    const payload = { ...this.nuevo };
 
     this.plantillaDestinoService
-      .plantillaDestinoCrud(payload as any, accion)
+      .plantillaDestinoCrud(payload, accion)
       .subscribe({
         next: () => {
           this.messageService.add({
@@ -310,13 +340,96 @@ export class PlantillaDestino implements OnInit {
     this.limpiarFormulario();
     if (opts.planInteId != null)
       this.nuevo.pd_plan_inte_id = String(opts.planInteId);
-    if (opts.sistId != null) this.nuevo.pd_sist_id = String(opts.sistId);
+    if (opts.sistId != null) {
+      this.nuevo.pd_sist_id = String(opts.sistId);
+      this.onSistemaChange(this.nuevo.pd_sist_id);
+    }
 
     this.cdRef.detectChanges();
   }
 
   agregarTransformacionCampos(row: Plantilla_DestinoI): void {
     if (!row?.pd_id) return;
-    this.transfCmp?.abrirAgregarPreconfigurado({ pdId: row.pd_id });
+    setTimeout(() => {
+      document
+        .getElementById('camposPorDestino')
+        ?.scrollIntoView({ behavior: 'smooth' });
+      this.transfCmp?.abrirAgregarPreconfigurado({ pdId: row.pd_id });
+    }, 0);
+  }
+
+  abrirDialogoNuevoCampo(): void {
+    if (!this.selectedDestino?.pd_id) return;
+    // Asegura el render del hijo antes de abrir el diálogo
+    setTimeout(() => {
+      this.transfCmp?.abrirAgregarPreconfigurado({
+        pdId: this.selectedDestino!.pd_id,
+      });
+    }, 0);
+  }
+
+  onSistemaChange(sistId: string) {
+    this.nuevo.pd_sist_id = String(sistId);
+
+    this.endpointService.getAllEndpoints().subscribe({
+      next: (res) => {
+        const all: EndpointI[] = res.result.data;
+
+        // filtra por el sistema
+        this.endpoints = all.filter(
+          (e: any) => String(e.se_sistema_id) === String(sistId)
+        );
+
+        // mapea opciones
+        this.endpointsOptions = this.endpoints.map((e) => ({
+          label: `${e.se_id} - ${e.se_nombre ?? e.se_url} [${
+            e.se_metodo_http
+          }]`,
+          value: Number(e.se_id),
+        }));
+
+        // si estaba seleccionado un endpoint que ya no pertenece a este sistema, lo limpio
+        if (this.nuevo.pd_sist_dest_id) {
+          const exists = this.endpointsOptions.some(
+            (o) => Number(this.nuevo.pd_sist_dest_id) === o.value
+          );
+          if (!exists) this.nuevo.pd_sist_dest_id = '';
+        }
+
+        this.cdRef.detectChanges();
+      },
+      error: (err) => console.error('Error cargando endpoints', err),
+    });
+  }
+
+  onEndpointSelect(endpointId: number) {
+    const ep = this.endpoints.find(
+      (e) => Number(e.se_id) === Number(endpointId)
+    );
+    if (!ep) return;
+
+    this.nuevo.pd_sist_dest_id = Number(endpointId);
+
+    if (!this.nuevo.pd_url) this.nuevo.pd_url = ep.se_url || '';
+    if (!this.nuevo.pd_metodo_http)
+      this.nuevo.pd_metodo_http = ep.se_metodo_http || '';
+  }
+
+  onDestinoSelected(
+    data: Plantilla_DestinoI | Plantilla_DestinoI[] | undefined
+  ) {
+    if (!data || Array.isArray(data)) return;
+    this.selectedDestino = data;
+    setTimeout(
+      () =>
+        document
+          .getElementById('camposPorDestino')
+          ?.scrollIntoView({ behavior: 'smooth' }),
+      0
+    );
+  }
+
+  limpiarSeleccionDestino() {
+    this.selectedDestino = null;
   }
 }

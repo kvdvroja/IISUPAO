@@ -2,31 +2,12 @@
 <div
   class="flex items-center justify-between border-b border-gray-200 p-3 bg-white"
 >
-  <!-- Botón regresar -->
-  <button
-    *ngIf="activeTab === 'valores'"
-    class="flex items-center justify-center border rounded-md p-2 hover:bg-gray-100"
-    (click)="volver()"
-    title="Volver"
-  >
-    <i class="pi pi-arrow-left text-xl text-gray-700"></i>
-  </button>
-
   <!-- Título -->
   <div class="flex-1 px-4">
     <h2 class="text-2xl font-bold text-gray-800">
-      {{
-        activeTab === "campos"
-          ? "TRANSFORMACIÓN DE CAMPOS"
-          : "TRANSFORMACIÓN DE VALORES"
-      }}
+      TRANSFORMACIÓN DE CAMPOS
     </h2>
-    <p *ngIf="activeTab === 'campos'" class="text-sm text-gray-500">
-      Gestión de transformación de campos
-    </p>
-    <p *ngIf="activeTab === 'valores'" class="text-sm text-gray-500">
-      Gestión de transformación de valores
-    </p>
+    <p class="text-sm text-gray-500">Gestión de transformación de campos</p>
   </div>
 
   <!-- Acciones -->
@@ -37,12 +18,6 @@
       [model]="accionesDropdown"
       class="p-button-outlined p-button-sm"
     ></p-splitButton>
-    <p-button
-      label="Nuevo"
-      icon="pi pi-plus"
-      class="p-button-sm"
-      (click)="activeTab === 'campos' ? Agregar() : agregarDesdeValores()"
-    ></p-button>
     <p-button
       label="Limpiar"
       [outlined]="true"
@@ -62,33 +37,7 @@
     </p-iconfield>
   </div>
 </div>
-<!-- Tabs -->
-<div class="flex space-x-6 border-b border-gray-200 px-6 pt-4">
-  <button
-    class="pb-4 border-b-2 transition-all duration-150 text-sm font-medium"
-    [ngClass]="{
-      'border-[#1c3d67] text-[#1c3d67]': activeTab === 'campos',
-      'border-transparent text-gray-500 hover:text-[#1c3d67] hover:border-[#1c3d67]':
-        activeTab !== 'campos'
-    }"
-    (click)="activeTab = 'campos'"
-  >
-    TRANSFORMACIÓN CAMPOS
-  </button>
-  <button
-    class="pb-4 border-b-2 transition-all duration-150 text-sm font-medium"
-    [ngClass]="{
-      'border-[#1c3d67] text-[#1c3d67]': activeTab === 'valores',
-      'border-transparent text-gray-500 hover:text-[#1c3d67] hover:border-[#1c3d67]':
-        activeTab !== 'valores'
-    }"
-    (click)="verTodasLosValores()"
-  >
-    TRANSFORMACIÓN VALORES
-  </button>
-</div>
 
-<div *ngIf="activeTab === 'campos'">
   <!-- Móvil: Buscador -->
   <div *ngIf="pantallaPequena" class="p-2">
     <p-iconfield iconPosition="left" class="w-full mb-4">
@@ -137,9 +86,7 @@
           [severity]="'success'"
           class="btn-icon"
           pTooltip="Agregar Endpoint"
-          (click)="
-            $event.stopPropagation(); abrirDialogoValores()
-          "
+          (click)="$event.stopPropagation(); abrirDialogoValores()"
         >
           <i class="pi pi-plus"></i>
         </button>
@@ -217,13 +164,8 @@
       </ng-template>
     </p-table>
   </div>
-</div>
-<div *ngIf="activeTab === 'valores'">
-  <app-transformacion-valor
-    [campoId]="modoFiltradoPorSistema ? camposSeleccionado?.ct_id : null"
-  >
-  </app-transformacion-valor>
-</div>
+
+  <app-transformacion-valor #valoresRef style="display:none"></app-transformacion-valor>
 
 <!-- Diálogo Agregar -->
 <p-dialog

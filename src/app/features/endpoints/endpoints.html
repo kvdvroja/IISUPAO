@@ -206,8 +206,8 @@
     </ng-template>
   </p-table>
 </div>
-<div *ngIf="selectedEndpoint" class="px-6 pt-6" id="plantillasPorEndpoint">
-  <div class="bg-white flex flex-col gap-4">
+<div *ngIf="selectedEndpoint" class="pt-6" id="plantillasPorEndpoint">
+  <div class="bg-blue-50 flex flex-col gap-4">
     <div class="p-5 shadow-lg flex items-center justify-between">
       <div>
         <div class="flex items-center gap-2 text-lg font-semibold">
@@ -241,7 +241,7 @@
 
       <div class="flex items-center gap-2">
         <p-button
-          label="Nueva plantilla"
+          label="Nueva Plantilla Integración"
           icon="pi pi-plus"
           severity="success"
           (click)="crearPlantillaIntegracion(selectedEndpoint)"
@@ -250,7 +250,7 @@
     </div>
 
     <!-- NUEVO: Plantillas Integración filtradas por este endpoint -->
-    <div class="p-5">
+    <div class="">
       <app-plantillas [endpointIdFilter]="selectedEndpoint.se_id">
       </app-plantillas>
     </div>

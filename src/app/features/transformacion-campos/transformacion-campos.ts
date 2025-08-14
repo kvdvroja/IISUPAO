@@ -55,7 +55,7 @@ import { Plantilla_DestinoI } from '../../core/interfaces/Plantilla_Destino';
 export class TransformacionCampos implements OnInit, OnChanges {
   @ViewChild('dt') dt!: Table;
   @ViewChild(TransformacionValores) valoresComponent!: TransformacionValores;
-  
+  @Input() pdId: string | number | null = null;
   @Input() tabFromParent: 'campos' | 'valores' | null = null;
   @Output() stepNavigate = new EventEmitter<string>();
   @Output() stepProgress = new EventEmitter<number>();
@@ -66,7 +66,6 @@ export class TransformacionCampos implements OnInit, OnChanges {
   confirmationService = inject(ConfirmationService);
   pantallaPequena = false;
   mostrarDialogoAgregar = false;
-  activeTab: 'campos' | 'valores' = 'campos';
   camposSeleccionado: Transformacion_CamposI | null = null;
   modoFiltradoPorSistema: boolean = false;
   mostrarSoloPendientes: boolean = false;
@@ -104,11 +103,7 @@ export class TransformacionCampos implements OnInit, OnChanges {
       label: 'Refrescar',
       icon: 'pi pi-refresh',
       command: () => {
-        if (this.activeTab === 'campos') {
           this.cargarData();
-        } else if (this.activeTab === 'valores') {
-          this.valoresComponent?.cargarData();
-        }
       },
     },
     {
@@ -141,10 +136,16 @@ export class TransformacionCampos implements OnInit, OnChanges {
     if (changes['tabFromParent'] && this.tabFromParent) {
       this.goTab(this.tabFromParent);
     }
+    // si cambia el pdId y estás mostrando el diálogo, podrías re-preseleccionar
+    if (changes['pdId'] && this.pdId) {
+      // si el diálogo de agregar está abierto, bloquear pd_id al nuevo pdId
+      if (this.mostrarDialogoAgregar) {
+        this.nuevoCampo.pd_id = String(this.pdId);
+      }
+    }
   }
 
   goTab(tab: 'campos' | 'valores', opts?: { pct?: number }) {
-    this.activeTab = tab;
     this.stepNavigate.emit(
       tab === 'campos' ? 'TRANSFORMACION_CAMPOS' : 'TRANSFORMACION_VALORES'
     );
@@ -154,7 +155,6 @@ export class TransformacionCampos implements OnInit, OnChanges {
   exportarDatos(): void {}
 
   volver() {
-    this.activeTab = 'campos';
     this.camposSeleccionado = null;
     this.modoFiltradoPorSistema = false;
     this.stepNavigate.emit('TRANSFORMACION_CAMPOS');
@@ -173,8 +173,11 @@ export class TransformacionCampos implements OnInit, OnChanges {
   }
 
   get datosFiltrados(): Transformacion_CamposI[] {
-    return this.campos;
+    if (this.pdId == null || this.pdId === '') return this.campos;
+    const id = String(this.pdId);
+    return this.campos.filter((c) => String((c as any).pd_id) === id);
   }
+
 
   filtrarGlobal(event: Event) {
     const valor = (event.target as HTMLInputElement).value;
@@ -183,12 +186,7 @@ export class TransformacionCampos implements OnInit, OnChanges {
 
   onBuscarGlobal(event: Event): void {
     const input = (event.target as HTMLInputElement).value;
-
-    if (this.activeTab === 'campos') {
-      this.dt.filterGlobal(input, 'contains');
-    } else if (this.activeTab === 'valores') {
-      this.valoresComponent?.filtrarDesdePadre(input);
-    }
+    this.dt.filterGlobal(input, 'contains');
   }
 
   Agregar(): void {
@@ -200,7 +198,7 @@ export class TransformacionCampos implements OnInit, OnChanges {
       ct_validacion: '',
       ct_obligatorio: 'N',
       ct_usua_id: '',
-      pd_id: '',
+      pd_id: this.pdId ? String(this.pdId) : '',
     };
     this.validacionPairs = [];
     this.newValKey = '';
@@ -285,7 +283,6 @@ export class TransformacionCampos implements OnInit, OnChanges {
   }
 
   verTodasLosValores(): void {
-    this.activeTab = 'valores';
     this.modoFiltradoPorSistema = false;
     this.camposSeleccionado = null;
   }
@@ -357,15 +354,17 @@ export class TransformacionCampos implements OnInit, OnChanges {
     if (!this.pdOptions?.length) this.cargarPlantillasDestinoOptions();
     this.Agregar();
     if (opts.pdId != null) {
-      this.nuevoCampo.pd_id = String(opts.pdId); 
+      this.nuevoCampo.pd_id = String(opts.pdId);
     }
     this.cdRef.detectChanges();
   }
 
-abrirDialogoValores(): void {
-  this.valoresComponent?.abrirAgregar();
-}
-
-eliminar(): void {}
+  abrirDialogoValores(): void {
+    this.valoresComponent?.abrirAgregar();
+  }
   
+
+  
+
+  eliminar(): void {}
 }

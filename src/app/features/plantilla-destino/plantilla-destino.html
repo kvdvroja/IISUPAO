@@ -1,4 +1,6 @@
+<!-- HEADER cuando NO hay plantilla destino seleccionada -->
 <div
+  *ngIf="!selectedDestino; else headerConSeleccion"
   class="flex items-center justify-between border-b border-gray-200 p-3 bg-white"
 >
   <div class="flex-1">
@@ -13,13 +15,6 @@
       [model]="accionesDropdown"
       class="p-button-outlined p-button-sm"
     ></p-splitButton>
-
-    <p-button
-      label="Nuevo"
-      icon="pi pi-plus"
-      class="p-button-sm"
-      (click)="Agregar()"
-    ></p-button>
 
     <p-button
       label="Limpiar"
@@ -40,6 +35,31 @@
     </p-iconfield>
   </div>
 </div>
+
+<!-- HEADER cuando SÍ hay plantilla destino seleccionada -->
+<ng-template #headerConSeleccion>
+  <div
+    class="flex items-center justify-between border-b border-gray-200 py-3 bg-white"
+  >
+    <div class="flex items-center gap-1">
+      <p-button
+        icon="pi pi-chevron-left"
+        [text]="true"
+        (onClick)="limpiarSeleccionDestino()"
+        pTooltip="Volver a plantillas destino"
+      ></p-button>
+      <div>
+        <h2 class="text-xl font-bold text-gray-800">
+          PLANTILLA DESTINO SELECCIONADA
+        </h2>
+        <p class="text-sm text-gray-500">
+          Transformaciones de campos asociadas
+        </p>
+      </div>
+    </div>
+  </div>
+</ng-template>
+
 <!-- Filtro en móvil -->
 <div *ngIf="pantallaPequena" class="p-2">
   <p-iconfield iconPosition="left" class="w-full mb-4">
@@ -113,11 +133,19 @@
 </div>
 
 <!-- Vista escritorio -->
-<div *ngIf="!pantallaPequena" class="p-2 text-center text-gray-600">
+<div
+  *ngIf="!pantallaPequena && !selectedDestino"
+  class="p-2 text-center text-gray-600"
+>
   <p-table
     #dt
     [value]="datosFiltrados"
     dataKey="pd_id"
+    selectionMode="single"
+    [(selection)]="selectedDestino"
+    [metaKeySelection]="false"
+    rowHover
+    (onRowSelect)="onDestinoSelected($event.data)"
     [paginator]="true"
     [rows]="10"
     [rowsPerPageOptions]="[10, 25, 50]"
@@ -138,7 +166,7 @@
     </ng-template>
 
     <ng-template #body let-row>
-      <tr>
+      <tr [pSelectableRow]="row">
         <td>{{ row.pd_id }}</td>
         <td>{{ row.pd_plan_inte_id }}</td>
         <td>{{ row.pd_priodridad }}</td>
@@ -148,27 +176,43 @@
         <td>{{ row.pd_tipo_transformacion }}</td>
         <td>{{ row.pd_ind_estado }}</td>
         <td>
-          <p-button
-            icon="pi pi-pencil"
-            (onClick)="showEditar(row)"
-            severity="secondary"
-            rounded
-          ></p-button>
+          <button
+            pButton
+            type="button"
+            [text]="true"
+            [rounded]="true"
+            [severity]="'secondary'"
+            class="btn-icon"
+            pTooltip="Editar"
+            (click)="$event.stopPropagation(); showEditar(row)"
+          >
+            <i class="pi pi-pencil"></i>
+          </button>
+          <button
+            pButton
+            type="button"
+            [text]="true"
+            [rounded]="true"
+            [severity]="'success'"
+            class="btn-icon"
+            pTooltip="Agregar Plantilla de Campos"
+            (click)="$event.stopPropagation(); agregarTransformacionCampos(row)"
+          >
+            <i class="pi pi-plus"></i>
+          </button>
 
-          <p-button
-            icon="pi pi-plus"
-            (onClick)="agregarTransformacionCampos(row)"
-            severity="success"
-            rounded
-          ></p-button>
-
-          <p-button
-            *ngIf="row.pd_ind_estado == 'A'"
-            icon="pi pi-trash"
-            severity="danger"
-            rounded
-            (onClick)="eliminar(row)"
-          ></p-button>
+          <button
+            pButton
+            type="button"
+            [text]="true"
+            [rounded]="true"
+            [severity]="'danger'"
+            class="btn-icon"
+            pTooltip="Eliminar"
+            (click)="$event.stopPropagation(); eliminar(row)"
+          >
+            <i class="pi pi-trash"></i>
+          </button>
         </td>
       </tr>
     </ng-template>
@@ -179,6 +223,62 @@
       </tr>
     </ng-template>
   </p-table>
+</div>
+
+<div *ngIf="selectedDestino" class="pt-6" id="camposPorDestino">
+  <div class="rounded-lg bg-white">
+    <!-- Tarjeta con info de la plantilla destino seleccionada -->
+    <div class="p-5 bg-blue-50 shadow-lg flex items-center justify-between">
+      <div>
+        <div class="flex items-center gap-2 text-lg font-semibold">
+          <span class="text-blue-600">PLANTILLA DESTINO SELECCIONADA</span>
+          <span class="px-2 py-0.5 text-xs rounded-full border text-gray-700">
+            ID: {{ selectedDestino.pd_id }}
+          </span>
+        </div>
+        <p class="mt-1 text-gray-700 truncate">
+          <code class="px-2 py-0.5 rounded bg-white/70">{{
+            selectedDestino.pd_url
+          }}</code>
+          •
+          <span class="px-2 py-0.5 text-xs rounded-full border">{{
+            selectedDestino.pd_metodo_http
+          }}</span>
+        </p>
+        <p class="text-sm text-gray-600">
+          Plan Integración:
+          <span class="px-2 py-0.5 text-xs rounded-full border">{{
+            selectedDestino.pd_plan_inte_id
+          }}</span>
+          • Estado:
+          <span class="px-2 py-0.5 text-xs rounded-full border">{{
+            selectedDestino.pd_ind_estado || "A"
+          }}</span>
+          • Prioridad:
+          <span class="px-2 py-0.5 text-xs rounded-full border">{{
+            selectedDestino.pd_priodridad
+          }}</span>
+        </p>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <p-button
+          label="Nueva Transformación Campo"
+          icon="pi pi-plus"
+          severity="success"
+          (onClick)="abrirDialogoNuevoCampo()"
+        ></p-button>
+      </div>
+    </div>
+
+    <!-- Tabla hija: Transformación de Campos filtrada por pd_id -->
+    <div class="p-5">
+      <app-transformacion-campos
+        #transfCmp
+        [pdId]="selectedDestino.pd_id"
+      ></app-transformacion-campos>
+    </div>
+  </div>
 </div>
 
 <!-- Diálogo Agregar -->
@@ -204,6 +304,7 @@
         [options]="plantillasIOptions"
         optionLabel="label"
         optionValue="value"
+        disabled
         placeholder="Seleccionar Plantilla de Integración"
         style="width: 100%"
       ></p-select>
@@ -213,11 +314,14 @@
       <p-inputgroup-addon
         ><i class="pi pi-sort-numeric-up"></i
       ></p-inputgroup-addon>
-      <input
-        pInputText
-        placeholder="Prioridad"
+      <p-select
         [(ngModel)]="nuevo.pd_priodridad"
-      />
+        [options]="prioridadOptions"
+        optionLabel="label"
+        optionValue="value"
+        placeholder="Seleccionar Prioridad"
+        style="width: 100%"
+      ></p-select>
     </p-inputgroup>
 
     <p-inputgroup>
@@ -232,18 +336,24 @@
         [options]="sistemasOptions"
         optionLabel="label"
         optionValue="value"
+        disabled
         placeholder="Seleccionar Sistema"
+        (onChange)="onSistemaChange($event.value)"
         style="width: 100%"
       ></p-select>
     </p-inputgroup>
 
     <p-inputgroup>
-      <p-inputgroup-addon><i class="pi pi-server"></i></p-inputgroup-addon>
-      <input
-        pInputText
-        placeholder="Sistema Destino"
+      <p-inputgroup-addon><i class="pi pi-sitemap"></i></p-inputgroup-addon>
+      <p-select
         [(ngModel)]="nuevo.pd_sist_dest_id"
-      />
+        [options]="endpointsOptions"
+        optionLabel="label"
+        optionValue="value"
+        placeholder="Seleccionar Endpoint del sistema"
+        style="width: 100%"
+        (onChange)="onEndpointSelect($event.value)"
+      ></p-select>
     </p-inputgroup>
     <p-inputgroup>
       <p-inputgroup-addon><i class="pi pi-filter"></i></p-inputgroup-addon>
@@ -263,11 +373,14 @@
 
     <p-inputgroup>
       <p-inputgroup-addon><i class="pi pi-server"></i></p-inputgroup-addon>
-      <input
-        pInputText
-        placeholder="Método HTTP"
+      <p-select
         [(ngModel)]="nuevo.pd_metodo_http"
-      />
+        [options]="httpMethodOptions"
+        optionLabel="label"
+        optionValue="value"
+        placeholder="Seleccionar Método HTTP"
+        style="width: 100%"
+      ></p-select>
     </p-inputgroup>
 
     <div class="flex justify-end gap-2 pt-4">
@@ -315,7 +428,4 @@
     </div>
   </ng-template>
 </p-confirmDialog>
-<app-transformacion-campos
-  #transfCmp
-  style="display: none"
-></app-transformacion-campos>
+<app-transformacion-campos #transfCmp style="display:none"></app-transformacion-campos>

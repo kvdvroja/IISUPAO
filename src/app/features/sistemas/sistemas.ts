@@ -50,10 +50,7 @@ type StepKey = 'endpoints' | 'integracion' | 'destino' | 'campos' | 'valores';
     ConfirmDialogModule,
     SplitButtonModule,
     FormsModule,
-    Endpoints,
-    Plantillas,
-    PlantillaDestino,
-    TransformacionCampos,
+    Endpoints
   ],
   templateUrl: './sistemas.html',
   styleUrl: './sistemas.css',
