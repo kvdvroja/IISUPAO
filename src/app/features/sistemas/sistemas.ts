@@ -50,7 +50,7 @@ type StepKey = 'endpoints' | 'integracion' | 'destino' | 'campos' | 'valores';
     ConfirmDialogModule,
     SplitButtonModule,
     FormsModule,
-    Endpoints
+    Endpoints,
   ],
   templateUrl: './sistemas.html',
   styleUrl: './sistemas.css',
@@ -58,6 +58,7 @@ type StepKey = 'endpoints' | 'integracion' | 'destino' | 'campos' | 'valores';
 export class Sistemas implements OnInit, OnChanges, AfterViewInit {
   @ViewChild('dt') dt!: Table;
   @ViewChild('endpointsCmp', { static: false }) endpointsComponent!: Endpoints;
+  endpointIdForPlantillas: string | number | null = null;
 
   modo: 'lista' | 'detalle' = 'lista';
 
@@ -94,6 +95,7 @@ export class Sistemas implements OnInit, OnChanges, AfterViewInit {
     },
   ];
   currentIndex = 0;
+
   get currentStep(): StepKey {
     return this.steps[this.currentIndex].key;
   }
@@ -140,11 +142,11 @@ export class Sistemas implements OnInit, OnChanges, AfterViewInit {
   messageService = inject(MessageService);
   confirmService = inject(ConfirmationService);
 
-onRowSelectedEvent(ev: TableRowSelectEvent): void {
-  const sistema = ev.data as SistemasI | undefined;
-  if (!sistema) return;
-  this.entrarADetalle(sistema);
-}
+  onRowSelectedEvent(ev: TableRowSelectEvent): void {
+    const sistema = ev.data as SistemasI | undefined;
+    if (!sistema) return;
+    this.entrarADetalle(sistema);
+  }
 
   ngOnInit(): void {
     this.cargarSistemas();
@@ -179,6 +181,27 @@ onRowSelectedEvent(ev: TableRowSelectEvent): void {
         this.endpointsComponent?.cargarEndpoints();
     }
   }
+
+  private stepToIndex: Record<StepKey, number> = {
+    endpoints: 0,
+    integracion: 1,
+    destino: 2,
+    campos: 3,
+    valores: 4,
+  };
+
+  progressPct = 0;
+  indicatorIndex = 0;
+  
+  onChildNavigate = (step: StepKey) => {
+    const idx = this.stepToIndex[step];
+    if (idx !== undefined) this.indicatorIndex = idx; // <-- NO toques currentIndex
+  };
+
+  // si quieres soportar un % opcional
+  onChildProgress = (pct: number) => {
+    this.progressPct = Math.max(0, Math.min(100, pct));
+  };
 
   onLimpiar() {
     if (this.modo === 'lista') this.dt?.clear();

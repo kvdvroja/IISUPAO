@@ -1,4 +1,11 @@
-import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  OnChanges,
+  OnInit,
+  SimpleChanges,
+  inject,
+} from '@angular/core';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { MessageService } from 'primeng/api';
 import { TableModule } from 'primeng/table';
@@ -6,6 +13,7 @@ import { FloatLabelModule } from 'primeng/floatlabel';
 import { InputTextModule } from 'primeng/inputtext';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { InputGroupModule } from 'primeng/inputgroup';
+import { SplitButtonModule } from 'primeng/splitbutton';
 import { Table } from 'primeng/table';
 import { InputIcon } from 'primeng/inputicon';
 import { IconField } from 'primeng/iconfield';
@@ -23,7 +31,8 @@ import { Input } from '@angular/core';
 import { SelectModule } from 'primeng/select';
 import { TransformacionValorS } from '../../core/services/mant/transformacion-valor/transformacion-valor';
 import { TransformacionCampoS } from '../../core/services/mant/transformacion-campo/transformacion-campo';
-
+import { Output, EventEmitter } from '@angular/core';
+type StepKey = 'endpoints' | 'integracion' | 'destino' | 'campos' | 'valores';
 @Component({
   selector: 'app-transformacion-valor',
   standalone: true,
@@ -43,11 +52,13 @@ import { TransformacionCampoS } from '../../core/services/mant/transformacion-ca
     Toast,
     ConfirmDialogModule,
     SelectModule,
-  ]
+    SplitButtonModule
+  ],
 })
-export class TransformacionValores implements OnInit {
+export class TransformacionValores implements OnInit, OnChanges {
   @ViewChild('dt') dt!: Table;
-  @Input() campoId!: string | null | undefined;
+  @Input() campoId!: string | number | null | undefined;
+  @Output() stepNavigate = new EventEmitter<StepKey>();
   transformacionValoresService = inject(TransformacionValorS);
   transformacionCamposService = inject(TransformacionCampoS);
   cdRef = inject(ChangeDetectorRef);
@@ -66,18 +77,44 @@ export class TransformacionValores implements OnInit {
     vt_valor_destino: '',
   };
 
+    accionesDropdown = [
+    {
+      label: 'Refrescar',
+      icon: 'pi pi-refresh',
+      command: () => {
+        this.cargarData();
+      },
+    },
+    {
+      label: 'Exportar',
+      icon: 'pi pi-download',
+      command: () => this.exportarDatos(),
+    },
+  ];
+
   get valoresFiltrados(): Transformacion_ValorI[] {
-    return this.valores ;
+    const id = Number(this.campoId);
+    if (Number.isNaN(id)) return this.valores;
+    return this.valores.filter((v) => Number(v.vt_camp_tran_id) === id);
   }
 
   ngOnInit(): void {
-    this.cargarCamposTransformacion();
+    //this.cargarCamposTransformacion();
+    //this.cargarData();
+  }
+
+    onBuscarGlobal(event: Event): void {
+    const input = (event.target as HTMLInputElement).value;
+    this.dt.filterGlobal(input, 'contains');
+  }
+
+  ngOnChanges(): void {
     this.cargarData();
   }
 
+  exportarDatos(): void {}
+
   cargarCamposTransformacion(): void {
-    // Ajusta este método al servicio real que tengas para "Campos de Transformación".
-    // Si lo expone tu mismo servicio, úsalo. Si tienes otro (p.ej. TransformacionCampoS), cámbialo aquí.
     this.transformacionCamposService.getAllTransformacionCampos().subscribe({
       next: (resp) => {
         const data = resp.result?.data ?? [];
@@ -147,11 +184,6 @@ export class TransformacionValores implements OnInit {
     )
       return;
 
-    if (!this.nuevoValor.vt_id) {
-      // Eliminar vt_id para el caso de inserción
-      this.nuevoValor.vt_id = null; // Asegúrate de eliminar vt_id en la inserción
-    }
-
     // Si tiene vt_id, es una actualización
     const accion = this.nuevoValor.vt_id ? 'U' : 'I';
 
@@ -214,12 +246,14 @@ export class TransformacionValores implements OnInit {
   }
 
   abrirAgregar(opts?: { vt_camp_tran_id?: string | number }): void {
+    const pre = opts?.vt_camp_tran_id ?? this.campoId ?? '';
     this.nuevoValor = {
-      vt_camp_tran_id: opts?.vt_camp_tran_id ?? '',
+      vt_camp_tran_id: pre,
       vt_valor_origen: '',
       vt_valor_destino: '',
     };
     this.mostrarDialogoAgregar = true;
+    this.cargarCamposTransformacion();
     this.cdRef.detectChanges();
   }
 }

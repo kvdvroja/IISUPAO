@@ -29,6 +29,13 @@ import { Output, EventEmitter } from '@angular/core';
 import { SplitButtonModule } from 'primeng/splitbutton';
 import { Plantillas } from '../plantillas/plantillas';
 
+export type StepKey =
+  | 'endpoints'
+  | 'integracion'
+  | 'destino'
+  | 'campos'
+  | 'valores';
+
 @Component({
   selector: 'app-endpoints',
   imports: [
@@ -52,11 +59,14 @@ import { Plantillas } from '../plantillas/plantillas';
   templateUrl: './endpoints.html',
   styleUrl: './endpoints.css',
 })
-export class Endpoints implements OnInit {
+export class Endpoints implements OnInit, OnChanges {
   private _sistemasLista: SistemasI[] = [];
   @ViewChild('dt') dt!: Table;
   @ViewChild('plantCmp') plantCmp!: Plantillas;
   @Input() sistemaId!: string | null | undefined;
+
+  @Output() stepNavigate = new EventEmitter<StepKey>();
+  @Output() stepProgress = new EventEmitter<number>();
   @Input() set sistemasLista(value: SistemasI[]) {
     this._sistemasLista = value;
     this.sistemasOptions = value.map((s) => ({
@@ -65,6 +75,7 @@ export class Endpoints implements OnInit {
     }));
   }
   selectedEndpoint: EndpointI | null = null;
+  ocultarTarjetaEndpoint = false;
   endpointService = inject(Endpoint);
   cdRef = inject(ChangeDetectorRef);
   messageService = inject(MessageService);
@@ -114,6 +125,10 @@ export class Endpoints implements OnInit {
     },
   ];
   ngOnInit(): void {
+    //this.cargarEndpoints();
+  }
+
+  ngOnChanges(): void {
     this.cargarEndpoints();
   }
 
@@ -263,6 +278,9 @@ export class Endpoints implements OnInit {
 
   onEndpointSelected(ep: EndpointI) {
     this.selectedEndpoint = ep;
+    this.ocultarTarjetaEndpoint = false;
+    this.stepNavigate.emit('integracion');
+
     setTimeout(
       () =>
         document
@@ -274,5 +292,16 @@ export class Endpoints implements OnInit {
 
   limpiarSeleccion() {
     this.selectedEndpoint = null;
+    this.ocultarTarjetaEndpoint = false;
+    this.stepNavigate.emit('endpoints');
+  }
+
+  onChildStep(step: StepKey) {
+    // reenvía hacia arriba si lo necesitas
+    this.stepNavigate.emit(step);
+
+    // oculta la tarjeta si pasas a destino/campos/valores
+    this.ocultarTarjetaEndpoint =
+      step === 'destino' || step === 'campos' || step === 'valores';
   }
 }

@@ -27,7 +27,7 @@ import { TransformacionCampoS } from '../../core/services/mant/transformacion-ca
 import { Input, Output, EventEmitter, SimpleChanges } from '@angular/core';
 import { PlantillaDestinoS } from '../../core/services/mant/plantilla-destino/plantilla-destino';
 import { Plantilla_DestinoI } from '../../core/interfaces/Plantilla_Destino';
-
+type StepKey = 'endpoints' | 'integracion' | 'destino' | 'campos' | 'valores';
 @Component({
   selector: 'app-transformacion-campos',
   standalone: true,
@@ -56,7 +56,7 @@ export class TransformacionCampos implements OnInit, OnChanges {
   @ViewChild('dt') dt!: Table;
   @ViewChild(TransformacionValores) valoresComponent!: TransformacionValores;
   @Input() pdId: string | number | null = null;
-  @Output() stepNavigate = new EventEmitter<string>();
+  @Output() stepNavigate = new EventEmitter<StepKey>();
   @Output() stepProgress = new EventEmitter<number>();
   transformacionCamposService = inject(TransformacionCampoS);
   plantillaDestinoService = inject(PlantillaDestinoS);
@@ -65,6 +65,7 @@ export class TransformacionCampos implements OnInit, OnChanges {
   confirmationService = inject(ConfirmationService);
   pantallaPequena = false;
   mostrarDialogoAgregar = false;
+  ocultarTarjetaTransformacionCampo: boolean = false;
   camposSeleccionado: Transformacion_CamposI | null = null;
   modoFiltradoPorSistema: boolean = false;
   mostrarSoloPendientes: boolean = false;
@@ -76,6 +77,7 @@ export class TransformacionCampos implements OnInit, OnChanges {
   newValKey = '';
   newValValue = '';
   editingValIndex: number | null = null;
+  campoSeleccionado: Transformacion_CamposI | null = null;
 
   tipoTransfOptions = [
     { label: 'DIRECTA', value: 'DIRECTA' },
@@ -113,8 +115,8 @@ export class TransformacionCampos implements OnInit, OnChanges {
   ];
 
   ngOnInit(): void {
-    this.cargarData();
-    this.cargarPlantillasDestinoOptions();
+    //this.cargarData();
+    //this.cargarPlantillasDestinoOptions();
   }
 
   private cargarPlantillasDestinoOptions(): void {
@@ -132,7 +134,7 @@ export class TransformacionCampos implements OnInit, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    // si cambia el pdId y estás mostrando el diálogo, podrías re-preseleccionar
+    this.cargarData();
     if (changes['pdId'] && this.pdId) {
       // si el diálogo de agregar está abierto, bloquear pd_id al nuevo pdId
       if (this.mostrarDialogoAgregar) {
@@ -146,7 +148,6 @@ export class TransformacionCampos implements OnInit, OnChanges {
   volver() {
     this.camposSeleccionado = null;
     this.modoFiltradoPorSistema = false;
-    this.stepNavigate.emit('TRANSFORMACION_CAMPOS');
   }
 
   cargarData(): void {
@@ -346,4 +347,30 @@ export class TransformacionCampos implements OnInit, OnChanges {
   }
 
   eliminar(): void {}
+
+  onCampoSelected(
+    row: Transformacion_CamposI | Transformacion_CamposI[] | undefined
+  ) {
+    if (!row || Array.isArray(row)) return;
+    this.campoSeleccionado = row;
+    this.stepNavigate.emit('valores');
+    // opcional: hacer scroll a la tarjeta
+    setTimeout(
+      () =>
+        document
+          .getElementById('valoresPorCampo')
+          ?.scrollIntoView({ behavior: 'smooth' }),
+      0
+    );
+  }
+
+  limpiarSeleccionCampo() {
+    this.stepNavigate.emit('campos');
+    this.campoSeleccionado = null;
+  }
+
+  onChildStep(step: StepKey) {
+    this.stepNavigate.emit(step);
+    this.ocultarTarjetaTransformacionCampo = step === 'campos' || step === 'valores';
+  }
 }

@@ -36,7 +36,12 @@ import { Endpoint } from '../../core/services/mant/endpoint/endpoint';
 import { EndpointI } from '../../core/interfaces/Endpoint';
 import { ColaS } from '../../core/services/mant/cola/cola';
 import { ColaI } from '../../core/interfaces/Cola';
-
+export type StepKey =
+  | 'endpoints'
+  | 'integracion'
+  | 'destino'
+  | 'campos'
+  | 'valores';
 @Component({
   selector: 'app-plantillas',
   standalone: true,
@@ -67,8 +72,9 @@ export class Plantillas implements OnInit, OnChanges {
   @Input() tabFromParent: 'integracion' | 'destino' | null = null;
   @Input() endpointIdFilter: string | number | null = null;
   @ViewChild('pdCmp') pdCmp!: PlantillaDestino;
-  @Output() stepNavigate = new EventEmitter<string>();
+  @Output() stepNavigate = new EventEmitter<StepKey>();
   @Output() stepProgress = new EventEmitter<number>();
+  ocultarTarjetaPlantillaI = false;
   endpointService = inject(Endpoint);
   colasService = inject(ColaS);
   colas: ColaI[] = [];
@@ -78,7 +84,6 @@ export class Plantillas implements OnInit, OnChanges {
   endpointsOptions: { label: string; value: string | number }[] = [];
   selectedEndpointId: string | number | null = null;
   selectedColaId: string | number | null = null;
-  activeTab: 'integracion' | 'destino' = 'integracion';
   plantillaIntegracionService = inject(PlantillaIntegracionS);
   messageService = inject(MessageService);
   confirmService = inject(ConfirmationService);
@@ -125,12 +130,8 @@ export class Plantillas implements OnInit, OnChanges {
       label: 'Refrescar',
       icon: 'pi pi-refresh',
       command: () => {
-        if (this.activeTab === 'integracion') {
-          this.cargarPlantillas();
-        } else if (this.activeTab === 'destino') {
-          this.plantillasDComponent?.cargarPlantillas();
-        }
-      },
+        this.cargarPlantillas();
+      }
     },
     {
       label: 'Exportar',
@@ -156,29 +157,35 @@ export class Plantillas implements OnInit, OnChanges {
   };
 
   ngOnInit(): void {
-    this.cargarPlantillas();
+    //this.cargarPlantillas();
   }
 
-onPlantillaSelected(
-  data: Plantilla_IntegracionI | Plantilla_IntegracionI[] | undefined
-): void {
-  if (!data || Array.isArray(data)) return;
-  this.selectedPlantilla = data;
-  setTimeout(() =>
-    document.getElementById('destinosPorPlantilla')
-      ?.scrollIntoView({ behavior: 'smooth' }), 0);
+  onPlantillaSelected(
+    data: Plantilla_IntegracionI | Plantilla_IntegracionI[] | undefined
+  ): void {
+    if (!data || Array.isArray(data)) return;
+    this.selectedPlantilla = data;
+    this.ocultarTarjetaPlantillaI = false;
+    // mueve la barra a "destino"
+    this.stepNavigate.emit('destino');
+
+    setTimeout(
+      () =>
+        document
+          .getElementById('destinosPorPlantilla')
+          ?.scrollIntoView({ behavior: 'smooth' }),
+      0
+    );
+  }
+
+limpiarSeleccionPlantilla() {
+  this.selectedPlantilla = null;
+  this.ocultarTarjetaPlantillaI = false;
+  this.stepNavigate.emit('integracion');
 }
 
-  limpiarSeleccionPlantilla() {
-    this.selectedPlantilla = null;
-  }
-
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['endpointIdFilter']) {
-    }
-    if (changes['tabFromParent'] && this.tabFromParent) {
-      this.goTab(this.tabFromParent);
-    }
+  ngOnChanges(): void {
+    this.cargarPlantillas();
   }
 
   private cargarColasOptions(): void {
@@ -277,18 +284,8 @@ onPlantillaSelected(
   }
 
   volver() {
-    this.activeTab = 'integracion';
-    this.stepNavigate.emit('PLANTILLA_INTEGRACION');
     this.plantillaISeleccionado = null;
     this.modoFiltradoPorSistema = false;
-  }
-
-  goTab(tab: 'integracion' | 'destino', opts?: { pct?: number }) {
-    this.activeTab = tab;
-    this.stepNavigate.emit(
-      tab === 'destino' ? 'PLANTILLA_DESTINO' : 'PLANTILLA_INTEGRACION'
-    );
-    if (opts?.pct !== undefined) this.stepProgress.emit(opts.pct);
   }
 
   agregarDesdeDestino(): void {
@@ -297,12 +294,8 @@ onPlantillaSelected(
 
   onBuscarGlobal(event: Event): void {
     const input = (event.target as HTMLInputElement).value;
-
-    if (this.activeTab === 'integracion') {
       this.dt.filterGlobal(input, 'contains');
-    } else if (this.activeTab === 'destino') {
-      this.plantillasDComponent?.filtrarDesdePadre(input);
-    }
+
   }
 
   AgregarPlantilla(): void {
@@ -423,7 +416,6 @@ onPlantillaSelected(
     });
   }
   verTodasLasPlantillasD(): void {
-    this.activeTab = 'destino';
     this.modoFiltradoPorSistema = false;
     this.plantillaISeleccionado = null;
   }
@@ -583,7 +575,6 @@ onPlantillaSelected(
     };
   }
   public abrirAgregarDesdeEndpoint(endpointId: string | number): void {
-    this.activeTab = 'integracion';
     this.AgregarPlantilla();
     const id = String(endpointId);
     this.cargarEndpointsOptions(id);
@@ -593,9 +584,15 @@ onPlantillaSelected(
   agregarDestinoDesdeIntegracion(row: Plantilla_IntegracionI): void {
     const planInteId = row.pi_id;
     const sistemaId = row.pi_sist_id || row.pi_sist_orig_id; // el que corresponda en tu modelo
+
     this.pdCmp.abrirAgregarPreconfigurado({
       planInteId: planInteId as any,
       sistId: sistemaId as any,
     });
+  }
+
+    onChildStep(step: StepKey) {
+    this.stepNavigate.emit(step);
+    this.ocultarTarjetaPlantillaI = step === 'campos' || step === 'valores'
   }
 }

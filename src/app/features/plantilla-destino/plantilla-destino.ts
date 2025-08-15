@@ -26,6 +26,14 @@ import { SistemasS } from '../../core/services/mant/sistemas/sistemas';
 import { TransformacionCampos } from '../transformacion-campos/transformacion-campos';
 import { Endpoint } from '../../core/services/mant/endpoint/endpoint';
 import { EndpointI } from '../../core/interfaces/Endpoint';
+import { Output, EventEmitter } from '@angular/core';
+
+export type StepKey =
+  | 'endpoints'
+  | 'integracion'
+  | 'destino'
+  | 'campos'
+  | 'valores';
 
 @Component({
   selector: 'app-plantilla-destino',
@@ -54,6 +62,7 @@ export class PlantillaDestino implements OnInit {
   @ViewChild('dt') dt!: Table;
   @ViewChild('transfCmp') transfCmp!: TransformacionCampos;
   @Input() plantillaIId!: string | number | null | undefined;
+  @Output() stepNavigate = new EventEmitter<StepKey>();
   @Input() set sistemasLista(value: SistemasI[] | null | undefined) {
     if (!value) {
       this.sistemasOptions = [];
@@ -72,6 +81,7 @@ export class PlantillaDestino implements OnInit {
   confirmService = inject(ConfirmationService);
   plantillaIntegracionService = inject(PlantillaIntegracionS);
   selectedDestino: Plantilla_DestinoI | null = null;
+  ocultarTarjetaPlantillaD: boolean = false;
   pantallaPequena = false;
   plantillasI: Plantilla_IntegracionI[] = [];
   plantillasIOptions: { label: string; value: string | number }[] = [];
@@ -131,9 +141,13 @@ export class PlantillaDestino implements OnInit {
   };
 
   ngOnInit(): void {
+    //this.cargarPlantillas();
+    //this.cargarPlantillasIntegracion();
+    //this.cargarSistemasOptions();
+  }
+
+  ngOnChanges(): void {
     this.cargarPlantillas();
-    this.cargarPlantillasIntegracion();
-    this.cargarSistemasOptions();
   }
 
   onBuscarGlobal(event: Event): void {
@@ -342,6 +356,8 @@ export class PlantillaDestino implements OnInit {
       this.nuevo.pd_plan_inte_id = String(opts.planInteId);
     if (opts.sistId != null) {
       this.nuevo.pd_sist_id = String(opts.sistId);
+      this.cargarPlantillasIntegracion();
+      this.cargarSistemasOptions();
       this.onSistemaChange(this.nuevo.pd_sist_id);
     }
 
@@ -420,7 +436,10 @@ export class PlantillaDestino implements OnInit {
   ) {
     if (!data || Array.isArray(data)) return;
     this.selectedDestino = data;
-    console.log('Destino seleccionado:', data);
+    this.ocultarTarjetaPlantillaD = false;
+    // Solo mueve el indicador a "campos"
+    this.stepNavigate.emit('campos');
+
     setTimeout(
       () =>
         document
@@ -431,12 +450,20 @@ export class PlantillaDestino implements OnInit {
   }
 
   get pdIdAsNumber(): number | null {
-  return this.selectedDestino?.pd_id != null
-    ? Number(this.selectedDestino.pd_id)
-    : null;
-}
+    return this.selectedDestino?.pd_id != null
+      ? Number(this.selectedDestino.pd_id)
+      : null;
+  }
 
   limpiarSeleccionDestino() {
     this.selectedDestino = null;
+    // Vuelve el indicador a "destino"
+    this.ocultarTarjetaPlantillaD = false;
+    this.stepNavigate.emit('destino');
+  }
+
+  onChildStep(step: StepKey) {
+    this.stepNavigate.emit(step);
+    this.ocultarTarjetaPlantillaD = step === 'valores';
   }
 }

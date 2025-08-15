@@ -206,9 +206,10 @@
     </ng-template>
   </p-table>
 </div>
-<div *ngIf="selectedEndpoint" class="pt-6" id="plantillasPorEndpoint">
+@if(selectedEndpoint){
+  <div class="pt-6" id="plantillasPorEndpoint">
   <div class="bg-blue-50 flex flex-col gap-4">
-    <div class="p-5 shadow-lg flex items-center justify-between">
+    <div *ngIf="!ocultarTarjetaEndpoint" class="p-5 shadow-lg flex items-center justify-between">
       <div>
         <div class="flex items-center gap-2 text-lg font-semibold">
           <span class="text-blue-600 uppercase">{{ selectedEndpoint.se_nombre }}</span>
@@ -251,11 +252,16 @@
 
     <!-- NUEVO: Plantillas Integración filtradas por este endpoint -->
     <div class="">
-      <app-plantillas [endpointIdFilter]="selectedEndpoint.se_id">
-      </app-plantillas>
+    <app-plantillas
+      [endpointIdFilter]="selectedEndpoint.se_id"
+      (stepNavigate)="onChildStep($event)"
+      (stepProgress)="stepProgress.emit($event)"
+    >
+    </app-plantillas>
     </div>
   </div>
 </div>
+}
 <p-toast></p-toast>
 <p-dialog
   [(visible)]="mostrarDialogoAgregar"

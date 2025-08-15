@@ -225,10 +225,10 @@
   </p-table>
 </div>
 
-<div *ngIf="selectedDestino" class="pt-6" id="camposPorDestino">
+<div *ngIf="selectedDestino" class="" id="camposPorDestino">
   <div class="rounded-lg bg-white">
     <!-- Tarjeta con info de la plantilla destino seleccionada -->
-    <div class="p-5 bg-blue-50 shadow-lg flex items-center justify-between">
+     @if(!ocultarTarjetaPlantillaD){    <div class="p-5 bg-blue-50 shadow-lg flex items-center justify-between">
       <div>
         <div class="flex items-center gap-2 text-lg font-semibold">
           <span class="text-blue-600">PLANTILLA DESTINO SELECCIONADA</span>
@@ -270,12 +270,13 @@
           (onClick)="abrirDialogoNuevoCampo()"
         ></p-button>
       </div>
-    </div>
+    </div>}
 
     <div *ngIf="selectedDestino" class="py-5" id="camposPorDestino">
       <app-transformacion-campos
         #transfCmp
         [pdId]="pdIdAsNumber"
+        (stepNavigate)="onChildStep($event)"
       ></app-transformacion-campos>
     </div>
   </div>

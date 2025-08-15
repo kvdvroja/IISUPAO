@@ -2,11 +2,27 @@
 <div class="bg-white rounded-t-lg">
   <div
     class="flex items-center justify-between"
-    [ngClass]="{ 'p-4 border-b': modo === 'lista' }"
+    [ngClass]="{ 'p-4': modo === 'lista' }"
   >
     <!-- Título y subtítulo dinámicos -->
-    <div class="flex items-center gap-2" *ngIf="modo === 'lista'">
-      <h2 class="text-xl font-semibold">SISTEMAS</h2>
+    <div *ngIf="modo === 'lista'" class="relative">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <h2
+            class="text-2xl md:text-3xl font-bold bg-gradient-to-r from-blue-600 to-blue-700 bg-clip-text text-transparent"
+          >
+            SISTEMAS
+          </h2>
+        </div>
+
+        <!-- (Opcional) espacio para acciones a la derecha -->
+        <!-- <div class="hidden sm:flex items-center gap-2"> ... </div> -->
+      </div>
+
+      <!-- Línea inferior con gradiente -->
+      <div
+        class="mt-2 h-1 bg-gradient-to-r from-blue-600 to-blue-700 rounded"
+      ></div>
     </div>
 
     <!-- Toolbar (igual tanto en lista como en detalle) -->
@@ -49,49 +65,100 @@
   @if (modo === 'detalle' && selectedSystem) {
   <div>
     <!-- Tarjeta del sistema -->
-    <div class="rounded-lg bg-white shadow-2xl flex flex-row p-4">
-      <button
-        pButton
-        type="button"
-        [text]="true"
-        class="h-8 w-8 flex items-center justify-center"
-        (click)="volverALaLista()"
-        title="Volver"
-      >
-        <i class="pi pi-chevron-left"></i>
-      </button>
-      <div class="flex flex-col">
-        <div class="px-2">
-          <div class="flex items-center gap-3 text-xl font-semibold">
-            <span class="text-blue-600">{{
-              selectedSystem.sistema_nombre
-            }}</span>
-            <span class="px-2 py-0.5 text-xs rounded-full border text-gray-700">
-              {{ selectedSystem.sistema_id }}
-            </span>
+    <div
+      class="relative bg-white/95 backdrop-blur-sm border border-blue-200 rounded-xl shadow-xl overflow-hidden"
+    >
+      <div class="p-6 md:p-8">
+        <div class="flex items-start justify-between gap-4">
+          <!-- Contenido principal -->
+          <div class="flex-1">
+            <!-- Nombre del sistema + código -->
+            <div class="flex items-center gap-4 mb-4">
+              <div class="flex items-center gap-3">
+                <button
+                  pButton
+                  type="button"
+                  [text]="true"
+                  class="absolute h-8 w-8 flex items-center justify-center"
+                  (click)="volverALaLista()"
+                  title="Volver"
+                >
+                  <i class="pi pi-chevron-left"></i>
+                </button>
+                <div
+                  class="w-1 md:w-1.5 h-7 md:h-8 bg-gradient-to-b from-blue-600 to-blue-700 rounded-full"
+                ></div>
+                <h1
+                  class="text-2xl md:text-4xl font-bold bg-gradient-to-r from-blue-600 to-blue-700 bg-clip-text text-transparent"
+                >
+                  {{ selectedSystem.sistema_nombre }}
+                </h1>
+              </div>
+
+              <span
+                class="text-xs md:text-lg px-3 md:px-4 py-1 md:py-2 rounded-lg bg-blue-100 text-blue-800 border border-blue-200 font-mono"
+              >
+                {{ selectedSystem.sistema_id }}
+              </span>
+            </div>
+
+            <!-- Descripción -->
+            <p
+              class="text-base md:text-xl text-gray-700 font-medium mb-4 md:mb-6 leading-relaxed"
+            >
+              {{ selectedSystem.sistema_descripcion || "—" }}
+            </p>
+
+            <!-- Estado y última actividad -->
+            <div class="flex flex-wrap items-center gap-4 md:gap-6 text-sm">
+              <div class="flex items-center gap-2">
+                <span
+                  class="font-semibold text-gray-600 uppercase tracking-wide"
+                  >Estado:</span
+                >
+                <span
+                  class="px-2.5 py-1 rounded-md border font-semibold"
+                  [ngClass]="{
+                    'bg-green-50 text-green-700 border-green-200':
+                      (selectedSystem.sistema_ind_estado || 'A') === 'A',
+                    'bg-yellow-50 text-yellow-700 border-yellow-200':
+                      (selectedSystem.sistema_ind_estado || 'A') === 'P',
+                    'bg-red-50 text-red-700 border-red-200':
+                      (selectedSystem.sistema_ind_estado || 'A') === 'I'
+                  }"
+                >
+                  {{ selectedSystem.sistema_ind_estado || "A" }}
+                </span>
+              </div>
+
+              <div class="flex items-center gap-2">
+                <span
+                  class="font-semibold text-gray-600 uppercase tracking-wide"
+                  >Última Actividad:</span
+                >
+                <span class="font-medium text-gray-800">
+                  {{
+                    selectedSystem.sistema_fecha_actividad
+                      | date : "dd MMM yyyy, HH:mm"
+                  }}
+                </span>
+              </div>
+            </div>
           </div>
 
-          <p class="mt-1 text-gray-700">
-            {{ selectedSystem.sistema_descripcion }}
-          </p>
-        </div>
-
-        <div class="py-2 px-2 text-sm text-gray-600 flex items-center gap-6">
-          <span
-            >Estado:
-            <span class="px-2 py-0.5 rounded-full border">
-              {{ selectedSystem.sistema_ind_estado || "A" }}
-            </span>
-          </span>
-          <span>
-            Última Actividad:
-            {{
-              selectedSystem.sistema_fecha_actividad
-                | date : "dd MMM yyyy, HH:mm"
-            }}
-          </span>
+          <!-- Acento visual derecha -->
+          <div class="hidden md:block">
+            <div
+              class="w-20 h-20 md:w-24 md:h-24 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-2xl opacity-10 rotate-12"
+            ></div>
+          </div>
         </div>
       </div>
+
+      <!-- Línea inferior con gradiente -->
+      <div
+        class="h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-blue-600"
+      ></div>
     </div>
 
     <!-- Pills / jerarquía (sin cambios) -->
@@ -290,6 +357,8 @@
           #endpointsCmp
           [sistemaId]="selectedSystem?.sistema_id || null"
           [sistemasLista]="sistemas"
+          (stepNavigate)="onChildNavigate($event)"
+          (stepProgress)="onChildProgress($event)"
         ></app-endpoints>
       </ng-container>
     </ng-container>
@@ -304,34 +373,6 @@
 >
   <div class="max-w-7xl mx-auto px-4 py-4">
     <div class="flex items-center justify-between gap-4">
-      <!-- Back / Next -->
-      <div class="flex items-center">
-        <button
-          pButton
-          type="button"
-          (click)="prevStep()"
-          [disabled]="currentIndex === 0"
-          label="Back"
-          icon="pi pi-chevron-left"
-          iconPos="left"
-          [severity]="'secondary'"
-        ></button>
-        <button
-          pButton
-          type="button"
-          (click)="nextStep()"
-          [disabled]="currentIndex === steps.length - 1"
-        >
-          <span class="inline-flex items-center gap-2">
-            {{ currentIndex === steps.length - 1 ? "Done" : "Next" }}
-            <i
-              *ngIf="currentIndex !== steps.length - 1"
-              class="pi pi-chevron-right"
-            ></i>
-          </span>
-        </button>
-      </div>
-
       <!-- Indicador de pasos -->
       <div class="flex items-center overflow-x-auto gap-3">
         <ng-container *ngFor="let s of steps; let i = index">
@@ -339,8 +380,8 @@
             <div
               class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium"
               [ngClass]="{
-                'bg-blue-600 text-white': i === currentIndex,
-                'bg-gray-200 text-gray-700': i !== currentIndex
+                'bg-blue-600 text-white': i === indicatorIndex,
+                'bg-gray-200 text-gray-700': i !== indicatorIndex
               }"
             >
               {{ i + 1 }}
@@ -349,8 +390,8 @@
               <p
                 class="text-sm font-medium"
                 [ngClass]="{
-                  'text-blue-600': i === currentIndex,
-                  'text-gray-900': i !== currentIndex
+                  'text-blue-600': i === indicatorIndex,
+                  'text-gray-900': i !== indicatorIndex
                 }"
               >
                 {{ s.title }}

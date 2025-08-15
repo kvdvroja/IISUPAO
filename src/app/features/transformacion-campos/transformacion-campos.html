@@ -1,15 +1,11 @@
-<!-- Cabecera -->
-<div
-  class="flex items-center justify-between border-b border-gray-200 p-3 bg-white"
->
+<!-- HEADER cuando NO hay selección -->
+<div *ngIf="!campoSeleccionado; else headerConSeleccion"
+     class="flex items-center justify-between border-b border-gray-200 p-3 bg-white">
   <div class="flex-1">
-    <h2 class="text-2xl font-bold text-gray-800">
-      TRANSFORMACIÓN DE CAMPOS
-    </h2>
+    <h2 class="text-2xl font-bold text-gray-800">TRANSFORMACIÓN DE CAMPOS</h2>
     <p class="text-sm text-gray-500">Gestión de transformación de campos</p>
   </div>
-
-  <div class="flex items-center space-x-2">
+    <div class="flex items-center space-x-2">
     <p-splitButton
       label="Acciones"
       icon="pi pi-cog"
@@ -36,6 +32,21 @@
   </div>
 </div>
 
+<!-- HEADER cuando SÍ hay selección -->
+<ng-template #headerConSeleccion>
+  <div class="flex items-center justify-between border-b border-gray-200 py-3 bg-white">
+    <div class="flex items-center gap-1">
+      <p-button icon="pi pi-chevron-left" [text]="true"
+                (onClick)="limpiarSeleccionCampo()"
+                pTooltip="Volver a lista de campos"></p-button>
+      <div>
+        <h2 class="text-xl font-bold text-gray-800">TRANSFORMACIÓN DE CAMPO SELECCIONADA</h2>
+        <p class="text-sm text-gray-500">Valores asociados</p>
+      </div>
+    </div>
+  </div>
+</ng-template>
+
   <!-- Móvil: Buscador -->
   <div *ngIf="pantallaPequena" class="p-2">
     <p-iconfield iconPosition="left" class="w-full mb-4">
@@ -50,7 +61,7 @@
   </div>
 
   <!-- Móvil: Lista -->
-  <div *ngIf="pantallaPequena" class="flex flex-col gap-4">
+  <div *ngIf="pantallaPequena && !campoSeleccionado" class="flex flex-col gap-4">
     <div
       *ngFor="let campo of datosFiltrados"
       class="bg-white p-4 rounded shadow border"
@@ -106,21 +117,21 @@
   </div>
 
   <!-- Escritorio: Tabla -->
-  <div *ngIf="!pantallaPequena" class="p-2 text-center text-gray-600">
-    <p-table
-      #dt
-      [value]="datosFiltrados"
-      dataKey="ct_id"
-      [paginator]="true"
-      [rows]="10"
-      [rowsPerPageOptions]="[10, 25, 50]"
-      [globalFilterFields]="[
-        'ct_campo_origen',
-        'ct_campo_destino',
-        'ct_tipo_transformacion'
-      ]"
-    >
-      <ng-template #header>
+<div *ngIf="!pantallaPequena && !campoSeleccionado" class="p-2 text-center text-gray-600">
+  <p-table
+    #dt
+    [value]="datosFiltrados"
+    dataKey="ct_id"
+    selectionMode="single"
+    [(selection)]="campoSeleccionado"
+    [metaKeySelection]="false"
+    rowHover
+    (onRowSelect)="onCampoSelected($event.data)"
+    [paginator]="true"
+    [rows]="10"
+    [rowsPerPageOptions]="[10, 25, 50]"
+    [globalFilterFields]="['ct_campo_origen','ct_campo_destino','ct_tipo_transformacion']">
+    <ng-template #header>
         <tr>
           <th>Id</th>
           <th>Origen</th>
@@ -133,7 +144,7 @@
       </ng-template>
 
       <ng-template #body let-row>
-        <tr>
+      <tr [pSelectableRow]="row">
           <td>{{ row.ct_id }}</td>
           <td>{{ row.ct_campo_origen }}</td>
           <td>{{ row.ct_campo_destino }}</td>
@@ -189,6 +200,49 @@
       </ng-template>
     </p-table>
   </div>
+
+  <!-- Tarjeta de detalle + tabla de valores -->
+<div *ngIf="campoSeleccionado" class="pt-6" id="valoresPorCampo">
+  <div class="rounded-lg bg-white">
+    @if(!ocultarTarjetaTransformacionCampo){    
+      <div class="p-5 bg-blue-50 shadow-lg flex items-center justify-between">
+      <div>
+        <div class="flex items-center gap-2 text-lg font-semibold">
+          <span class="text-blue-600">TRANSFORMACIÓN DE CAMPO SELECCIONADA</span>
+          <span class="px-2 py-0.5 text-xs rounded-full border text-gray-700">
+            ID: {{ campoSeleccionado.ct_id }}
+          </span>
+        </div>
+        <p class="mt-1 text-gray-700 truncate">
+          <strong>Origen:</strong> {{ campoSeleccionado.ct_campo_origen }} •
+          <strong>Destino:</strong> {{ campoSeleccionado.ct_campo_destino }} •
+          <strong>Tipo:</strong> {{ campoSeleccionado.ct_tipo_transformacion }}
+        </p>
+      </div>
+      <div class="flex items-center gap-2">
+        <p-button label="Nueva Transformación Valores" icon="pi pi-plus" severity="success"
+                  (onClick)="valoresComponent.abrirAgregar({ vt_camp_tran_id: campoSeleccionado.ct_id })">
+        </p-button>
+      </div>
+    </div>
+}
+    <div class="py-5">
+      <!-- Pasa el id correcto al hijo -->
+      <!-- Si tu relación es vt_camp_tran_id -> ct_id (lo más normal), usa ct_id -->
+      <app-transformacion-valor
+        #valoresComponent
+        [campoId]="campoSeleccionado.ct_id"
+        (stepNavigate)="onChildStep($event)"
+        >
+        
+      </app-transformacion-valor>
+
+      <!-- Si de verdad tu relación fuese vt_camp_tran_id -> pd_id, entonces usa esto:
+      <app-transformacion-valor [campoId]="campoSeleccionado?.pd_id"></app-transformacion-valor>
+      -->
+    </div>
+  </div>
+</div>
 
   <app-transformacion-valor #valoresRef style="display:none"></app-transformacion-valor>
 

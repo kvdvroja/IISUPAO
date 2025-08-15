@@ -62,9 +62,9 @@
   </div>
 </ng-template>
 @if (selectedPlantilla){
-<div class="pt-6" id="destinosPorPlantilla">
+<div class="" id="destinosPorPlantilla">
   <div class="rounded-lg bg-white">
-    <div class="p-5 bg-blue-50 flex items-center justify-between shadow-lg">
+    <div *ngIf="!ocultarTarjetaPlantillaI" class="p-5 bg-blue-50 flex items-center justify-between shadow-lg">
       <div>
         <div class="flex items-center gap-2 text-lg font-semibold">
           <span class="text-blue-600">{{ selectedPlantilla.pi_nombre }}</span>
@@ -118,6 +118,7 @@
       <app-plantilla-destino
         #pdCmp
         [plantillaIId]="selectedPlantilla.pi_id"
+        (stepNavigate)="onChildStep($event)"
       ></app-plantilla-destino>
     </div>
   </div>
