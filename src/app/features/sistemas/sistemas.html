@@ -1,31 +1,23 @@
-<!-- ======= ENCABEZADO ======= -->
-<div class="bg-white rounded-t-lg">
+<div class="bg-white rounded-t-lg dark:bg-gray-800">
   <div
     class="flex items-center justify-between"
     [ngClass]="{ 'p-4': modo === 'lista' }"
   >
-    <!-- Título y subtítulo dinámicos -->
     <div *ngIf="modo === 'lista'" class="relative">
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-3">
           <h2
-            class="text-2xl md:text-3xl font-bold bg-gradient-to-r from-blue-600 to-blue-700 bg-clip-text text-transparent"
+            class="text-2xl md:text-3xl font-bold bg-gradient-to-r from-blue-600 to-blue-700 dark:text-white bg-clip-text text-transparent"
           >
             SISTEMAS
           </h2>
         </div>
-
-        <!-- (Opcional) espacio para acciones a la derecha -->
-        <!-- <div class="hidden sm:flex items-center gap-2"> ... </div> -->
       </div>
-
-      <!-- Línea inferior con gradiente -->
       <div
         class="mt-2 h-1 bg-gradient-to-r from-blue-600 to-blue-700 rounded"
       ></div>
     </div>
 
-    <!-- Toolbar (igual tanto en lista como en detalle) -->
     <div class="flex items-center gap-2" *ngIf="modo === 'lista'">
       <p-splitButton
         label="Acciones"
@@ -61,18 +53,14 @@
     </div>
   </div>
 
-  <!-- ======= TARJETA + PILLS (solo en DETALLE) ======= -->
   @if (modo === 'detalle' && selectedSystem) {
   <div>
-    <!-- Tarjeta del sistema -->
     <div
       class="relative bg-white/95 backdrop-blur-sm border border-blue-200 rounded-xl shadow-xl overflow-hidden"
     >
       <div class="p-6 md:p-8">
         <div class="flex items-start justify-between gap-4">
-          <!-- Contenido principal -->
           <div class="flex-1">
-            <!-- Nombre del sistema + código -->
             <div class="flex items-center gap-4 mb-4">
               <div class="flex items-center gap-3">
                 <button
@@ -102,14 +90,11 @@
               </span>
             </div>
 
-            <!-- Descripción -->
             <p
               class="text-base md:text-xl text-gray-700 font-medium mb-4 md:mb-6 leading-relaxed"
             >
               {{ selectedSystem.sistema_descripcion || "—" }}
             </p>
-
-            <!-- Estado y última actividad -->
             <div class="flex flex-wrap items-center gap-4 md:gap-6 text-sm">
               <div class="flex items-center gap-2">
                 <span
@@ -145,8 +130,6 @@
               </div>
             </div>
           </div>
-
-          <!-- Acento visual derecha -->
           <div class="hidden md:block">
             <div
               class="w-20 h-20 md:w-24 md:h-24 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-2xl opacity-10 rotate-12"
@@ -154,32 +137,10 @@
           </div>
         </div>
       </div>
-
-      <!-- Línea inferior con gradiente -->
       <div
         class="h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-blue-600"
       ></div>
     </div>
-
-    <!-- Pills / jerarquía (sin cambios) -->
-    <!-- <div class="rounded-lg my-4 bg-white shadow-2xl">
-      <div class="px-4 py-4 flex flex-wrap gap-2">
-        <button
-          *ngFor="let p of pills"
-          type="button"
-          (click)="goStep(p.key)"
-          class="inline-flex items-center gap-2 rounded-md border border-gray-300 px-3 py-1.5 text-sm cursor-pointer"
-          [ngClass]="
-            currentStep === p.key
-              ? 'bg-black text-white border-transparent'
-              : 'bg-white'
-          "
-        >
-          <span>{{ p.icon }}</span>
-          {{ p.title }}
-        </button>
-      </div>
-    </div> -->
   </div>
   }
 
@@ -247,14 +208,14 @@
           class="border-b hover:bg-gray-50 transition-colors cursor-pointer"
         >
           <td
-            class="px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap"
+            class="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white whitespace-nowrap"
           >
             {{ sistema.sistema_id }}
           </td>
-          <td class="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
+          <td class="px-6 py-4 text-sm text-gray-900 dark:text-white whitespace-nowrap">
             {{ sistema.sistema_nombre }}
           </td>
-          <td class="px-6 py-4 text-sm text-gray-900">
+          <td class="px-6 py-4 text-sm text-gray-900 dark:text-white">
             <div class="truncate max-w-[40rem]">
               {{ sistema.sistema_descripcion }}
             </div>
@@ -289,19 +250,6 @@
                 (click)="$event.stopPropagation(); showEditar(sistema)"
               >
                 <i class="pi pi-pencil"></i>
-              </button>
-
-              <button
-                pButton
-                type="button"
-                [text]="true"
-                [rounded]="true"
-                [severity]="'info'"
-                class="btn-icon"
-                pTooltip="Ver Endpoints"
-                (click)="$event.stopPropagation(); entrarADetalle(sistema)"
-              >
-                <i class="pi pi-link"></i>
               </button>
 
               <button
@@ -355,6 +303,7 @@
       <ng-container *ngSwitchCase="'endpoints'">
         <app-endpoints
           #endpointsCmp
+          *ngIf="sistemas?.length"
           [sistemaId]="selectedSystem?.sistema_id || null"
           [sistemasLista]="sistemas"
           (stepNavigate)="onChildNavigate($event)"

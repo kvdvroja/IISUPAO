@@ -347,9 +347,7 @@ export class Sistemas implements OnInit, OnChanges, AfterViewInit {
   agregarDesdeEndpointsT(sistema_id: string) {
     if (!this.selectedSystem || this.selectedSystem.sistema_id !== sistema_id) {
       const s = this.sistemas.find((x) => x.sistema_id === sistema_id);
-      if (s) this.entrarADetalle(s);
     }
-    this.currentIndex = 0; // endpoints
     setTimeout(
       () => this.endpointsComponent?.AgregarEndpointT?.(sistema_id),
       0
