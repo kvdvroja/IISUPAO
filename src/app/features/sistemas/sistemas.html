@@ -212,7 +212,9 @@
           >
             {{ sistema.sistema_id }}
           </td>
-          <td class="px-6 py-4 text-sm text-gray-900 dark:text-white whitespace-nowrap">
+          <td
+            class="px-6 py-4 text-sm text-gray-900 dark:text-white whitespace-nowrap"
+          >
             {{ sistema.sistema_nombre }}
           </td>
           <td class="px-6 py-4 text-sm text-gray-900 dark:text-white">
@@ -363,7 +365,7 @@
 <p-dialog
   [(visible)]="mostrarDialogoAgregar"
   modal
-  header="Agregar nuevo sistema"
+  [header]="editando ? 'Editar sistema' : 'Agregar nuevo sistema'"
   [style]="{ width: '40rem' }"
   [breakpoints]="{ '960px': '90vw' }"
   [draggable]="false"
@@ -371,6 +373,18 @@
   (visibleChange)="cerrarDialogoAgregar()"
 >
   <div class="flex flex-col gap-4">
+    @if(editando){
+    <p-inputgroup class="shadow-lg">
+      <p-inputgroup-addon><i class="pi pi-calendar"></i></p-inputgroup-addon>
+      <input
+        pInputText
+        [(ngModel)]="nuevoSistema.sistema_id"
+        placeholder="Id"
+        disabled
+      />
+    </p-inputgroup>
+    }
+
     <p-inputgroup class="shadow-lg">
       <p-inputgroup-addon><i class="pi pi-calendar"></i></p-inputgroup-addon>
       <input
@@ -392,6 +406,41 @@
         class="w-full border border-gray-400 rounded-r p-2 text-gray-600"
       ></textarea>
     </p-inputgroup>
+
+<p-inputgroup class="">
+  <p-inputgroup-addon><i class="pi pi-lock"></i></p-inputgroup-addon>
+
+  <div class="flex items-center justify-between w-full px-3 py-2 border border-gray-400 rounded-r">
+    <span class="font-medium text-gray-700">¿Requiere autenticación?</span>
+
+    <!-- ToggleSwitch nuevo -->
+    <p-toggleSwitch
+      [(ngModel)]="nuevoSistema.sistema_requiere_auth"
+      [disabled]="registroExitoso"
+      inputId="requiere-auth"
+    />
+    <label for="requiere-auth" class="ml-2 text-sm text-gray-600">
+      {{ nuevoSistema.sistema_requiere_auth ? 'Sí' : 'No' }}
+    </label>
+  </div>
+</p-inputgroup>
+
+    @if(editando){
+    <p-button
+      [label]="
+        nuevoSistema.sistema_ind_estado === 'A' ? 'Desactivar' : 'Activar'
+      "
+      [icon]="
+        nuevoSistema.sistema_ind_estado === 'A'
+          ? 'pi pi-ban'
+          : 'pi pi-check-circle'
+      "
+      [severity]="
+        nuevoSistema.sistema_ind_estado === 'A' ? 'danger' : 'success'
+      "
+      (click)="toggleEstadoSistema()"
+    ></p-button>
+    }
 
     <div class="flex justify-end gap-2 pt-4">
       <p-button

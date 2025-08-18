@@ -28,6 +28,7 @@ import { Endpoint } from '../../core/services/mant/endpoint/endpoint';
 import { Output, EventEmitter } from '@angular/core';
 import { SplitButtonModule } from 'primeng/splitbutton';
 import { Plantillas } from '../plantillas/plantillas';
+import { ToggleSwitch } from 'primeng/toggleswitch';
 
 export type StepKey =
   | 'endpoints'
@@ -54,6 +55,7 @@ export type StepKey =
     Toast,
     SelectModule,
     Plantillas,
+    ToggleSwitch,
     SplitButtonModule,
   ],
   templateUrl: './endpoints.html',
@@ -86,10 +88,21 @@ export class Endpoints implements OnInit, OnChanges {
   registroExitoso: boolean = false;
   endpoint: EndpointI[] = [];
   sistemasOptions: { label: string; value: string }[] = [];
+  authOptions: { label: string; value: string | number }[] = [];
   opcionesTransformacion = [
     { label: 'Sí', value: true },
     { label: 'No', value: false },
   ];
+
+  httpMethodOptions = [
+  { label: 'GET',    value: 'GET' },
+  { label: 'POST',   value: 'POST' },
+  { label: 'PUT',    value: 'PUT' },
+  { label: 'PATCH',  value: 'PATCH' },
+  { label: 'DELETE', value: 'DELETE' },
+  { label: 'HEAD',   value: 'HEAD' },
+  { label: 'OPTIONS',value: 'OPTIONS' }
+];
   nuevoEndpoint: any = {
     se_sistema_id: '',
     se_nombre: '',
@@ -174,9 +187,12 @@ export class Endpoints implements OnInit, OnChanges {
     this.mostrarDialogoAgregar = true;
   }
 
-  AgregarEndpoint(): void {
-    this.mostrarDialogoAgregar = true;
+AgregarEndpoint(): void {
+  if (this.sistemaId) {
+    this.nuevoEndpoint.se_sistema_id = this.sistemaId;
   }
+  this.mostrarDialogoAgregar = true;
+}
 
   AgregarEndpointT(sistema_id: string): void {
     this.nuevoEndpoint.se_sistema_id = sistema_id;
@@ -297,11 +313,14 @@ export class Endpoints implements OnInit, OnChanges {
   }
 
   onChildStep(step: StepKey) {
-    // reenvía hacia arriba si lo necesitas
     this.stepNavigate.emit(step);
-
-    // oculta la tarjeta si pasas a destino/campos/valores
     this.ocultarTarjetaEndpoint =
       step === 'destino' || step === 'campos' || step === 'valores';
   }
+
+  onToggleAuth(): void {
+  if (!this.nuevoEndpoint.se_requiere_auth) {
+    this.nuevoEndpoint.se_auth_id = null;
+  }
+}
 }

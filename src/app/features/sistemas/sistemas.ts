@@ -26,10 +26,8 @@ import { SistemasI } from '../../core/interfaces/Sistemas';
 import { SistemasS } from '../../core/services/mant/sistemas/sistemas';
 
 import { Endpoints } from '../endpoints/endpoints';
-import { Plantillas } from '../plantillas/plantillas';
-import { TransformacionCampos } from '../transformacion-campos/transformacion-campos';
 import { TableRowSelectEvent } from 'primeng/table';
-import { PlantillaDestino } from '../plantilla-destino/plantilla-destino';
+import { ToggleSwitch } from 'primeng/toggleswitch';
 
 type StepKey = 'endpoints' | 'integracion' | 'destino' | 'campos' | 'valores';
 
@@ -49,6 +47,7 @@ type StepKey = 'endpoints' | 'integracion' | 'destino' | 'campos' | 'valores';
     Toast,
     ConfirmDialogModule,
     SplitButtonModule,
+    ToggleSwitch,
     FormsModule,
     Endpoints,
   ],
@@ -123,6 +122,7 @@ export class Sistemas implements OnInit, OnChanges, AfterViewInit {
     sistema_descripcion: '',
     sistema_usua_id: '',
     sistema_ind_estado: '',
+    sistema_requiere_auth: false,
   };
 
   accionesDropdown = [
@@ -192,13 +192,12 @@ export class Sistemas implements OnInit, OnChanges, AfterViewInit {
 
   progressPct = 0;
   indicatorIndex = 0;
-  
+
   onChildNavigate = (step: StepKey) => {
     const idx = this.stepToIndex[step];
-    if (idx !== undefined) this.indicatorIndex = idx; // <-- NO toques currentIndex
+    if (idx !== undefined) this.indicatorIndex = idx;
   };
 
-  // si quieres soportar un % opcional
   onChildProgress = (pct: number) => {
     this.progressPct = Math.max(0, Math.min(100, pct));
   };
@@ -245,6 +244,7 @@ export class Sistemas implements OnInit, OnChanges, AfterViewInit {
       sistema_descripcion: '',
       sistema_usua_id: '',
       sistema_ind_estado: '',
+      sistema_requiere_auth: false,
     };
   }
 
@@ -315,7 +315,6 @@ export class Sistemas implements OnInit, OnChanges, AfterViewInit {
     });
   }
 
-  // ===== Detalle / Steps internos =====
   entrarADetalle(s: SistemasI) {
     this.selectedSystem = s;
     this.modo = 'detalle';
@@ -352,5 +351,10 @@ export class Sistemas implements OnInit, OnChanges, AfterViewInit {
       () => this.endpointsComponent?.AgregarEndpointT?.(sistema_id),
       0
     );
+  }
+
+  toggleEstadoSistema(): void {
+    this.nuevoSistema.sistema_ind_estado =
+      this.nuevoSistema.sistema_ind_estado === 'A' ? 'I' : 'A';
   }
 }

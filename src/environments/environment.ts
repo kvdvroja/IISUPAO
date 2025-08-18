@@ -27,6 +27,10 @@ export const environment = {
   get getAllColas() { return `${this.colasApiUrl}get_all_queue`; },
   get colasCrudUrl() { return `${this.colasApiUrl}crud`; },
 
+  get autenticacionApiUrl() { return `${this.apiBaseUrl}authentication/`; },
+  get getAllAutenticacion() { return `${this.autenticacionApiUrl}get_all_authentication`; },
+  get autenticacionCrudUrl() { return `${this.autenticacionApiUrl}crud`; },
+
   get plantillaIntegracionApiUrl() { return `${this.apiBaseUrl}integration_templates/`; },
   get getAllPlantillaIntegracion() { return `${this.plantillaIntegracionApiUrl}get_all_integration_templates`; },
   get plantillaIntegracionCrud() { return `${this.plantillaIntegracionApiUrl}crud_integration`; },

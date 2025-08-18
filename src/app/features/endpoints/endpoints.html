@@ -265,7 +265,7 @@
 <p-toast></p-toast>
 <p-dialog
   [(visible)]="mostrarDialogoAgregar"
-  header="Agregar Endpoint"
+  [header]="nuevoEndpoint?.se_id ? 'Editar Endpoint' : 'Agregar Endpoint'"
   [style]="{ width: '40rem' }"
   [breakpoints]="{ '960px': '90vw' }"
   modal
@@ -280,10 +280,12 @@
         [(ngModel)]="nuevoEndpoint.se_sistema_id"
         [options]="sistemasOptions"
         placeholder="Seleccione un sistema"
+        [disabled]="true"
         class="w-full"
       />
     </div>
 
+    <!-- Nombre -->
     <p-inputgroup>
       <p-inputgroup-addon><i class="pi pi-tag"></i></p-inputgroup-addon>
       <input
@@ -293,39 +295,80 @@
       />
     </p-inputgroup>
 
+    <!-- URL -->
     <p-inputgroup>
       <p-inputgroup-addon><i class="pi pi-link"></i></p-inputgroup-addon>
       <input pInputText placeholder="URL" [(ngModel)]="nuevoEndpoint.se_url" />
     </p-inputgroup>
 
-    <p-inputgroup>
-      <p-inputgroup-addon><i class="pi pi-server"></i></p-inputgroup-addon>
-      <input
-        pInputText
-        placeholder="Método HTTP (GET, POST, etc)"
-        [(ngModel)]="nuevoEndpoint.se_metodo_http"
-      />
-    </p-inputgroup>
-
+    <!-- Método HTTP (Select) -->
     <div class="flex flex-col">
-      <label class="font-semibold text-sm">¿Requiere Transformar?</label>
+      <label class="font-semibold text-sm">Método HTTP</label>
       <p-select
-        [(ngModel)]="nuevoEndpoint.se_requiere_transformar"
-        [options]="opcionesTransformacion"
+        [(ngModel)]="nuevoEndpoint.se_metodo_http"
+        [options]="httpMethodOptions"
         optionLabel="label"
         optionValue="value"
-        placeholder="Seleccione"
+        placeholder="Seleccione método"
         class="w-full md:w-56"
       />
     </div>
 
+    <!-- Requiere Transformar (ToggleSwitch) -->
+    <div class="flex items-center justify-between border rounded px-3 py-2">
+      <label for="requiere-transformar" class="font-semibold text-sm">
+        ¿Requiere transformar?
+      </label>
+      <div class="flex items-center gap-2">
+        <p-toggleSwitch
+          inputId="requiere-transformar"
+          [(ngModel)]="nuevoEndpoint.se_requiere_transformar"
+        />
+        <span class="text-sm text-gray-600">
+          {{ nuevoEndpoint.se_requiere_transformar ? 'Sí' : 'No' }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Requiere Auth (ToggleSwitch) -->
+    <div class="flex items-center justify-between border rounded px-3 py-2">
+      <label for="requiere-auth" class="font-semibold text-sm">
+        ¿Requiere autenticación?
+      </label>
+      <div class="flex items-center gap-2">
+        <p-toggleSwitch
+          inputId="requiere-auth"
+          [(ngModel)]="nuevoEndpoint.se_requiere_auth"
+          (onChange)="onToggleAuth()"
+        />
+        <span class="text-sm text-gray-600">
+          {{ nuevoEndpoint.se_requiere_auth ? 'Sí' : 'No' }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Auth ID (Select condicional) -->
+    <div class="flex flex-col" *ngIf="nuevoEndpoint.se_requiere_auth">
+      <label class="font-semibold text-sm">Configuración de Auth</label>
+      <p-select
+        [(ngModel)]="nuevoEndpoint.se_auth_id"
+        [options]="authOptions"
+        optionLabel="label"
+        optionValue="value"
+        placeholder="Seleccione una configuración"
+        class="w-full"
+      />
+      <small class="text-gray-500 mt-1">Selecciona la configuración de autenticación para este endpoint.</small>
+    </div>
+
+    <!-- Acciones -->
     <div class="flex justify-end gap-2 pt-4">
       <p-button
         label="Cancelar"
         icon="pi pi-times"
         (click)="mostrarDialogoAgregar = false"
         outlined
-      ></p-button>
+      />
       <p-button
         label="Guardar"
         icon="pi pi-check"
@@ -335,9 +378,10 @@
           !nuevoEndpoint.se_nombre ||
           !nuevoEndpoint.se_url ||
           !nuevoEndpoint.se_metodo_http ||
+          (nuevoEndpoint.se_requiere_auth && !nuevoEndpoint.se_auth_id) ||
           nuevoEndpoint.se_requiere_transformar === undefined
         "
-      ></p-button>
+      />
     </div>
   </div>
 </p-dialog>
