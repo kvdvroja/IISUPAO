@@ -207,12 +207,17 @@
   </p-table>
 </div>
 @if(selectedEndpoint){
-  <div class="pt-6" id="plantillasPorEndpoint">
+<div class="pt-6" id="plantillasPorEndpoint">
   <div class="bg-blue-50 flex flex-col gap-4">
-    <div *ngIf="!ocultarTarjetaEndpoint" class="p-5 shadow-lg flex items-center justify-between">
+    <div
+      *ngIf="!ocultarTarjetaEndpoint"
+      class="p-5 shadow-lg flex items-center justify-between"
+    >
       <div>
         <div class="flex items-center gap-2 text-lg font-semibold">
-          <span class="text-blue-600 uppercase">{{ selectedEndpoint.se_nombre }}</span>
+          <span class="text-blue-600 uppercase">{{
+            selectedEndpoint.se_nombre
+          }}</span>
           <span class="px-2 py-0.5 text-xs rounded-full border text-gray-700">
             ID: {{ selectedEndpoint.se_id }}
           </span>
@@ -226,9 +231,7 @@
           </div>
           <div class="mt-1 flex gap-2">
             <span class="font-semibold">Método:</span>
-            <span
-              class="bg-black text-white font-mono px-4 rounded-lg"
-            >
+            <span class="bg-black text-white font-mono px-4 rounded-lg">
               {{ selectedEndpoint.se_metodo_http }}
             </span>
           </div>
@@ -252,12 +255,12 @@
 
     <!-- NUEVO: Plantillas Integración filtradas por este endpoint -->
     <div class="">
-    <app-plantillas
-      [endpointIdFilter]="selectedEndpoint.se_id"
-      (stepNavigate)="onChildStep($event)"
-      (stepProgress)="stepProgress.emit($event)"
-    >
-    </app-plantillas>
+      <app-plantillas
+        [endpointIdFilter]="selectedEndpoint.se_id"
+        (stepNavigate)="onChildStep($event)"
+        (stepProgress)="stepProgress.emit($event)"
+      >
+      </app-plantillas>
     </div>
   </div>
 </div>
@@ -310,24 +313,24 @@
         optionLabel="label"
         optionValue="value"
         placeholder="Seleccione método"
-        class="w-full md:w-56"
+        class="w-full"
       />
     </div>
 
-    <!-- Requiere Transformar (ToggleSwitch) -->
-    <div class="flex items-center justify-between border rounded px-3 py-2">
-      <label for="requiere-transformar" class="font-semibold text-sm">
-        ¿Requiere transformar?
-      </label>
-      <div class="flex items-center gap-2">
-        <p-toggleSwitch
-          inputId="requiere-transformar"
-          [(ngModel)]="nuevoEndpoint.se_requiere_transformar"
-        />
-        <span class="text-sm text-gray-600">
-          {{ nuevoEndpoint.se_requiere_transformar ? 'Sí' : 'No' }}
-        </span>
-      </div>
+    <div class="flex flex-col">
+      <label class="font-semibold text-sm">Tipo de Endpoint</label>
+      <p-select
+        [(ngModel)]="nuevoEndpoint.se_tipo"
+        [options]="tipoOptions"
+        optionLabel="label"
+        optionValue="value"
+        placeholder="Seleccione tipo"
+        class="w-full"
+        (onChange)="onTipoChange()"
+      />
+      <small class="text-gray-500 mt-1">
+        NORM = Normal • AUTH = Requiere autenticación
+      </small>
     </div>
 
     <!-- Requiere Auth (ToggleSwitch) -->
@@ -342,7 +345,7 @@
           (onChange)="onToggleAuth()"
         />
         <span class="text-sm text-gray-600">
-          {{ nuevoEndpoint.se_requiere_auth ? 'Sí' : 'No' }}
+          {{ nuevoEndpoint.se_requiere_auth ? "Sí" : "No" }}
         </span>
       </div>
     </div>
@@ -358,7 +361,24 @@
         placeholder="Seleccione una configuración"
         class="w-full"
       />
-      <small class="text-gray-500 mt-1">Selecciona la configuración de autenticación para este endpoint.</small>
+      <small class="text-gray-500 mt-1"
+        >Selecciona la configuración de autenticación para este endpoint.</small
+      >
+    </div>
+
+    <div class="flex items-center justify-between border rounded px-3 py-2">
+      <label for="requiere-transformar" class="font-semibold text-sm">
+        ¿Requiere transformar?
+      </label>
+      <div class="flex items-center gap-2">
+        <p-toggleSwitch
+          inputId="requiere-transformar"
+          [(ngModel)]="nuevoEndpoint.se_requiere_transformar"
+        />
+        <span class="text-sm text-gray-600">
+          {{ nuevoEndpoint.se_requiere_transformar ? "Sí" : "No" }}
+        </span>
+      </div>
     </div>
 
     <!-- Acciones -->

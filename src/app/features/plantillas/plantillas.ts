@@ -8,7 +8,6 @@ import {
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { MessageService } from 'primeng/api';
 import { TableModule } from 'primeng/table';
-import { FloatLabelModule } from 'primeng/floatlabel';
 import { InputTextModule } from 'primeng/inputtext';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { InputGroupModule } from 'primeng/inputgroup';
@@ -18,7 +17,6 @@ import { IconField } from 'primeng/iconfield';
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
-import { NgFor } from '@angular/common';
 import { Dialog } from 'primeng/dialog';
 import { Toast } from 'primeng/toast';
 import { ViewChild } from '@angular/core';
@@ -31,7 +29,8 @@ import { ChangeDetectorRef } from '@angular/core';
 import { PlantillaIntegracionS } from '../../core/services/mant/plantilla-integracion/plantilla-integracion';
 import { PlantillaDestino } from '../plantilla-destino/plantilla-destino';
 import { Input, Output, EventEmitter } from '@angular/core';
-import { SimpleChanges } from '@angular/core';
+import { ToggleSwitch } from 'primeng/toggleswitch';
+import { Textarea } from 'primeng/textarea';
 import { Endpoint } from '../../core/services/mant/endpoint/endpoint';
 import { EndpointI } from '../../core/interfaces/Endpoint';
 import { ColaS } from '../../core/services/mant/cola/cola';
@@ -62,6 +61,8 @@ export type StepKey =
     SelectModule,
     SplitButtonModule,
     PlantillaDestino,
+    ToggleSwitch,
+    Textarea,
   ],
   templateUrl: './plantillas.html',
   styleUrl: './plantillas.css',
@@ -94,8 +95,18 @@ export class Plantillas implements OnInit, OnChanges {
   registroExitoso = false;
   plantillaISeleccionado: Plantilla_IntegracionI | null = null;
   modoFiltradoPorSistema: boolean = false;
+  mostrarDialogoAsignarJob = false;
 
   plantillas: Plantilla_IntegracionI[] = [];
+  plantillaParaJob: Plantilla_IntegracionI | null = null;
+
+  // opciones de JOB (cárgalas desde tu servicio real)
+  jobOptions: { label: string; value: string | number }[] = [];
+  selectedJobId: string | number | null = null;
+
+  // JSON de parámetros (opcional)
+  jobParamsRawText = '';
+  jobParamsRawError = false;
 
   //
   piDataPairs: Array<{ key: string; value: string }> = [];
@@ -110,9 +121,27 @@ export class Plantillas implements OnInit, OnChanges {
   editingSchemaIndex: number | null = null;
   //
 
+  // Modo “en bruto” / estructurado
+  modoPiDataRaw = false;
+  modoPiSchemaRaw = false;
+  // Opcional si quieres también modo raw para pi_valida:
+  modoPiValidaRaw = false;
+
+  // Textareas para pegar JSON
+  piDataRawText = '';
+  piSchemaRawText = '';
+  piValidaRawText = '';
+
+  // Validaciones de JSON
+  piDataRawError = false;
+  piSchemaRawError = false;
+  piValidaRawError = false;
+  //
+
   opcionesTipoServicio = [
     { label: 'MANUAL', value: 'MANUAL' },
     { label: 'ONLINE', value: 'ONLINE' },
+    { label: 'JOB', value: 'JOB' },
   ];
 
   opcionesValida = [
@@ -131,7 +160,7 @@ export class Plantillas implements OnInit, OnChanges {
       icon: 'pi pi-refresh',
       command: () => {
         this.cargarPlantillas();
-      }
+      },
     },
     {
       label: 'Exportar',
@@ -166,7 +195,6 @@ export class Plantillas implements OnInit, OnChanges {
     if (!data || Array.isArray(data)) return;
     this.selectedPlantilla = data;
     this.ocultarTarjetaPlantillaI = false;
-    // mueve la barra a "destino"
     this.stepNavigate.emit('destino');
 
     setTimeout(
@@ -178,11 +206,11 @@ export class Plantillas implements OnInit, OnChanges {
     );
   }
 
-limpiarSeleccionPlantilla() {
-  this.selectedPlantilla = null;
-  this.ocultarTarjetaPlantillaI = false;
-  this.stepNavigate.emit('integracion');
-}
+  limpiarSeleccionPlantilla() {
+    this.selectedPlantilla = null;
+    this.ocultarTarjetaPlantillaI = false;
+    this.stepNavigate.emit('integracion');
+  }
 
   ngOnChanges(): void {
     this.cargarPlantillas();
@@ -274,10 +302,46 @@ limpiarSeleccionPlantilla() {
     this.editando = true;
     this.nuevaPlantilla = { ...plantilla };
     this.mostrarDialogoAgregar = true;
-
     this.clearAllDynamicFields();
+
     this.loadPairsFromPiData(this.nuevaPlantilla.pi_data || {});
     this.loadPairsFromPiSchema(this.nuevaPlantilla.pi_schema || {});
+
+    try {
+      this.piDataRawText = JSON.stringify(
+        this.nuevaPlantilla.pi_data ?? {},
+        null,
+        2
+      );
+    } catch {
+      this.piDataRawText = '';
+    }
+    try {
+      this.piSchemaRawText = JSON.stringify(
+        this.nuevaPlantilla.pi_schema ?? {},
+        null,
+        2
+      );
+    } catch {
+      this.piSchemaRawText = '';
+    }
+    this.modoPiDataRaw = false;
+    this.modoPiSchemaRaw = false;
+    this.piDataRawError = false;
+    this.piSchemaRawError = false;
+
+    // Opcional pi_valida RAW
+    try {
+      this.piValidaRawText = JSON.stringify(
+        this.nuevaPlantilla.pi_valida ?? '',
+        null,
+        2
+      );
+    } catch {
+      this.piValidaRawText = '';
+    }
+    this.modoPiValidaRaw = false;
+    this.piValidaRawError = false;
 
     this.cargarEndpointsOptions();
     this.cargarColasOptions();
@@ -294,8 +358,7 @@ limpiarSeleccionPlantilla() {
 
   onBuscarGlobal(event: Event): void {
     const input = (event.target as HTMLInputElement).value;
-      this.dt.filterGlobal(input, 'contains');
-
+    this.dt.filterGlobal(input, 'contains');
   }
 
   AgregarPlantilla(): void {
@@ -305,6 +368,18 @@ limpiarSeleccionPlantilla() {
     this.clearAllDynamicFields();
     this.selectedEndpointId = null;
     this.selectedColaId = null;
+
+    // Reset modos y textos RAW
+    this.modoPiDataRaw = false;
+    this.modoPiSchemaRaw = false;
+    this.modoPiValidaRaw = false;
+    this.piDataRawText = '';
+    this.piSchemaRawText = '';
+    this.piValidaRawText = '';
+    this.piDataRawError = false;
+    this.piSchemaRawError = false;
+    this.piValidaRawError = false;
+
     this.cargarEndpointsOptions();
     this.cargarColasOptions();
   }
@@ -316,8 +391,17 @@ limpiarSeleccionPlantilla() {
     this.nuevaPlantilla = this.nuevaPlantillaBase();
     this.selectedEndpointId = null;
     this.selectedColaId = null;
-  }
 
+    this.modoPiDataRaw = false;
+    this.modoPiSchemaRaw = false;
+    this.modoPiValidaRaw = false;
+    this.piDataRawText = '';
+    this.piSchemaRawText = '';
+    this.piValidaRawText = '';
+    this.piDataRawError = false;
+    this.piSchemaRawError = false;
+    this.piValidaRawError = false;
+  }
   guardar(): void {
     if (
       !this.nuevaPlantilla.pi_codigo ||
@@ -327,9 +411,37 @@ limpiarSeleccionPlantilla() {
     )
       return;
 
+    if (
+      this.modoPiDataRaw &&
+      (this.piDataRawError || !this.piDataRawText?.trim())
+    )
+      return;
+    if (
+      this.modoPiSchemaRaw &&
+      (this.piSchemaRawError || !this.piSchemaRawText?.trim())
+    )
+      return;
+    if (
+      this.modoPiValidaRaw &&
+      (this.piValidaRawError || !this.piValidaRawText?.trim())
+    )
+      return;
+
     const payload: any = { ...this.nuevaPlantilla };
-    payload.pi_data = this.pairsToObject();
-    payload.pi_schema = this.schemaPairsToObject();
+
+    // pi_data
+    if (this.modoPiDataRaw) {
+      payload.pi_data = JSON.parse(this.piDataRawText);
+    } else {
+      payload.pi_data = this.pairsToObject();
+    }
+
+    // pi_schema
+    if (this.modoPiSchemaRaw) {
+      payload.pi_schema = JSON.parse(this.piSchemaRawText);
+    } else {
+      payload.pi_schema = this.schemaPairsToObject();
+    }
 
     if (
       payload.pi_numreg_peticion !== null &&
@@ -591,8 +703,129 @@ limpiarSeleccionPlantilla() {
     });
   }
 
-    onChildStep(step: StepKey) {
+  onChildStep(step: StepKey) {
     this.stepNavigate.emit(step);
-    this.ocultarTarjetaPlantillaI = step === 'campos' || step === 'valores'
+    this.ocultarTarjetaPlantillaI = step === 'campos' || step === 'valores';
+  }
+
+  private isValidJson(text: string): boolean {
+    try {
+      JSON.parse(text);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  onTogglePiDataRaw(): void {
+    // Si pasas de estructurado → bruto, precarga JSON formateado
+    if (!this.modoPiDataRaw) {
+      const obj = this.pairsToObject(); // ya existe
+      this.piDataRawText = JSON.stringify(obj, null, 2);
+    }
+    this.modoPiDataRaw = !this.modoPiDataRaw;
+    this.validatePiDataRaw();
+  }
+
+  onTogglePiSchemaRaw(): void {
+    if (!this.modoPiSchemaRaw) {
+      const obj = this.schemaPairsToObject(); // ya existe
+      this.piSchemaRawText = JSON.stringify(obj, null, 2);
+    }
+    this.modoPiSchemaRaw = !this.modoPiSchemaRaw;
+    this.validatePiSchemaRaw();
+  }
+
+  onTogglePiValidaRaw(): void {
+    if (!this.modoPiValidaRaw) {
+      this.piValidaRawText = this.nuevaPlantilla.pi_valida
+        ? JSON.stringify(this.nuevaPlantilla.pi_valida, null, 2)
+        : '';
+    }
+    this.modoPiValidaRaw = !this.modoPiValidaRaw;
+    this.validatePiValidaRaw();
+  }
+
+  validatePiDataRaw(): void {
+    this.piDataRawError = !(
+      this.piDataRawText?.trim() && this.isValidJson(this.piDataRawText)
+    );
+  }
+
+  validatePiSchemaRaw(): void {
+    this.piSchemaRawError = !(
+      this.piSchemaRawText?.trim() && this.isValidJson(this.piSchemaRawText)
+    );
+  }
+
+  validatePiValidaRaw(): void {
+    if (!this.modoPiValidaRaw) {
+      this.piValidaRawError = false;
+      return;
+    }
+    // Si quieres exigir JSON válido en valida raw:
+    this.piValidaRawError = !(
+      this.piValidaRawText?.trim() && this.isValidJson(this.piValidaRawText)
+    );
+  }
+
+  abrirAsignarJob(plantilla: Plantilla_IntegracionI): void {
+    this.plantillaParaJob = plantilla;
+    this.selectedJobId = null;
+    this.jobParamsRawText = '';
+    this.jobParamsRawError = false;
+    this.cargarJobsOptions(); // traer del backend
+    this.mostrarDialogoAsignarJob = true;
+  }
+
+  validateJobParamsRaw(): void {
+    if (!this.jobParamsRawText?.trim()) {
+      this.jobParamsRawError = false; // vacío es permitido
+      return;
+    }
+    try {
+      JSON.parse(this.jobParamsRawText);
+      this.jobParamsRawError = false;
+    } catch {
+      this.jobParamsRawError = true;
+    }
+  }
+
+  cargarJobsOptions(): void {
+    // TODO: reemplazar por tu servicio real de JOBs
+    // this.jobsService.getAll().subscribe(...)
+    this.jobOptions = [
+      { label: 'JOB Diario (ID 101)', value: 101 },
+      { label: 'JOB Semanal (ID 102)', value: 102 },
+      { label: 'JOB Mensual (ID 103)', value: 103 },
+    ];
+  }
+
+  guardarAsignacionJob(): void {
+    if (!this.plantillaParaJob || !this.selectedJobId || this.jobParamsRawError)
+      return;
+
+    const payload = {
+      pi_id: this.plantillaParaJob.pi_id,
+      job_id: this.selectedJobId,
+      params: this.jobParamsRawText?.trim()
+        ? JSON.parse(this.jobParamsRawText)
+        : null,
+    };
+
+    // TODO: llama a tu endpoint real de asignación
+    // this.plantillaIntegracionService.asignarJob(payload).subscribe({
+    //   next: () => { ... },
+    //   error: () => { ... }
+    // });
+
+    // Por ahora, feedback inmediato:
+    console.log('Asignar JOB payload:', payload);
+    this.messageService.add({
+      severity: 'success',
+      summary: 'JOB asignado',
+      detail: `Se asignó el JOB ${this.selectedJobId} a la plantilla.`,
+    });
+    this.mostrarDialogoAsignarJob = false;
   }
 }

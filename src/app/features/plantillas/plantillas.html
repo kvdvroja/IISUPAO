@@ -64,7 +64,10 @@
 @if (selectedPlantilla){
 <div class="" id="destinosPorPlantilla">
   <div class="rounded-lg bg-white">
-    <div *ngIf="!ocultarTarjetaPlantillaI" class="p-5 bg-blue-50 flex items-center justify-between shadow-lg">
+    <div
+      *ngIf="!ocultarTarjetaPlantillaI"
+      class="p-5 bg-blue-50 flex items-center justify-between shadow-lg"
+    >
       <div>
         <div class="flex items-center gap-2 text-lg font-semibold">
           <span class="text-blue-600">{{ selectedPlantilla.pi_nombre }}</span>
@@ -126,7 +129,8 @@
 }
 
 <!-- Tabs -->
-<div *ngIf="pantallaPequena && !selectedPlantilla" class="p-2">
+@if(pantallaPequena && !selectedPlantilla){
+<div class="p-2">
   <p-iconfield iconPosition="left" class="w-full mb-4">
     <p-inputicon><i class="pi pi-search"></i></p-inputicon>
     <input
@@ -175,6 +179,20 @@
         >
           <i class="pi pi-plus"></i>
         </button>
+        @if(plantilla.pi_tipo_servicio === 'JOB'){
+        <button
+          pButton
+          type="button"
+          [text]="true"
+          [rounded]="true"
+          [severity]="'help'"
+          class="btn-icon"
+          pTooltip="Asignar JOB"
+          (click)="$event.stopPropagation(); abrirAsignarJob(plantilla)"
+        >
+          <i class="pi pi-briefcase"></i>
+        </button>
+        }
         <button
           pButton
           type="button"
@@ -191,7 +209,7 @@
     </div>
   </div>
 </div>
-@if (!pantallaPequena && !selectedPlantilla) {
+} @if (!pantallaPequena && !selectedPlantilla) {
 <div class="p-2 text-center text-gray-600">
   <p-table
     #dt
@@ -264,6 +282,21 @@
             >
               <i class="pi pi-plus"></i>
             </button>
+            @if(plantilla.pi_tipo_servicio === 'JOB'){
+            <button
+              pButton
+              type="button"
+              [text]="true"
+              [rounded]="true"
+              [severity]="'help'"
+              class="btn-icon"
+              pTooltip="Asignar JOB"
+              (click)="$event.stopPropagation(); abrirAsignarJob(plantilla)"
+            >
+              <i class="pi pi-briefcase"></i>
+            </button>
+            }
+
             <button
               pButton
               type="button"
@@ -295,7 +328,7 @@
 <p-dialog
   [(visible)]="mostrarDialogoAgregar"
   header="Agregar Plantilla"
-  [style]="{ width: '60rem' }"
+  [style]="{ width: '80rem' }"
   [breakpoints]="{ '960px': '90vw' }"
   modal
   [dismissableMask]="true"
@@ -303,23 +336,25 @@
   (visibleChange)="cerrarDialogoAgregar()"
 >
   <div class="flex flex-col gap-4 h-full">
-    <p-inputgroup>
-      <p-inputgroup-addon><i class="pi pi-tag"></i></p-inputgroup-addon>
-      <input
-        pInputText
-        placeholder="Codigo de Plantilla"
-        [(ngModel)]="nuevaPlantilla.pi_codigo"
-      />
-    </p-inputgroup>
-    <!-- Nombre -->
-    <p-inputgroup>
-      <p-inputgroup-addon><i class="pi pi-tag"></i></p-inputgroup-addon>
-      <input
-        pInputText
-        placeholder="Nombre de la plantilla"
-        [(ngModel)]="nuevaPlantilla.pi_nombre"
-      />
-    </p-inputgroup>
+    <div class="flex flex-row gap-2">
+      <p-inputgroup>
+        <p-inputgroup-addon><i class="pi pi-tag"></i></p-inputgroup-addon>
+        <input
+          pInputText
+          placeholder="Codigo de Plantilla"
+          [(ngModel)]="nuevaPlantilla.pi_codigo"
+        />
+      </p-inputgroup>
+      <!-- Nombre -->
+      <p-inputgroup>
+        <p-inputgroup-addon><i class="pi pi-tag"></i></p-inputgroup-addon>
+        <input
+          pInputText
+          placeholder="Nombre de la plantilla"
+          [(ngModel)]="nuevaPlantilla.pi_nombre"
+        />
+      </p-inputgroup>
+    </div>
 
     <!-- Descripción -->
     <p-inputgroup>
@@ -360,27 +395,28 @@
     </div>
 
     <!-- URL -->
-    <p-inputgroup>
-      <p-inputgroup-addon><i class="pi pi-globe"></i></p-inputgroup-addon>
-      <input
-        pInputText
-        placeholder="URL"
-        [(ngModel)]="nuevaPlantilla.pi_url"
-        disabled="true"
-      />
-    </p-inputgroup>
+    <div class="flex flex-row gap-2">
+      <p-inputgroup>
+        <p-inputgroup-addon><i class="pi pi-globe"></i></p-inputgroup-addon>
+        <input
+          pInputText
+          placeholder="URL"
+          [(ngModel)]="nuevaPlantilla.pi_url"
+          disabled="true"
+        />
+      </p-inputgroup>
 
-    <!-- Método HTTP -->
-    <p-inputgroup>
-      <p-inputgroup-addon><i class="pi pi-server"></i></p-inputgroup-addon>
-      <input
-        pInputText
-        placeholder="Método HTTP"
-        [(ngModel)]="nuevaPlantilla.pi_metodo_http"
-        disabled="true"
-      />
-    </p-inputgroup>
-
+      <!-- Método HTTP -->
+      <p-inputgroup>
+        <p-inputgroup-addon><i class="pi pi-server"></i></p-inputgroup-addon>
+        <input
+          pInputText
+          placeholder="Método HTTP"
+          [(ngModel)]="nuevaPlantilla.pi_metodo_http"
+          disabled="true"
+        />
+      </p-inputgroup>
+    </div>
     <div class="flex flex-col">
       <label class="font-semibold text-sm">Colas</label>
       <p-select
@@ -396,150 +432,214 @@
     </div>
 
     <!-- pi_data (pares key/value) -->
+    <!-- pi_data -->
     <div class="flex flex-col gap-2 pt-2">
-      <label class="font-semibold text-sm">Parámetros (pi_data)</label>
-
-      <div class="flex grid-cols-1 md:grid-cols-12 gap-2">
-        <p-inputgroup class="md:col-span-5">
-          <p-inputgroup-addon><i class="pi pi-key"></i></p-inputgroup-addon>
-          <input pInputText placeholder="Clave (key)" [(ngModel)]="newKVKey" />
-        </p-inputgroup>
-
-        <p-inputgroup class="md:col-span-6">
-          <p-inputgroup-addon><i class="pi pi-pencil"></i></p-inputgroup-addon>
-          <input
-            pInputText
-            placeholder="Valor (value)"
-            [(ngModel)]="newKVValue"
+      <div class="flex items-center justify-between">
+        <label class="font-semibold text-sm">Parámetros (pi_data)</label>
+        <div class="flex items-center gap-2">
+          <span class="text-xs text-gray-600">En bruto (JSON)</span>
+          <p-toggleSwitch
+            [ngModel]="modoPiDataRaw"
+            (ngModelChange)="onTogglePiDataRaw()"
           />
-        </p-inputgroup>
-
-        <div class="md:col-span-1 flex items-center">
-          <p-button
-            [label]="editingKVIndex !== null ? 'Actualizar' : 'Agregar'"
-            icon="pi pi-plus"
-            (click)="addOrUpdateKV()"
-            [disabled]="!newKVKey"
-          ></p-button>
         </div>
       </div>
 
-      <p-table
-        [value]="piDataPairs"
-        [paginator]="false"
-        [style]="{ 'max-height': '200px', overflow: 'auto' }"
-      >
-        <ng-template #header>
-          <tr>
-            <th style="width: 40%">Clave</th>
-            <th>Valor</th>
-            <th style="width: 120px">Acciones</th>
-          </tr>
-        </ng-template>
+      <!-- MODO ESTRUCTURADO -->
+      <ng-container *ngIf="!modoPiDataRaw; else piDataRawTpl">
+        <div class="flex grid-cols-1 md:grid-cols-12 gap-2">
+          <p-inputgroup class="md:col-span-5">
+            <p-inputgroup-addon><i class="pi pi-key"></i></p-inputgroup-addon>
+            <input
+              pInputText
+              placeholder="Clave (key)"
+              [(ngModel)]="newKVKey"
+            />
+          </p-inputgroup>
 
-        <ng-template #body let-row let-i="rowIndex">
-          <tr>
-            <td class="text-left break-words">{{ row.key }}</td>
-            <td class="text-left break-words">{{ row.value }}</td>
-            <td class="text-center">
-              <div class="flex gap-2 justify-center">
-                <p-button
-                  icon="pi pi-pencil"
-                  severity="secondary"
-                  rounded
-                  (onClick)="editKV(i)"
-                ></p-button>
-                <p-button
-                  icon="pi pi-trash"
-                  severity="danger"
-                  rounded
-                  (onClick)="removeKV(i)"
-                ></p-button>
-              </div>
-            </td>
-          </tr>
-        </ng-template>
+          <p-inputgroup class="md:col-span-6">
+            <p-inputgroup-addon
+              ><i class="pi pi-pencil"></i
+            ></p-inputgroup-addon>
+            <input
+              pInputText
+              placeholder="Valor (value)"
+              [(ngModel)]="newKVValue"
+            />
+          </p-inputgroup>
 
-        <ng-template #emptymessage>
-          <tr>
-            <td colspan="3">Sin parámetros.</td>
-          </tr>
-        </ng-template>
-      </p-table>
+          <div class="md:col-span-1 flex items-center">
+            <p-button
+              [label]="editingKVIndex !== null ? 'Actualizar' : 'Agregar'"
+              icon="pi pi-plus"
+              (click)="addOrUpdateKV()"
+              [disabled]="!newKVKey"
+            />
+          </div>
+        </div>
+
+        <p-table
+          [value]="piDataPairs"
+          [paginator]="false"
+          [style]="{ 'max-height': '200px', overflow: 'auto' }"
+        >
+          <ng-template #header>
+            <tr>
+              <th style="width: 40%">Clave</th>
+              <th>Valor</th>
+              <th style="width: 120px">Acciones</th>
+            </tr>
+          </ng-template>
+          <ng-template #body let-row let-i="rowIndex">
+            <tr>
+              <td class="text-left break-words">{{ row.key }}</td>
+              <td class="text-left break-words">{{ row.value }}</td>
+              <td class="text-center">
+                <div class="flex gap-2 justify-center">
+                  <p-button
+                    icon="pi pi-pencil"
+                    severity="secondary"
+                    rounded
+                    (onClick)="editKV(i)"
+                  ></p-button>
+                  <p-button
+                    icon="pi pi-trash"
+                    severity="danger"
+                    rounded
+                    (onClick)="removeKV(i)"
+                  ></p-button>
+                </div>
+              </td>
+            </tr>
+          </ng-template>
+          <ng-template #emptymessage>
+            <tr>
+              <td colspan="3">Sin parámetros.</td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </ng-container>
+
+      <!-- MODO EN BRUTO (JSON) -->
+      <ng-template #piDataRawTpl>
+        <textarea
+          pTextarea
+          [(ngModel)]="piDataRawText"
+          (ngModelChange)="validatePiDataRaw()"
+          autoResize
+          rows="8"
+          placeholder='Pegue aquí JSON válido. Ej: {"a":1,"b":[1,2,3]}'
+          class="w-full"
+        ></textarea>
+        <small *ngIf="piDataRawError" class="text-red-600"
+          >JSON inválido.</small
+        >
+      </ng-template>
     </div>
 
+    <!-- pi_schema -->
     <div class="flex flex-col gap-2 pt-2">
-      <label class="font-semibold text-sm">Esquema (pi_schema)</label>
-
-      <div class="flex grid-cols-1 md:grid-cols-12 gap-2">
-        <p-inputgroup class="md:col-span-5">
-          <p-inputgroup-addon><i class="pi pi-key"></i></p-inputgroup-addon>
-          <input
-            pInputText
-            placeholder="Clave (key)"
-            [(ngModel)]="newSchemaKey"
+      <div class="flex items-center justify-between">
+        <label class="font-semibold text-sm">Esquema (pi_schema)</label>
+        <div class="flex items-center gap-2">
+          <span class="text-xs text-gray-600">En bruto (JSON)</span>
+          <p-toggleSwitch
+            [ngModel]="modoPiSchemaRaw"
+            (ngModelChange)="onTogglePiSchemaRaw()"
           />
-        </p-inputgroup>
-
-        <p-inputgroup class="md:col-span-6">
-          <p-inputgroup-addon><i class="pi pi-pencil"></i></p-inputgroup-addon>
-          <input
-            pInputText
-            placeholder="Valor (value)"
-            [(ngModel)]="newSchemaValue"
-          />
-        </p-inputgroup>
-
-        <div class="md:col-span-1 flex items-center">
-          <p-button
-            [label]="editingSchemaIndex !== null ? 'Actualizar' : 'Agregar'"
-            icon="pi pi-plus"
-            (click)="addOrUpdateSchemaKV()"
-            [disabled]="!newSchemaKey"
-          ></p-button>
         </div>
       </div>
 
-      <p-table
-        [value]="schemaPairs"
-        [paginator]="false"
-        [style]="{ 'max-height': '200px', overflow: 'auto' }"
-      >
-        <ng-template #header>
-          <tr>
-            <th style="width: 40%">Clave</th>
-            <th>Valor</th>
-            <th style="width: 120px">Acciones</th>
-          </tr>
-        </ng-template>
-        <ng-template #body let-row let-i="rowIndex">
-          <tr>
-            <td class="text-left break-words">{{ row.key }}</td>
-            <td class="text-left break-words">{{ row.value }}</td>
-            <td class="text-center">
-              <div class="flex gap-2 justify-center">
-                <p-button
-                  icon="pi pi-pencil"
-                  severity="secondary"
-                  rounded
-                  (onClick)="editSchemaKV(i)"
-                ></p-button>
-                <p-button
-                  icon="pi pi-trash"
-                  severity="danger"
-                  rounded
-                  (onClick)="removeSchemaKV(i)"
-                ></p-button>
-              </div>
-            </td>
-          </tr>
-        </ng-template>
-        <ng-template #emptymessage>
-          <tr>
-            <td colspan="3">Sin campos de esquema.</td>
-          </tr>
-        </ng-template>
-      </p-table>
+      <!-- MODO ESTRUCTURADO -->
+      <ng-container *ngIf="!modoPiSchemaRaw; else piSchemaRawTpl">
+        <div class="flex grid-cols-1 md:grid-cols-12 gap-2">
+          <p-inputgroup class="md:col-span-5">
+            <p-inputgroup-addon><i class="pi pi-key"></i></p-inputgroup-addon>
+            <input
+              pInputText
+              placeholder="Clave (key)"
+              [(ngModel)]="newSchemaKey"
+            />
+          </p-inputgroup>
+
+          <p-inputgroup class="md:col-span-6">
+            <p-inputgroup-addon
+              ><i class="pi pi-pencil"></i
+            ></p-inputgroup-addon>
+            <input
+              pInputText
+              placeholder="Valor (value)"
+              [(ngModel)]="newSchemaValue"
+            />
+          </p-inputgroup>
+
+          <div class="md:col-span-1 flex items-center">
+            <p-button
+              [label]="editingSchemaIndex !== null ? 'Actualizar' : 'Agregar'"
+              icon="pi pi-plus"
+              (click)="addOrUpdateSchemaKV()"
+              [disabled]="!newSchemaKey"
+            />
+          </div>
+        </div>
+
+        <p-table
+          [value]="schemaPairs"
+          [paginator]="false"
+          [style]="{ 'max-height': '200px', overflow: 'auto' }"
+        >
+          <ng-template #header>
+            <tr>
+              <th style="width: 40%">Clave</th>
+              <th>Valor</th>
+              <th style="width: 120px">Acciones</th>
+            </tr>
+          </ng-template>
+          <ng-template #body let-row let-i="rowIndex">
+            <tr>
+              <td class="text-left break-words">{{ row.key }}</td>
+              <td class="text-left break-words">{{ row.value }}</td>
+              <td class="text-center">
+                <div class="flex gap-2 justify-center">
+                  <p-button
+                    icon="pi pi-pencil"
+                    severity="secondary"
+                    rounded
+                    (onClick)="editSchemaKV(i)"
+                  ></p-button>
+                  <p-button
+                    icon="pi pi-trash"
+                    severity="danger"
+                    rounded
+                    (onClick)="removeSchemaKV(i)"
+                  ></p-button>
+                </div>
+              </td>
+            </tr>
+          </ng-template>
+          <ng-template #emptymessage>
+            <tr>
+              <td colspan="3">Sin campos de esquema.</td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </ng-container>
+
+      <!-- MODO EN BRUTO (JSON) -->
+      <ng-template #piSchemaRawTpl>
+        <textarea
+          pTextarea
+          [(ngModel)]="piSchemaRawText"
+          (ngModelChange)="validatePiSchemaRaw()"
+          autoResize
+          rows="8"
+          placeholder='Pegue aquí JSON válido. Ej: {"type":"object","properties":{"id":{"type":"string"}}}'
+          class="w-full"
+        ></textarea>
+        <small *ngIf="piSchemaRawError" class="text-red-600"
+          >JSON inválido.</small
+        >
+      </ng-template>
     </div>
     <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
       <!-- pi_valida -->
@@ -621,6 +721,63 @@
     </div>
   </div>
 </p-dialog>
+
+<p-dialog
+  [(visible)]="mostrarDialogoAsignarJob"
+  header="Asignar JOB"
+  [style]="{ width: '36rem' }"
+  [breakpoints]="{ '960px': '90vw' }"
+  modal
+  [dismissableMask]="true"
+  appendTo="body"
+>
+  <div class="flex flex-col gap-3">
+    <div class="text-sm text-gray-600">
+      Plantilla: <b>{{ plantillaParaJob?.pi_nombre }}</b>
+      <span class="ml-2 px-2 py-0.5 rounded-full border"
+        >{{ plantillaParaJob?.pi_codigo || ('ID:' + plantillaParaJob?.pi_id) }}</span
+      >
+    </div>
+
+    <div class="flex flex-col">
+      <label class="font-semibold text-sm">JOB</label>
+      <p-select
+        [(ngModel)]="selectedJobId"
+        [options]="jobOptions"
+        optionLabel="label"
+        optionValue="value"
+        placeholder="Seleccione un JOB"
+        class="w-full"
+        appendTo="body"
+      ></p-select>
+    </div>
+
+    <div class="flex flex-col">
+      <label class="font-semibold text-sm">Parámetros (JSON opcional)</label>
+      <textarea
+        pTextarea
+        [(ngModel)]="jobParamsRawText"
+        (ngModelChange)="validateJobParamsRaw()"
+        autoResize
+        rows="6"
+        placeholder='Pegue JSON válido si aplica. Ej: {"desde":"2025-01-01","hasta":"2025-01-31"}'
+        class="w-full"
+      ></textarea>
+      <small *ngIf="jobParamsRawError" class="text-red-600">JSON inválido.</small>
+    </div>
+
+    <div class="flex justify-end gap-2 pt-2">
+      <p-button label="Cancelar" outlined (click)="mostrarDialogoAsignarJob=false"></p-button>
+      <p-button
+        label="Asignar"
+        icon="pi pi-check"
+        (click)="guardarAsignacionJob()"
+        [disabled]="!selectedJobId || jobParamsRawError"
+      ></p-button>
+    </div>
+  </div>
+</p-dialog>
+
 
 <p-confirmDialog #cd>
   <ng-template

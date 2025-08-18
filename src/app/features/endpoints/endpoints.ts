@@ -29,6 +29,7 @@ import { Output, EventEmitter } from '@angular/core';
 import { SplitButtonModule } from 'primeng/splitbutton';
 import { Plantillas } from '../plantillas/plantillas';
 import { ToggleSwitch } from 'primeng/toggleswitch';
+import { AutenticacionS } from '../../core/services/mant/autenticacion/autenticacion';
 
 export type StepKey =
   | 'endpoints'
@@ -79,6 +80,7 @@ export class Endpoints implements OnInit, OnChanges {
   selectedEndpoint: EndpointI | null = null;
   ocultarTarjetaEndpoint = false;
   endpointService = inject(Endpoint);
+  authService = inject(AutenticacionS);
   cdRef = inject(ChangeDetectorRef);
   messageService = inject(MessageService);
   confirmationService = inject(ConfirmationService);
@@ -95,14 +97,20 @@ export class Endpoints implements OnInit, OnChanges {
   ];
 
   httpMethodOptions = [
-  { label: 'GET',    value: 'GET' },
-  { label: 'POST',   value: 'POST' },
-  { label: 'PUT',    value: 'PUT' },
-  { label: 'PATCH',  value: 'PATCH' },
-  { label: 'DELETE', value: 'DELETE' },
-  { label: 'HEAD',   value: 'HEAD' },
-  { label: 'OPTIONS',value: 'OPTIONS' }
-];
+    { label: 'GET', value: 'GET' },
+    { label: 'POST', value: 'POST' },
+    { label: 'PUT', value: 'PUT' },
+    { label: 'PATCH', value: 'PATCH' },
+    { label: 'DELETE', value: 'DELETE' },
+    { label: 'HEAD', value: 'HEAD' },
+    { label: 'OPTIONS', value: 'OPTIONS' },
+  ];
+
+  tipoOptions = [
+    { label: 'NORMAL', value: 'NORM' },
+    { label: 'Autenticación', value: 'AUTH' },
+  ];
+
   nuevoEndpoint: any = {
     se_sistema_id: '',
     se_nombre: '',
@@ -139,6 +147,21 @@ export class Endpoints implements OnInit, OnChanges {
   ];
   ngOnInit(): void {
     //this.cargarEndpoints();
+  }
+
+  cargarAuthOptions(): void {
+    this.authService.getAllAutenticacion().subscribe({
+      next: (res) => {
+        const rows = res?.result?.data ?? [];
+        this.authOptions = rows.map((r: any) => ({
+          label: `${r.auth_codigo ?? r.auth_id} - ${
+            r.auth_nombre ?? ''
+          }`.trim(),
+          value: r.auth_id, // ajusta al campo real de tu tabla
+        }));
+      },
+      error: (e) => console.error('Error cargando opciones de auth', e),
+    });
   }
 
   ngOnChanges(): void {
@@ -183,20 +206,34 @@ export class Endpoints implements OnInit, OnChanges {
   }
 
   showEditar(endpoint: EndpointI): void {
-    this.nuevoEndpoint = { ...endpoint };
+    this.nuevoEndpoint = {
+      ...endpoint,
+      se_tipo: (endpoint as any).se_tipo ?? 'NORM',
+      se_auth_id: (endpoint as any).se_auth_id ?? null,
+      se_requiere_transformar: !!(endpoint as any).se_requiere_transformar,
+    };
     this.mostrarDialogoAgregar = true;
+    this.cargarAuthOptions();
   }
 
-AgregarEndpoint(): void {
-  if (this.sistemaId) {
-    this.nuevoEndpoint.se_sistema_id = this.sistemaId;
+  onTipoChange(): void {
+    if (this.nuevoEndpoint.se_tipo === 'NORM') {
+      this.nuevoEndpoint.se_auth_id = null;
+    }
   }
-  this.mostrarDialogoAgregar = true;
-}
+
+  AgregarEndpoint(): void {
+    if (this.sistemaId) {
+      this.nuevoEndpoint.se_sistema_id = this.sistemaId;
+    }
+    this.mostrarDialogoAgregar = true;
+    this.cargarAuthOptions();
+  }
 
   AgregarEndpointT(sistema_id: string): void {
     this.nuevoEndpoint.se_sistema_id = sistema_id;
     this.mostrarDialogoAgregar = true;
+    this.cargarAuthOptions();
   }
 
   cerrarDialogoAgregar(): void {
@@ -216,43 +253,48 @@ AgregarEndpoint(): void {
     };
   }
 
-  guardarNuevoEndpoint(): void {
-    if (
-      !this.nuevoEndpoint.se_sistema_id ||
-      !this.nuevoEndpoint.se_nombre ||
-      !this.nuevoEndpoint.se_url ||
-      !this.nuevoEndpoint.se_metodo_http
-    ) {
-      return;
-    }
-
-    this.nuevoEndpoint.se_usua_id = 'ADMIN';
-    this.nuevoEndpoint.se_ind_estado = 'A';
-
-    const action = this.nuevoEndpoint.se_id ? 'U' : 'I';
-
-    this.endpointService.endpointCrud(this.nuevoEndpoint, action).subscribe({
-      next: (response) => {
-        this.messageService.add({
-          severity: 'success',
-          summary:
-            action === 'I' ? 'Endpoint agregado' : 'Endpoint actualizado',
-          detail: 'Operación exitosa',
-        });
-        this.registroExitoso = true;
-        this.cargarEndpoints();
-        this.cerrarDialogoAgregar();
-      },
-      error: (err) => {
-        console.error(
-          action === 'I'
-            ? 'Error al agregar endpoint'
-            : 'Error al actualizar endpoint',
-          err
-        );
-      },
-    });
+guardarNuevoEndpoint(): void {
+  if (
+    !this.nuevoEndpoint.se_sistema_id ||
+    !this.nuevoEndpoint.se_nombre ||
+    !this.nuevoEndpoint.se_url ||
+    !this.nuevoEndpoint.se_metodo_http ||
+    !this.nuevoEndpoint.se_tipo ||
+    (this.nuevoEndpoint.se_tipo === 'AUTH' && !this.nuevoEndpoint.se_auth_id)
+  ) {
+    return;
   }
+
+  this.nuevoEndpoint.se_usua_id = 'ADMIN';
+  this.nuevoEndpoint.se_ind_estado = this.nuevoEndpoint.se_ind_estado || 'A';
+
+  if (this.nuevoEndpoint.se_tipo === 'NORM') {
+    this.nuevoEndpoint.se_auth_id = null;
+  }
+
+  const action = this.nuevoEndpoint.se_id ? 'U' : 'I';
+
+  this.endpointService.endpointCrud(this.nuevoEndpoint, action).subscribe({
+    next: () => {
+      this.messageService.add({
+        severity: 'success',
+        summary: action === 'I' ? 'Endpoint agregado' : 'Endpoint actualizado',
+        detail: 'Operación exitosa',
+      });
+      this.registroExitoso = true;
+      this.cargarEndpoints();
+      this.cerrarDialogoAgregar();
+    },
+    error: (err) => {
+      console.error('Error al guardar endpoint', err);
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'No se pudo guardar el endpoint',
+      });
+    },
+  });
+}
 
   eliminarEndpoint(endpoint: any): void {
     this.confirmationService.confirm({
@@ -319,8 +361,8 @@ AgregarEndpoint(): void {
   }
 
   onToggleAuth(): void {
-  if (!this.nuevoEndpoint.se_requiere_auth) {
-    this.nuevoEndpoint.se_auth_id = null;
+    if (!this.nuevoEndpoint.se_requiere_auth) {
+      this.nuevoEndpoint.se_auth_id = null;
+    }
   }
-}
 }

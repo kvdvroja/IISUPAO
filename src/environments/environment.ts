@@ -35,6 +35,10 @@ export const environment = {
   get getAllPlantillaIntegracion() { return `${this.plantillaIntegracionApiUrl}get_all_integration_templates`; },
   get plantillaIntegracionCrud() { return `${this.plantillaIntegracionApiUrl}crud_integration`; },
 
+  get programacionJobApiUrl() { return `${this.apiBaseUrl}programacionjobs/`; },
+  get getAllProgramacionJob() { return `${this.programacionJobApiUrl}get_all_programacionjobs`; },
+  get programacionJobCrudUrl() { return `${this.programacionJobApiUrl}crud`; },
+
   get plantillaDestinoApiUrl() { return `${this.apiBaseUrl}integration_ends/`; },
   get getAllPlantillaDestino() { return `${this.plantillaDestinoApiUrl}get_all_integration_end`; },
   get plantillaDestinoCrudUrl() { return `${this.plantillaDestinoApiUrl}crud_end`; },
