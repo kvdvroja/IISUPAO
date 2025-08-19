@@ -16,8 +16,8 @@ export class ProgramacionJobS {
       });
     }
   
-    getAllProgramacionJob(): Observable<{ result: { data: Programacion_JobI[] } }> {
-      return this.http.get<{ result: { data: Programacion_JobI[] } }>(
+    getAllProgramacionJob(): Observable<{ result: { data: any[] } }> {
+      return this.http.get<{ result: { data: any[] } }>(
         environment.getAllProgramacionJob,
         {
           headers: this.getHeaders(),
@@ -25,9 +25,9 @@ export class ProgramacionJobS {
       );
     }
   
-    programacionJobCrud(sistemas: Programacion_JobI, action: string): Observable<any> {
+    programacionJobCrud(programacion: any, action: string): Observable<any> {
       const url = `${environment.programacionJobCrudUrl}?action=${action}`; // Agregar el parámetro 'action' a la URL
-      return this.http.post<any>(url, sistemas, {
+      return this.http.post<any>(url, programacion, {
         headers: this.getHeaders(),
       });
     }

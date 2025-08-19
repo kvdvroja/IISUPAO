@@ -35,6 +35,7 @@ import { Endpoint } from '../../core/services/mant/endpoint/endpoint';
 import { EndpointI } from '../../core/interfaces/Endpoint';
 import { ColaS } from '../../core/services/mant/cola/cola';
 import { ColaI } from '../../core/interfaces/Cola';
+import { ProgramacionJob } from '../../shared/components/programacion-job/programacion-job';
 export type StepKey =
   | 'endpoints'
   | 'integracion'
@@ -63,6 +64,7 @@ export type StepKey =
     PlantillaDestino,
     ToggleSwitch,
     Textarea,
+    ProgramacionJob,
   ],
   templateUrl: './plantillas.html',
   styleUrl: './plantillas.css',
@@ -771,11 +773,8 @@ export class Plantillas implements OnInit, OnChanges {
 
   abrirAsignarJob(plantilla: Plantilla_IntegracionI): void {
     this.plantillaParaJob = plantilla;
-    this.selectedJobId = null;
-    this.jobParamsRawText = '';
-    this.jobParamsRawError = false;
-    this.cargarJobsOptions(); // traer del backend
     this.mostrarDialogoAsignarJob = true;
+    this.cargarJobsOptions();
   }
 
   validateJobParamsRaw(): void {

@@ -1,1 +1,270 @@
-<p>programacion-job works!</p>
+<p-dialog
+  [(visible)]="visible"
+  header="Asignar JOB"
+  [style]="{ width: '62rem' }"
+  [breakpoints]="{ '960px': '95vw' }"
+  modal
+  [dismissableMask]="true"
+  appendTo="body"
+>
+  <div class="text-sm text-gray-600 mb-3">
+    Plantilla: <b>{{ plantilla?.pi_nombre }}</b>
+    <span class="ml-2 px-2 py-0.5 rounded-full border">
+      {{ plantilla?.pi_codigo || "ID:" + plantilla?.pi_id }}
+    </span>
+    <span
+      class="ml-2 text-xs px-2 py-0.5 rounded-full border"
+      [ngClass]="
+        isEdit
+          ? 'border-green-500 text-green-700'
+          : 'border-sky-500 text-sky-700'
+      "
+    >
+      {{ isEdit ? "Edición" : "Inserción" }}
+    </span>
+  </div>
+
+  <!-- Selector de Programación existente / nueva -->
+  <div class="rounded-lg border p-4 bg-white mb-4">
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
+      <div class="md:col-span-12">
+        <label class="font-semibold text-sm">Programación existente</label>
+        <p-select
+          [options]="programacionOptions"
+          [(ngModel)]="selectedProgId"
+          (onChange)="onChangeSelectedProg()"
+          optionLabel="label"
+          optionValue="value"
+          class="w-full"
+          appendTo="body"
+        ></p-select>
+        <small class="text-xs text-gray-500">
+          Seleccione una programación para editar o elija “Nueva programación…”
+          para insertar.
+        </small>
+      </div>
+    </div>
+  </div>
+
+  <div class="rounded-lg border p-4 bg-white mb-4">
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
+      @if(isEdit){
+      <div class="md:col-span-4">
+        <label class="font-semibold text-sm">Zona Horaria *</label>
+        <p-select
+          [(ngModel)]="programacion.pj_zona_horaria"
+          [options]="zonasHorarias"
+          optionLabel="label"
+          optionValue="value"
+          class="w-full"
+          appendTo="body"
+        ></p-select>
+      </div>
+      }
+
+      <div class="md:col-span-4">
+        <label class="font-semibold text-sm">Usuario</label>
+        <input
+          pInputText
+          [(ngModel)]="programacion.pj_usua_id"
+          class="w-full"
+        />
+      </div>
+
+      <div class="md:col-span-12">
+        <label class="font-semibold text-sm">Descripción</label>
+        <textarea
+          pTextarea
+          rows="2"
+          [(ngModel)]="programacion.pj_descripcion"
+          class="w-full"
+          placeholder="Describa qué hace este trabajo..."
+        ></textarea>
+      </div>
+
+      <!-- Fecha (creación): sólo edición, readonly -->
+      @if(isEdit){
+      <div class="md:col-span-4">
+        <label class="font-semibold text-sm">Fecha (creación)</label>
+        <input
+          pInputText
+          [disabled]="true"
+          [value]="programacion.pj_fecha | date : 'dd MMM yyyy, HH:mm'"
+          class="w-full"
+        />
+      </div>
+      }
+    </div>
+  </div>
+
+  <!-- Programación (condicionales por frecuencia) -->
+  <div class="rounded-lg border p-4 bg-white mb-4">
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
+      <div class="md:col-span-3">
+        <label class="font-semibold text-sm">Frecuencia *</label>
+        <p-select
+          [(ngModel)]="programacion.pj_frecuencia"
+          [options]="frecuencias"
+          optionLabel="label"
+          optionValue="value"
+          class="w-full"
+          (onChange)="onFrecuenciaChange()"
+        ></p-select>
+      </div>
+
+      <!-- SEMANAL -->
+      @if(showDiaSemana){
+      <div class="md:col-span-3">
+        <label class="font-semibold text-sm">Día de la Semana *</label>
+        <p-select
+          [(ngModel)]="programacion.pj_dia"
+          [options]="diasSemana"
+          optionLabel="label"
+          optionValue="value"
+          class="w-full"
+        ></p-select>
+        <small class="text-xs text-gray-500">Requerido para SEMANAL.</small>
+      </div>
+      }
+
+      <!-- MENSUAL -->
+      @if(showDiaMes){
+      <div class="md:col-span-3">
+        <label class="font-semibold text-sm">Día del Mes *</label>
+        <input
+          pInputText
+          type="number"
+          min="1"
+          max="31"
+          [(ngModel)]="programacion.pj_dia_mes"
+          class="w-full"
+          placeholder="1..31"
+        />
+        <small
+          class="text-xs"
+          [ngClass]="{
+            'text-red-600': !monthDayValid(),
+            'text-gray-500': monthDayValid()
+          }"
+          >Debe ser entre 1 y 31.</small
+        >
+      </div>
+      } @if(showFechaUnica){
+      <div class="md:col-span-3">
+        <label class="font-semibold text-sm">Fecha Única *</label>
+        <p-datepicker
+          [(ngModel)]="programacion.pj_fecha_unica"
+          [showIcon]="true"
+        ></p-datepicker>
+        <small class="text-xs text-gray-500">Requerido para ÚNICA.</small>
+      </div>
+      }
+
+      <div class="md:col-span-3">
+        <label class="font-semibold text-sm">Hora de Ejecución *</label>
+        <input
+          pInputText
+          type="time"
+          step="60"
+          class="w-full"
+          [(ngModel)]="programacion.pj_hora"
+        />
+      </div>
+
+      <!-- Fecha Inicio: sólo edición, readonly -->
+      @if(isEdit){
+      <div class="md:col-span-3">
+        <label class="font-semibold text-sm">Fecha Inicio</label>
+        <p-datepicker
+          [(ngModel)]="programacion.pj_fecha_inicio"
+          [showIcon]="true"
+          [disabled]="true"
+        ></p-datepicker>
+      </div>
+      }
+
+      <div class="md:col-span-3">
+        <label class="font-semibold text-sm">Fecha Fin</label>
+        <p-datepicker
+          [(ngModel)]="programacion.pj_fecha_fin"
+          [showIcon]="true"
+        ></p-datepicker>
+      </div>
+
+      <div class="md:col-span-3">
+        <label class="font-semibold text-sm">Tipo de Regla *</label>
+        <p-select
+          [(ngModel)]="programacion.pj_tipo"
+          [options]="tiposRegla"
+          optionLabel="label"
+          optionValue="value"
+          class="w-full"
+        ></p-select>
+      </div>
+    </div>
+  </div>
+
+  <div class="rounded-lg border p-4 bg-white">
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
+      @if(isEdit){
+      <div class="md:col-span-3">
+        <label class="font-semibold text-sm">Estado *</label>
+        <p-select
+          [(ngModel)]="programacion.pj_ind_estado"
+          [options]="estadosProg"
+          optionLabel="label"
+          optionValue="value"
+          class="w-full"
+        ></p-select>
+      </div>
+      }
+
+      <div class="md:col-span-3">
+        <label class="font-semibold text-sm">Prioridad</label>
+        <input
+          pInputText
+          type="number"
+          min="1"
+          max="10"
+          [(ngModel)]="programacion.pj_prioridad"
+          class="w-full"
+        />
+      </div>
+
+      <div class="md:col-span-3">
+        <label class="font-semibold text-sm">Versión de Schedule *</label>
+        <input
+          pInputText
+          type="number"
+          min="1"
+          [(ngModel)]="programacion.pj_schedule_version"
+          class="w-full"
+        />
+      </div>
+
+      <div class="md:col-span-12">
+        <small class="text-xs text-gray-500">
+          Reglas BD: DIARIA ⇒ sin día/mes/fecha única; SEMANAL ⇒ requiere día;
+          MENSUAL ⇒ día 1..31; ÚNICA ⇒ requiere fecha única. En inserción, la BD
+          asigna automáticamente zona horaria, estado, fecha inicio y fecha
+          (creación).
+        </small>
+      </div>
+    </div>
+  </div>
+
+  <div class="flex justify-end gap-2 pt-4">
+    <p-button
+      label="Cancelar"
+      outlined
+      (click)="onCancel()"
+      [disabled]="loading"
+    ></p-button>
+    <p-button
+      label="Guardar"
+      icon="pi pi-check"
+      (click)="onSave()"
+      [disabled]="disableSave"
+    ></p-button>
+  </div>
+</p-dialog>

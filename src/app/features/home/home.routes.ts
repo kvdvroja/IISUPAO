@@ -14,7 +14,9 @@ export const HOME_ROUTES: Routes = [
       {
         path: 'Endpoints',
         loadChildren: () =>
-          import('../endpoints/endpoints.routes').then((m) => m.ENDPOINTS_ROUTES),
+          import('../endpoints/endpoints.routes').then(
+            (m) => m.ENDPOINTS_ROUTES
+          ),
       },
       {
         path: 'Usuarios',
@@ -24,27 +26,40 @@ export const HOME_ROUTES: Routes = [
       {
         path: 'Plantilla-Destino',
         loadChildren: () =>
-          import('../plantilla-destino/plantilla-destino.routes').then((m) => m.PLANTILLA_DESTINO_ROUTES),
+          import('../plantilla-destino/plantilla-destino.routes').then(
+            (m) => m.PLANTILLA_DESTINO_ROUTES
+          ),
       },
       {
         path: 'Plantilla-Integracion',
         loadChildren: () =>
-          import('../plantillas/plantillas.route').then((m) => m.PLANTILLA_INTEGRACION_ROUTES),
+          import('../plantillas/plantillas.route').then(
+            (m) => m.PLANTILLA_INTEGRACION_ROUTES
+          ),
       },
       {
         path: 'Transformacion-Campos',
         loadChildren: () =>
-          import('../transformacion-campos/transformacion-campos.routes').then((m) => m.TRANSFORMACION_CAMPOS_ROUTES),
+          import('../transformacion-campos/transformacion-campos.routes').then(
+            (m) => m.TRANSFORMACION_CAMPOS_ROUTES
+          ),
       },
       {
         path: 'Transformacion-Valores',
         loadChildren: () =>
-          import('../transformacion-valores/transformacion-valores.routes').then((m) => m.TRANSFORMACION_VALORES_ROUTES),
+          import(
+            '../transformacion-valores/transformacion-valores.routes'
+          ).then((m) => m.TRANSFORMACION_VALORES_ROUTES),
       },
       {
         path: 'Colas',
         loadChildren: () =>
           import('../colas/colas.routes').then((m) => m.COLAS_ROUTES),
+      },
+      {
+        path: 'Autenticacion',
+        loadChildren: () =>
+          import('../autenticacion/autenticacion.routes').then((m) => m.AUTENTICACION_ROUTES),
       },
     ],
   },

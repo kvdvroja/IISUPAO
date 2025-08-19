@@ -18,4 +18,5 @@ export interface Programacion_JobI {
   pj_proxima_ejecucion: Date;
   pj_zona_horaria: string; 
   pj_prioridad: number; 
+  pj_schedule_version: number;
 }
