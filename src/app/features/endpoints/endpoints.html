@@ -100,6 +100,19 @@
         rounded
         (onClick)="showEditar(endpoint)"
       ></p-button>
+      <button
+        pButton
+        type="button"
+        [text]="true"
+        [rounded]="true"
+        [severity]="'help'"
+        class="btn-icon"
+        pTooltip="Autenticación"
+        *ngIf="endpoint.se_requiere_auth"
+        (click)="$event.stopPropagation(); abrirAutenticacion(endpoint)"
+      >
+        <i class="pi pi-key"></i>
+      </button>
       <p-button
         icon="pi pi-trash"
         severity="danger"
@@ -181,6 +194,19 @@
               "
             >
               <i class="pi pi-plus"></i>
+            </button>
+            <button
+              pButton
+              type="button"
+              [text]="true"
+              [rounded]="true"
+              [severity]="'help'"
+              class="btn-icon"
+              pTooltip="Autenticación"
+              *ngIf="endpoint.se_requiere_auth"
+              (click)="$event.stopPropagation(); abrirAutenticacion(endpoint)"
+            >
+              <i class="pi pi-key"></i>
             </button>
             <button
               pButton
@@ -343,27 +369,12 @@
           inputId="requiere-auth"
           [(ngModel)]="nuevoEndpoint.se_requiere_auth"
           (onChange)="onToggleAuth()"
+          [disabled]="nuevoEndpoint.se_tipo === 'AUTH'"
         />
         <span class="text-sm text-gray-600">
           {{ nuevoEndpoint.se_requiere_auth ? "Sí" : "No" }}
         </span>
       </div>
-    </div>
-
-    <!-- Auth ID (Select condicional) -->
-    <div class="flex flex-col" *ngIf="nuevoEndpoint.se_requiere_auth">
-      <label class="font-semibold text-sm">Configuración de Auth</label>
-      <p-select
-        [(ngModel)]="nuevoEndpoint.se_auth_id"
-        [options]="authOptions"
-        optionLabel="label"
-        optionValue="value"
-        placeholder="Seleccione una configuración"
-        class="w-full"
-      />
-      <small class="text-gray-500 mt-1"
-        >Selecciona la configuración de autenticación para este endpoint.</small
-      >
     </div>
 
     <div class="flex items-center justify-between border rounded px-3 py-2">
@@ -398,8 +409,7 @@
           !nuevoEndpoint.se_nombre ||
           !nuevoEndpoint.se_url ||
           !nuevoEndpoint.se_metodo_http ||
-          (nuevoEndpoint.se_requiere_auth && !nuevoEndpoint.se_auth_id) ||
-          nuevoEndpoint.se_requiere_transformar === undefined
+          !nuevoEndpoint.se_requiere_auth
         "
       />
     </div>
@@ -436,3 +446,7 @@
   </ng-template>
 </p-confirmDialog>
 <app-plantillas #plantCmp style="display: none"></app-plantillas>
+<app-autenticacion
+  [(visible)]="mostrarDialogoAutenticacion"
+  [endpoint]="endpointParaAuth">
+</app-autenticacion>

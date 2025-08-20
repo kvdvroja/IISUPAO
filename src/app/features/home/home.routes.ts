@@ -56,11 +56,6 @@ export const HOME_ROUTES: Routes = [
         loadChildren: () =>
           import('../colas/colas.routes').then((m) => m.COLAS_ROUTES),
       },
-      {
-        path: 'Autenticacion',
-        loadChildren: () =>
-          import('../autenticacion/autenticacion.routes').then((m) => m.AUTENTICACION_ROUTES),
-      },
     ],
   },
 ];

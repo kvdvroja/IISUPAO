@@ -1,0 +1,210 @@
+<p-dialog
+  [(visible)]="visible"
+  [header]="(isEdit ? 'Editar' : 'Nueva') + ' Autenticación' + (endpoint ? ' • EP ' + endpoint.se_id : '')"
+  [style]="{ width: '52rem' }"
+  [breakpoints]="{ '960px': '95vw' }"
+  modal
+  [dismissableMask]="true"
+  appendTo="body"
+>
+  <form (ngSubmit)="onSave()" class="space-y-6">
+    <!-- Título y subtítulo -->
+    <div class="space-y-1">
+      <h1 class="text-2xl font-bold text-gray-900">Configuración de Autenticación</h1>
+      <p class="text-gray-500">Define y valida parámetros para autenticar tus integraciones HTTP</p>
+    </div>
+
+    <!-- Tabs -->
+<p-tabs [(value)]="activeTab" class="space-y-4">
+      <p-tablist>
+        <p-tab value="basic"><i class="pi pi-cog mr-2"></i> Básico</p-tab>
+        <p-tab value="templates"><i class="pi pi-code mr-2"></i> Templates</p-tab>
+        <p-tab value="token"><i class="pi pi-key mr-2"></i> Token</p-tab>
+        <p-tab value="credentials"><i class="pi pi-shield mr-2"></i> Credenciales</p-tab>
+      </p-tablist>
+
+      <p-tabpanels>
+        <!-- BASIC -->
+        <p-tabpanel value="basic">
+          <div class="p-4 rounded-lg bg-white shadow-sm border space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="space-y-2">
+                <label class="font-semibold text-sm">Nombre *</label>
+                <input
+                  pInputText
+                  [(ngModel)]="form.auth_nombre"
+                  name="auth_nombre"
+                  (ngModelChange)="clearError('auth_nombre')"
+                  [ngClass]="{ 'p-invalid': hasError('auth_nombre') }"
+                  placeholder="p.ej., OAuth2 API Auth"
+                  class="w-full"
+                />
+                <small class="text-sm text-red-600" *ngIf="hasError('auth_nombre')">
+                  {{ errors['auth_nombre'] }}
+                </small>
+              </div>
+
+              <div class="space-y-2">
+                <label class="font-semibold text-sm">Tipo *</label>
+                <p-select
+                  [(ngModel)]="form.tipo_auth"
+                  name="tipo_auth"
+                  [options]="tipoAuthOptions"
+                  optionLabel="label"
+                  optionValue="value"
+                  placeholder="Seleccione"
+                  class="w-full"
+                  (onChange)="clearError('tipo_auth')"
+                  [ngClass]="{ 'p-invalid': hasError('tipo_auth') }"
+                ></p-select>
+                <small class="text-sm text-red-600" *ngIf="hasError('tipo_auth')">
+                  {{ errors['tipo_auth'] }}
+                </small>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="space-y-2">
+                <label class="font-semibold text-sm">Tiempo expira (segundos)</label>
+                <input
+                  pInputText
+                  type="number"
+                  min="0"
+                  [(ngModel)]="form.auth_tiempo_expira"
+                  name="auth_tiempo_expira"
+                  class="w-full"
+                  placeholder="3600"
+                />
+              </div>
+
+              <div class="space-y-2">
+                <label class="font-semibold text-sm">Estado</label>
+                <p-select
+                  [(ngModel)]="form.auth_ind_estado"
+                  name="auth_ind_estado"
+                  [options]="estadosOptions"
+                  optionLabel="label"
+                  optionValue="value"
+                  class="w-full"
+                ></p-select>
+              </div>
+            </div>
+          </div>
+        </p-tabpanel>
+
+        <!-- TEMPLATES -->
+        <p-tabpanel value="templates">
+          <div class="p-4 rounded-lg bg-white shadow-sm border space-y-6">
+            <p-message severity="info" [text]="'Los templates deben ser JSON válido. Puedes usar {{variable}} como placeholder.'"></p-message>
+
+            <div class="space-y-2">
+              <label class="font-semibold text-sm">Body Template</label>
+              <textarea
+                pTextarea
+                [(ngModel)]="form.auth_body_template"
+                name="auth_body_template"
+                (blur)="validateJSON('auth_body_template')"
+                (ngModelChange)="clearError('auth_body_template')"
+                [ngClass]="{ 'p-invalid': hasError('auth_body_template') }"
+                rows="5"
+                class="w-full font-mono text-sm"
+                [placeholder]="placeholderBody"
+              ></textarea>
+              <small class="text-sm text-red-600" *ngIf="hasError('auth_body_template')">
+                {{ errors['auth_body_template'] }}
+              </small>
+            </div>
+
+            <div class="space-y-2">
+              <label class="font-semibold text-sm">Headers Template</label>
+              <textarea
+                pTextarea
+                [(ngModel)]="form.auth_headers_template"
+                name="auth_headers_template"
+                (blur)="validateJSON('auth_headers_template')"
+                (ngModelChange)="clearError('auth_headers_template')"
+                [ngClass]="{ 'p-invalid': hasError('auth_headers_template') }"
+                rows="4"
+                class="w-full font-mono text-sm"
+                [placeholder]="placeholderHeaders"
+              ></textarea>
+              <small class="text-sm text-red-600" *ngIf="hasError('auth_headers_template')">
+                {{ errors['auth_headers_template'] }}
+              </small>
+            </div>
+
+            <div class="space-y-2">
+              <label class="font-semibold text-sm">Params Template</label>
+              <textarea
+                pTextarea
+                [(ngModel)]="form.auth_params_template"
+                name="auth_params_template"
+                (blur)="validateJSON('auth_params_template')"
+                (ngModelChange)="clearError('auth_params_template')"
+                [ngClass]="{ 'p-invalid': hasError('auth_params_template') }"
+                rows="4"
+                class="w-full font-mono text-sm"
+                placeholder='{"scope":"read write","response_type":"code"}'
+              ></textarea>
+              <small class="text-sm text-red-600" *ngIf="hasError('auth_params_template')">
+                {{ errors['auth_params_template'] }}
+              </small>
+            </div>
+          </div>
+        </p-tabpanel>
+
+        <!-- TOKEN -->
+        <p-tabpanel value="token">
+          <div class="p-4 rounded-lg bg-white shadow-sm border space-y-4">
+            <div class="space-y-2">
+              <label class="font-semibold text-sm">Token Path *</label>
+              <input
+                pInputText
+                [(ngModel)]="form.auth_token_path"
+                name="auth_token_path"
+                (ngModelChange)="clearError('auth_token_path')"
+                [ngClass]="{ 'p-invalid': hasError('auth_token_path') }"
+                class="w-full"
+                placeholder="p.ej., data.access_token"
+              />
+              <small class="text-sm text-red-600" *ngIf="hasError('auth_token_path')">
+                {{ errors['auth_token_path'] }}
+              </small>
+              <p-message severity="info" [text]="'Usa notación por puntos para objetos anidados (e.g. data.access_token).'" />
+            </div>
+          </div>
+        </p-tabpanel>
+
+        <!-- CREDENTIALS -->
+        <p-tabpanel value="credentials">
+          <div class="p-4 rounded-lg bg-white shadow-sm border space-y-4">
+            <div class="space-y-2">
+              <label class="font-semibold text-sm">Credenciales (JSON)</label>
+              <textarea
+                pTextarea
+                [(ngModel)]="form.credenciales"
+                name="credenciales"
+                (blur)="validateJSON('credenciales')"
+                (ngModelChange)="clearError('credenciales')"
+                [ngClass]="{ 'p-invalid': hasError('credenciales') }"
+                rows="5"
+                class="w-full font-mono text-sm"
+                placeholder='{"client_id":"...","client_secret":"..."}'
+              ></textarea>
+              <small class="text-sm text-red-600" *ngIf="hasError('credenciales')">
+                {{ errors['credenciales'] }}
+              </small>
+              <p-message severity="warn" [text]="'Nunca expongas estas credenciales en código cliente.'"></p-message>
+            </div>
+          </div>
+        </p-tabpanel>
+      </p-tabpanels>
+    </p-tabs>
+
+    <!-- Acciones -->
+    <div class="flex justify-end gap-3 pt-2">
+      <p-button label="Cancelar" outlined (click)="onCancel()" [disabled]="loading"></p-button>
+      <p-button label="Guardar" icon="pi pi-check" [loading]="loading" [disabled]="disableSave" type="submit"></p-button>
+    </div>
+  </form>
+</p-dialog>

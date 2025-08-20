@@ -2,7 +2,6 @@ import { Component, OnInit, AfterViewInit, OnChanges } from '@angular/core';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { MessageService } from 'primeng/api';
 import { TableModule } from 'primeng/table';
-import { FloatLabelModule } from 'primeng/floatlabel';
 import { InputTextModule } from 'primeng/inputtext';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { InputGroupModule } from 'primeng/inputgroup';
@@ -12,7 +11,6 @@ import { IconField } from 'primeng/iconfield';
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
-import { NgFor } from '@angular/common';
 import { Dialog } from 'primeng/dialog';
 import { Input } from '@angular/core';
 import { Toast } from 'primeng/toast';
@@ -30,6 +28,7 @@ import { SplitButtonModule } from 'primeng/splitbutton';
 import { Plantillas } from '../plantillas/plantillas';
 import { ToggleSwitch } from 'primeng/toggleswitch';
 import { AutenticacionS } from '../../core/services/mant/autenticacion/autenticacion';
+import { Autenticacion } from '../../shared/components/autenticacion/autenticacion';
 
 export type StepKey =
   | 'endpoints'
@@ -40,6 +39,7 @@ export type StepKey =
 
 @Component({
   selector: 'app-endpoints',
+  standalone: true,
   imports: [
     ConfirmDialogModule,
     TableModule,
@@ -58,6 +58,7 @@ export type StepKey =
     Plantillas,
     ToggleSwitch,
     SplitButtonModule,
+    Autenticacion,
   ],
   templateUrl: './endpoints.html',
   styleUrl: './endpoints.css',
@@ -91,6 +92,8 @@ export class Endpoints implements OnInit, OnChanges {
   endpoint: EndpointI[] = [];
   sistemasOptions: { label: string; value: string }[] = [];
   authOptions: { label: string; value: string | number }[] = [];
+  mostrarDialogoAutenticacion = false;
+  endpointParaAuth: EndpointI | null = null;
   opcionesTransformacion = [
     { label: 'Sí', value: true },
     { label: 'No', value: false },
@@ -108,7 +111,7 @@ export class Endpoints implements OnInit, OnChanges {
 
   tipoOptions = [
     { label: 'NORMAL', value: 'NORM' },
-    { label: 'Autenticación', value: 'AUTH' },
+    { label: 'AUTENTICACION', value: 'AUTH' },
   ];
 
   nuevoEndpoint: any = {
@@ -217,8 +220,8 @@ export class Endpoints implements OnInit, OnChanges {
   }
 
   onTipoChange(): void {
-    if (this.nuevoEndpoint.se_tipo === 'NORM') {
-      this.nuevoEndpoint.se_auth_id = null;
+    if (this.nuevoEndpoint.se_tipo === 'AUTH') {
+      this.nuevoEndpoint.se_requiere_auth = true;
     }
   }
 
@@ -253,48 +256,49 @@ export class Endpoints implements OnInit, OnChanges {
     };
   }
 
-guardarNuevoEndpoint(): void {
-  if (
-    !this.nuevoEndpoint.se_sistema_id ||
-    !this.nuevoEndpoint.se_nombre ||
-    !this.nuevoEndpoint.se_url ||
-    !this.nuevoEndpoint.se_metodo_http ||
-    !this.nuevoEndpoint.se_tipo ||
-    (this.nuevoEndpoint.se_tipo === 'AUTH' && !this.nuevoEndpoint.se_auth_id)
-  ) {
-    return;
+  guardarNuevoEndpoint(): void {
+    if (
+      !this.nuevoEndpoint.se_sistema_id ||
+      !this.nuevoEndpoint.se_nombre ||
+      !this.nuevoEndpoint.se_url ||
+      !this.nuevoEndpoint.se_metodo_http ||
+      !this.nuevoEndpoint.se_tipo ||
+      (this.nuevoEndpoint.se_tipo === 'AUTH' && !this.nuevoEndpoint.se_auth_id)
+    ) {
+      return;
+    }
+
+    this.nuevoEndpoint.se_usua_id = 'ADMIN';
+    this.nuevoEndpoint.se_ind_estado = this.nuevoEndpoint.se_ind_estado || 'A';
+
+    if (this.nuevoEndpoint.se_tipo === 'NORM') {
+      this.nuevoEndpoint.se_auth_id = null;
+    }
+
+    const action = this.nuevoEndpoint.se_id ? 'U' : 'I';
+
+    this.endpointService.endpointCrud(this.nuevoEndpoint, action).subscribe({
+      next: () => {
+        this.messageService.add({
+          severity: 'success',
+          summary:
+            action === 'I' ? 'Endpoint agregado' : 'Endpoint actualizado',
+          detail: 'Operación exitosa',
+        });
+        this.registroExitoso = true;
+        this.cargarEndpoints();
+        this.cerrarDialogoAgregar();
+      },
+      error: (err) => {
+        console.error('Error al guardar endpoint', err);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'No se pudo guardar el endpoint',
+        });
+      },
+    });
   }
-
-  this.nuevoEndpoint.se_usua_id = 'ADMIN';
-  this.nuevoEndpoint.se_ind_estado = this.nuevoEndpoint.se_ind_estado || 'A';
-
-  if (this.nuevoEndpoint.se_tipo === 'NORM') {
-    this.nuevoEndpoint.se_auth_id = null;
-  }
-
-  const action = this.nuevoEndpoint.se_id ? 'U' : 'I';
-
-  this.endpointService.endpointCrud(this.nuevoEndpoint, action).subscribe({
-    next: () => {
-      this.messageService.add({
-        severity: 'success',
-        summary: action === 'I' ? 'Endpoint agregado' : 'Endpoint actualizado',
-        detail: 'Operación exitosa',
-      });
-      this.registroExitoso = true;
-      this.cargarEndpoints();
-      this.cerrarDialogoAgregar();
-    },
-    error: (err) => {
-      console.error('Error al guardar endpoint', err);
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Error',
-        detail: 'No se pudo guardar el endpoint',
-      });
-    },
-  });
-}
 
   eliminarEndpoint(endpoint: any): void {
     this.confirmationService.confirm({
@@ -365,4 +369,10 @@ guardarNuevoEndpoint(): void {
       this.nuevoEndpoint.se_auth_id = null;
     }
   }
+
+  abrirAutenticacion(ep: EndpointI): void {
+  this.endpointParaAuth = ep;
+  this.mostrarDialogoAutenticacion = true;
+}
+
 }

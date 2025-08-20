@@ -441,7 +441,7 @@ export class ProgramacionJob implements OnChanges {
 
     const p: any = {
       pj_id: f.pj_id,
-      pj_pi_id: f.pj_pi_id, // <-- agregar para satisfacer el validador
+      pj_pi_id: f.pj_pi_id,
       pj_usua_id: f.pj_usua_id,
       pj_hora: f.pj_hora,
       pj_tipo: f.pj_tipo,
