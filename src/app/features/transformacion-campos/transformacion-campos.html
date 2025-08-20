@@ -2,26 +2,45 @@
 <div *ngIf="!campoSeleccionado; else headerConSeleccion"
      class="flex items-center justify-between border-b border-gray-200 p-3 bg-white">
   <div class="flex-1">
-    <h2 class="text-2xl font-bold text-gray-800">TRANSFORMACIÓN DE CAMPOS</h2>
+    <!-- Título remodelado -->
+    <div class="flex items-center gap-2">
+      <div class="w-1 h-6 bg-blue-600 rounded"></div>
+      <h2 class="text-2xl font-bold text-gray-800">TRANSFORMACIÓN DE CAMPOS</h2>
+      <span class="ml-2 px-2 py-0.5 text-xs rounded-lg bg-blue-600 text-white font-semibold">
+        Gestión Activa
+      </span>
+    </div>
     <p class="text-sm text-gray-500">Gestión de transformación de campos</p>
   </div>
-    <div class="flex items-center space-x-2">
+
+  <div class="flex items-center space-x-2">
+    <p-button
+      label="Nueva Transformación Campo"
+      icon="pi pi-plus"
+      severity="success"
+      class="p-button-sm"
+      (onClick)="Agregar()"
+      [disabled]="!pdId"  
+      pTooltip="Crear para la plantilla destino actual"
+    ></p-button>
+
     <p-splitButton
       label="Acciones"
       icon="pi pi-cog"
       [model]="accionesDropdown"
       class="p-button-outlined p-button-sm"
     ></p-splitButton>
+
     <p-button
       label="Limpiar"
       [outlined]="true"
       icon="pi pi-filter-slash"
       (click)="dt.clear()"
+      class="p-button-sm"
     ></p-button>
+
     <p-iconfield iconPosition="left" class="w-64">
-      <p-inputicon>
-        <i class="pi pi-search"></i>
-      </p-inputicon>
+      <p-inputicon><i class="pi pi-search"></i></p-inputicon>
       <input
         pInputText
         (input)="onBuscarGlobal($event)"
@@ -34,14 +53,29 @@
 
 <!-- HEADER cuando SÍ hay selección -->
 <ng-template #headerConSeleccion>
-  <div class="flex items-center justify-between border-b border-gray-200 py-3 bg-white">
-    <div class="flex items-center gap-1">
-      <p-button icon="pi pi-chevron-left" [text]="true"
-                (onClick)="limpiarSeleccionCampo()"
-                pTooltip="Volver a lista de campos"></p-button>
-      <div>
-        <h2 class="text-xl font-bold text-gray-800">TRANSFORMACIÓN DE CAMPO SELECCIONADA</h2>
-        <p class="text-sm text-gray-500">Valores asociados</p>
+  <div
+    class="flex items-center justify-between border-b border-gray-200 bg-white p-3"
+  >
+    <div class="flex items-center gap-2">
+    <button
+      pButton
+      type="button"
+      [text]="true"
+      class="h-8 w-8 flex items-center justify-center rounded-md !bg-blue-400 !text-white hover:!bg-blue-100 hover:!text-blue-500 transition-colors"
+      (click)="limpiarSeleccionCampo()"
+      title="Volver"
+    >
+      <i class="pi pi-chevron-left"></i>
+    </button>
+
+      <div class="flex flex-row items-end gap-2">
+        <h2 class="text-md font-medium text-gray-800">
+          TRANSFORMACIÓN DE CAMPO SELECCIONADA
+        </h2>
+        <h2 class="text-md font-semibold text-gray-500">
+          • {{ campoSeleccionado!.ct_campo_origen }} →
+          {{ campoSeleccionado!.ct_campo_destino }}
+        </h2>
       </div>
     </div>
   </div>
@@ -202,45 +236,44 @@
   </div>
 
   <!-- Tarjeta de detalle + tabla de valores -->
-<div *ngIf="campoSeleccionado" class="pt-6" id="valoresPorCampo">
+<div *ngIf="campoSeleccionado" class="" id="valoresPorCampo">
   <div class="rounded-lg bg-white">
-    @if(!ocultarTarjetaTransformacionCampo){    
-      <div class="p-5 bg-blue-50 shadow-lg flex items-center justify-between">
-      <div>
-        <div class="flex items-center gap-2 text-lg font-semibold">
-          <span class="text-blue-600">TRANSFORMACIÓN DE CAMPO SELECCIONADA</span>
-          <span class="px-2 py-0.5 text-xs rounded-full border text-gray-700">
+    <!-- TARJETA COMPACTA estilo Integración -->
+    <div
+      *ngIf="!ocultarTarjetaTransformacionCampo"
+      class="p-2 shadow-lg flex items-center justify-between rounded-xl bg-white mb-4"
+    >
+      <div class="px-2">
+        <div class="flex items-center gap-2 text-md font-semibold">
+          <span class="uppercase">Transformación</span>
+          <span class="px-2 py-0.5 text-xs rounded-lg border border-gray-400">
             ID: {{ campoSeleccionado.ct_id }}
           </span>
         </div>
-        <p class="mt-1 text-gray-700 truncate">
-          <strong>Origen:</strong> {{ campoSeleccionado.ct_campo_origen }} •
-          <strong>Destino:</strong> {{ campoSeleccionado.ct_campo_destino }} •
-          <strong>Tipo:</strong> {{ campoSeleccionado.ct_tipo_transformacion }}
+
+        <p class="text-sm text-gray-500">
+          Origen:
+          <span class="font-mono">{{ campoSeleccionado.ct_campo_origen }}</span>
+          • Destino:
+          <span class="font-mono">{{ campoSeleccionado.ct_campo_destino }}</span>
+          • Tipo:
+          <span class="px-2 py-0.5 text-xs rounded-lg border border-gray-400">
+            {{ campoSeleccionado.ct_tipo_transformacion }}
+          </span>
+          • Obligatorio:
+          <span class="px-2 py-0.5 text-xs rounded-lg border border-gray-400">
+            {{ campoSeleccionado.ct_obligatorio ? 'SI' : 'NO' }}
+          </span>
         </p>
       </div>
-      <div class="flex items-center gap-2">
-        <p-button label="Nueva Transformación Valores" icon="pi pi-plus" severity="success"
-                  (onClick)="valoresComponent.abrirAgregar({ vt_camp_tran_id: campoSeleccionado.ct_id })">
-        </p-button>
-      </div>
     </div>
-}
-    <div class="py-5">
-      <!-- Pasa el id correcto al hijo -->
-      <!-- Si tu relación es vt_camp_tran_id -> ct_id (lo más normal), usa ct_id -->
+
+    <!-- LISTA DE VALORES -->
       <app-transformacion-valor
         #valoresComponent
         [campoId]="campoSeleccionado.ct_id"
         (stepNavigate)="onChildStep($event)"
-        >
-        
-      </app-transformacion-valor>
-
-      <!-- Si de verdad tu relación fuese vt_camp_tran_id -> pd_id, entonces usa esto:
-      <app-transformacion-valor [campoId]="campoSeleccionado?.pd_id"></app-transformacion-valor>
-      -->
-    </div>
+      ></app-transformacion-valor>
   </div>
 </div>
 

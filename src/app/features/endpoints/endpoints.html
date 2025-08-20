@@ -2,25 +2,58 @@
   class="flex rounded items-center justify-between border-b border-gray-200 p-3 bg-white"
 >
   <!-- Título -->
-  <div class="flex-1 flex">
+  <div class="flex-1 flex items-center">
     @if (selectedEndpoint) {
+    <!-- Botón de volver -->
     <button
       pButton
       type="button"
       [text]="true"
-      class="h-8 w-8 flex items-center justify-center"
+      class="h-8 w-8 flex items-center justify-center rounded-md !bg-blue-400 !text-white hover:!bg-blue-100 hover:!text-blue-500 transition-colors"
       (click)="limpiarSeleccion()"
       title="Volver"
     >
       <i class="pi pi-chevron-left"></i>
     </button>
-    }
-    <div class="px-2">
-      <h2 class="text-xl font-bold text-gray-800">
-        {{ !selectedEndpoint ? "ENDPOINTS" : "ENDPOINT SELECCIONADO" }}
+
+    <!-- Título compacto -->
+    <div class="px-2 flex flex-row items-end gap-2">
+      <h2 class="text-md font-medium text-gray-800">ENDPOINT SELECCIONADO</h2>
+      <h2 class="text-md font-semibold text-gray-500">
+        • {{ selectedEndpoint.se_nombre }}
       </h2>
-      <p class="text-sm text-gray-500">Gestión de endpoints</p>
     </div>
+    } @else {
+    <!-- Título grande cuando no hay selección -->
+    <div class="px-2">
+      <div class="flex items-center gap-2">
+        <!-- Barra vertical decorativa -->
+        <div class="w-1 h-6 bg-blue-600 rounded"></div>
+
+        <!-- Título principal -->
+        <h1 class="text-2xl md:text-3xl font-bold text-gray-900">ENDPOINTS</h1>
+
+        <!-- Badge -->
+        <span
+          class="ml-2 px-2 py-0.5 text-xs rounded-lg bg-blue-600 text-white font-semibold"
+        >
+          Gestión Activa
+        </span>
+      </div>
+
+      <!-- Subtítulo -->
+      <p class="mt-1 text-sm text-gray-500">
+        Gestión de plantillas de integración para el endpoint seleccionado
+      </p>
+
+      <!-- Etiqueta filtro (opcional) -->
+      <div class="mt-2">
+        <span class="px-2 py-0.5 rounded-full border text-gray-700 text-xs">
+          Filtrado por Endpoint: 47
+        </span>
+      </div>
+    </div>
+    }
   </div>
 
   <!-- Acciones -->
@@ -233,49 +266,31 @@
   </p-table>
 </div>
 @if(selectedEndpoint){
-<div class="pt-6" id="plantillasPorEndpoint">
-  <div class="bg-blue-50 flex flex-col gap-4">
+<div class="" id="plantillasPorEndpoint">
+  <div class="flex flex-col gap-4">
     <div
       *ngIf="!ocultarTarjetaEndpoint"
-      class="p-5 shadow-lg flex items-center justify-between"
+      class="p-2 shadow-lg flex items-center justify-between rounded-xl"
     >
-      <div>
-        <div class="flex items-center gap-2 text-lg font-semibold">
-          <span class="text-blue-600 uppercase">{{
-            selectedEndpoint.se_nombre
-          }}</span>
-          <span class="px-2 py-0.5 text-xs rounded-full border text-gray-700">
+      <div class="px-2">
+        <div class="flex items-center gap-2 text-md font-semibold">
+          <span class="uppercase">{{ selectedEndpoint.se_nombre }}</span>
+          <span class="px-2 py-0.5 text-xs rounded-lg border border-gray-400">
             ID: {{ selectedEndpoint.se_id }}
           </span>
         </div>
-        <div class="mt-1 text-gray-700 flex flex-col">
+        <div class="flex flex-row gap-2 items-center">
           <div class="flex gap-2">
-            <span class="font-semibold">URL:</span>
-            <span class="bg-gray-100 font-mono px-4 rounded-lg">
-              {{ selectedEndpoint.se_url }}
-            </span>
-          </div>
-          <div class="mt-1 flex gap-2">
-            <span class="font-semibold">Método:</span>
-            <span class="bg-black text-white font-mono px-4 rounded-lg">
+            <span class="">Método:</span>
+            <span class="font-mono rounded-lg">
               {{ selectedEndpoint.se_metodo_http }}
             </span>
           </div>
+          <p class="text-sm text-gray-500">
+            Sistema: {{ selectedEndpoint.se_sistema_id }} • Estado:
+            {{ selectedEndpoint.se_ind_estado || "A" }}
+          </p>
         </div>
-
-        <p class="text-sm text-gray-500">
-          Sistema: {{ selectedEndpoint.se_sistema_id }} • Estado:
-          {{ selectedEndpoint.se_ind_estado || "A" }}
-        </p>
-      </div>
-
-      <div class="flex items-center gap-2">
-        <p-button
-          label="Nueva Plantilla Integración"
-          icon="pi pi-plus"
-          severity="success"
-          (click)="crearPlantillaIntegracion(selectedEndpoint)"
-        ></p-button>
       </div>
     </div>
 
@@ -448,5 +463,6 @@
 <app-plantillas #plantCmp style="display: none"></app-plantillas>
 <app-autenticacion
   [(visible)]="mostrarDialogoAutenticacion"
-  [endpoint]="endpointParaAuth">
+  [endpoint]="endpointParaAuth"
+>
 </app-autenticacion>

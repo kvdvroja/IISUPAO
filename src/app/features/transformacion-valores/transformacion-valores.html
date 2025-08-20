@@ -1,9 +1,20 @@
-<div class="flex items-center justify-between border-b border-gray-200 p-3 bg-white">
+<div
+  class="flex items-center justify-between border-b border-gray-200 p-3 bg-white"
+>
   <div class="flex-1">
     <h2 class="text-2xl font-bold text-gray-800">TRANSFORMACIÓN DE VALORES</h2>
     <p class="text-sm text-gray-500">Gestión de transformación de Valores</p>
   </div>
-    <div class="flex items-center space-x-2">
+  <div class="flex items-center space-x-2">
+    <p-button
+      label="Nuevo Valor"
+      icon="pi pi-plus"
+      severity="success"
+      class="p-button-sm"
+      (onClick)="abrirAgregar({ vt_camp_tran_id: campoId! })"
+      [disabled]="!campoId"
+      pTooltip="Crear para la transformación seleccionada"
+    ></p-button>
     <p-splitButton
       label="Acciones"
       icon="pi pi-cog"

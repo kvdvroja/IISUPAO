@@ -62,6 +62,7 @@ export class PlantillaDestino implements OnInit {
   @ViewChild('dt') dt!: Table;
   @ViewChild('transfCmp') transfCmp!: TransformacionCampos;
   @Input() plantillaIId!: string | number | null | undefined;
+  @Input() sistIdFromParent: string | number | null = null;
   @Output() stepNavigate = new EventEmitter<StepKey>();
   @Input() set sistemasLista(value: SistemasI[] | null | undefined) {
     if (!value) {
@@ -344,21 +345,26 @@ export class PlantillaDestino implements OnInit {
     });
   }
   public abrirAgregarPreconfigurado(
-    opts: {
-      planInteId?: string | number;
-      sistId?: string | number;
-    } = {}
+    opts: { planInteId?: string | number; sistId?: string | number } = {}
   ): void {
     this.mostrarDialogoAgregar = true;
     this.editando = false;
     this.limpiarFormulario();
-    if (opts.planInteId != null)
+
+    // Precarga plan de integración
+    if (opts.planInteId != null) {
       this.nuevo.pd_plan_inte_id = String(opts.planInteId);
-    if (opts.sistId != null) {
       this.nuevo.pd_sist_id = String(opts.sistId);
-      this.cargarPlantillasIntegracion();
-      this.cargarSistemasOptions();
-      this.onSistemaChange(this.nuevo.pd_sist_id);
+    }
+
+    // Carga combos (labels)
+    this.cargarPlantillasIntegracion();
+    this.cargarSistemasOptions();
+
+    // sistId puede venir como sistema o como endpoint; lo resolvemos
+    if (opts.sistId != null) {
+      const id = String(opts.sistId);
+      this.resolverSistemaDesdeSistemaOEndpoint(id);
     }
 
     this.cdRef.detectChanges();
@@ -465,5 +471,26 @@ export class PlantillaDestino implements OnInit {
   onChildStep(step: StepKey) {
     this.stepNavigate.emit(step);
     this.ocultarTarjetaPlantillaD = step === 'valores';
+  }
+
+  private resolverSistemaDesdeSistemaOEndpoint(id: string): void {
+    // 1) Intento directo como sistema
+    this.nuevo.pd_sist_id = String(id);
+    this.onSistemaChange(this.nuevo.pd_sist_id);
+
+    // 2) Si fue un endpointId por error, lo resuelvo a su se_sistema_id
+    this.endpointService.getAllEndpoints().subscribe({
+      next: (res) => {
+        const all: EndpointI[] = res.result.data;
+        const ep = all.find((e) => String(e.se_id) === String(id));
+        if (ep) {
+          this.nuevo.pd_sist_id = String((ep as any).se_sistema_id ?? '');
+          this.onSistemaChange(this.nuevo.pd_sist_id);
+          this.cdRef.detectChanges();
+        }
+      },
+      error: (err) =>
+        console.error('Error resolviendo sistema desde endpoint', err),
+    });
   }
 }
