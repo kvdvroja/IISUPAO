@@ -1,32 +1,295 @@
-<div class="bg-black flex justify-between w-full bg-gradient-to-r from-[#1C3D67] to-[#000000] bg-cover bg-fixed" style="padding:8px">
-  <div>
-    <img src="upao_logo_white.png" alt="" class="w-20" />
-  </div>
-  <div class="text-white flex justify-center items-center">
-    <!-- PrimeNG button with Tailwind styles -->
-    <p-button
-  label="INGRESAR"
-  [style]="{ 'background-color': 'black', 'border-color': 'black', 'color': 'white' }"
-  styleClass="hover-black transition-all duration-300" (click)="ingresar()">
-</p-button>
-  </div>
-</div>
+<div class="min-h-screen bg-background font-sans">
+  <!-- Header -->
+  <header
+    class="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border"
+  >
+    <div class="container mx-auto px-6 py-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div
+            class="w-8 h-8 rounded-lg flex items-center justify-center"
+          >
+            <img src="iconsystem.png" alt="" class="" />
 
-<section class="w-full h-screen bg-gradient-to-r from-[#1C3D67] to-[#000000] bg-cover bg-fixed">
-  <div class="flex w-full h-full">
-    <!-- Título: Ocupa 8 columnas (w-8/12) -->
-    <div class="w-8/12 flex justify-center items-start text-white flex-col" style="padding:30px">
-      <div class="text-8xl font-bold">
-        IIS UPAO
-      </div>
-      <div class="text-3xl">
-        INFRAESTRUCTURA DE INTEGRACIÓN DE SERVICIOS
+          </div>
+          <span class="font-heading font-bold text-xl text-foreground flex gap-1"
+            >IISERVICES<span class="text-primary">UPAO</span></span
+          >
+        </div>
+        <button
+          class="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-primary hover:bg-primary/90 text-primary-foreground transition cursor-pointer font-semibold"
+          (click)="ingresar()"
+        >
+          INGRESAR
+          <span class="inline-block">→</span>
+        </button>
       </div>
     </div>
+  </header>
 
-    <!-- Imagen: Ocupa 4 columnas (w-4/12) -->
-    <div class="w-4/12 relative min-h-[92.5vh] bg-cover bg-no-repeat bg-center-right right-col" style="background-image: url('herobg.jpg'); z-index: 0;">
-      <img src="integ.jpg" alt="Laptop y silla" class="overlay-img img-fluid degradado-img" />
+  <!-- Hero Section -->
+  <section class="relative overflow-hidden">
+    <div
+      class="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-secondary/5"
+    ></div>
+    <div class="container mx-auto px-6 py-20 relative">
+      <div class="grid lg:grid-cols-2 gap-12 items-center">
+        <div
+          class="space-y-8 transition-all duration-1000"
+          [class.opacity-100]="isVisible"
+          [class.translate-y-0]="isVisible"
+          [class.opacity-0]="!isVisible"
+          [class.translate-y-8]="!isVisible"
+        >
+          <div class="space-y-4">
+            <span
+              class="inline-flex items-center px-3 py-1 rounded-md bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 text-sm cursor-default"
+            >
+              Infrastructure Integration Services
+            </span>
+            <h1
+              class="font-heading font-bold text-5xl lg:text-6xl text-foreground leading-tight"
+            >
+              IISERVICES <span class="text-primary">UPAO</span>
+            </h1>
+            <p class="text-xl text-muted-foreground leading-relaxed">
+              Plataforma avanzada de configuración para la gestión de proyectos,
+              claves API, sistemas de autenticación y métodos de integración.
+            </p>
+          </div>
+
+          <div class="flex flex-col sm:flex-row gap-4">
+            <button
+              class="group inline-flex items-center gap-2 px-5 py-3 rounded-md bg-primary hover:bg-primary/90 text-primary-foreground text-lg transition cursor-pointer"
+            >
+              Comenzar Ahora
+              <span
+                class="ml-2 inline-block group-hover:translate-x-1 transition-transform"
+                >→</span
+              >
+            </button>
+            <button
+              class="px-5 py-3 rounded-md border border-primary text-primary hover:bg-primary/5 bg-transparent text-lg cursor-pointer"
+            >
+              Ver Documentación
+            </button>
+          </div>
+
+          <!-- Stats -->
+          <div class="grid grid-cols-2 lg:grid-cols-4 gap-6 pt-8">
+            <div *ngFor="let stat of stats" class="text-center space-y-2">
+              <div class="flex items-center justify-center text-primary">
+                <i
+                  [class]="stat.icon"
+                  class="text-[20px]"
+                  aria-hidden="true"
+                ></i>
+              </div>
+              <div class="font-heading font-bold text-2xl text-foreground">
+                {{ stat.value }}
+              </div>
+              <div class="text-sm text-muted-foreground">{{ stat.label }}</div>
+            </div>
+          </div>
+        </div>
+
+        <div
+          class="relative transition-all duration-1000 delay-300"
+          [class.opacity-100]="isVisible"
+          [class.translate-y-0]="isVisible"
+          [class.opacity-0]="!isVisible"
+          [class.translate-y-8]="!isVisible"
+        >
+          <div class="relative">
+            <img
+              src="III.jpg"
+              alt="UPAO Integration Dashboard"
+              class="w-full h-auto rounded-2xl shadow-2xl"
+            />
+            <div
+              class="absolute inset-0 rounded-2xl bg-gradient-to-t from-[color:var(--p-primary-color)]/40 to-transparent"
+            ></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="py-20 bg-muted/30">
+    <div class="container mx-auto px-6">
+      <div class="text-center space-y-4 mb-16">
+        <h2 class="font-heading font-bold text-4xl text-foreground">
+          Funcionalidades Principales
+        </h2>
+        <p class="text-xl text-muted-foreground max-w-2xl mx-auto">
+          Herramientas profesionales diseñada para administradores técnicos que
+          requieren control total sobre los sistemas de integración.
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div
+          *ngFor="let feature of features; let i = index"
+          class="group cursor-pointer transition-all duration-300 hover:shadow-lg hover:-translate-y-1 rounded-xl border border-border bg-card"
+          [class.ring-2]="activeFeature === i"
+          [class.ring-primary]="activeFeature === i"
+          (mouseenter)="activeFeature = i"
+        >
+          <div class="p-6 space-y-4">
+            <div
+              class="w-12 h-12 rounded-lg flex items-center justify-center text-white group-hover:scale-110 transition-transform"
+              [ngClass]="feature.color"
+            >
+              <i
+                [class]="feature.icon"
+                class="text-[22px]"
+                aria-hidden="true"
+              ></i>
+            </div>
+            <div class="font-heading text-lg text-foreground">
+              {{ feature.title }}
+            </div>
+            <p class="text-muted-foreground leading-relaxed">
+              {{ feature.description }}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+<section class="py-20 bg-primary text-primary-foreground">
+  <div class="container mx-auto px-6 text-center">
+    <div class="max-w-3xl mx-auto space-y-8">
+      <h2 class="font-heading font-bold text-4xl">
+        Accede al sistema de integraciones
+      </h2>
+      <p class="text-xl text-primary-foreground/80">
+        Plataforma interna de IISERVICES UPAO para gestionar y monitorear 
+        integraciones de manera centralizada y segura.
+      </p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <button
+          class="px-5 py-3 rounded-md bg-white text-primary hover:bg-white/90 text-lg inline-flex items-center gap-2 cursor-pointer"
+          (click)="ingresar()"
+        >
+          Acceder al Sistema
+          <span>›</span>
+        </button>
+        <button
+          class="px-5 py-3 rounded-md border border-white text-white hover:bg-white/10 bg-transparent text-lg cursor-pointer"
+        >
+          Solicitar Acceso
+        </button>
+      </div>
     </div>
   </div>
 </section>
+
+  <!-- Footer -->
+  <footer class="bg-card border-t border-border py-12">
+    <div class="container mx-auto px-6">
+      <div class="grid md:grid-cols-4 gap-8">
+        <div class="space-y-4">
+        <div class="flex items-center gap-3">
+          <div
+            class="w-8 h-8 rounded-lg flex items-center justify-center"
+          >
+            <img src="iconsystem.png" alt="" class="" />
+
+          </div>
+          <span class="font-heading font-bold text-xl text-foreground flex gap-1"
+            >IISERVICES<span class="text-primary">UPAO</span></span
+          >
+        </div>
+          <p class="text-muted-foreground">
+            Infraestructura de Integración de Servicios para la gestión
+            empresarial moderna.
+          </p>
+        </div>
+
+        <div class="space-y-4">
+          <h3 class="font-heading font-semibold">Plataforma</h3>
+          <ul class="space-y-2 text-muted-foreground">
+            <li>
+              <a href="#" class="hover:text-primary transition-colors"
+                >Configuración</a
+              >
+            </li>
+            <li>
+              <a href="#" class="hover:text-primary transition-colors"
+                >Integraciones</a
+              >
+            </li>
+            <li>
+              <a href="#" class="hover:text-primary transition-colors"
+                >Seguridad</a
+              >
+            </li>
+            <li>
+              <a href="#" class="hover:text-primary transition-colors"
+                >Monitoreo</a
+              >
+            </li>
+          </ul>
+        </div>
+
+        <div class="space-y-4">
+          <h3 class="font-heading font-semibold">Recursos</h3>
+          <ul class="space-y-2 text-muted-foreground">
+            <li>
+              <a href="#" class="hover:text-primary transition-colors"
+                >Documentación</a
+              >
+            </li>
+            <li>
+              <a href="#" class="hover:text-primary transition-colors"
+                >API Reference</a
+              >
+            </li>
+            <li>
+              <a href="#" class="hover:text-primary transition-colors">Guías</a>
+            </li>
+            <li>
+              <a href="#" class="hover:text-primary transition-colors"
+                >Soporte</a
+              >
+            </li>
+          </ul>
+        </div>
+
+        <div class="space-y-4">
+          <h3 class="font-heading font-semibold">Contacto</h3>
+          <ul class="space-y-2 text-muted-foreground">
+            <li>
+              <a href="#" class="hover:text-primary transition-colors"
+                >Soporte Técnico</a
+              >
+            </li>
+            <li>
+              <a href="#" class="hover:text-primary transition-colors"
+                >Ventas</a
+              >
+            </li>
+            <li>
+              <a href="#" class="hover:text-primary transition-colors"
+                >Partnerships</a
+              >
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div
+        class="border-t border-border mt-12 pt-8 text-center text-muted-foreground"
+      >
+        <p>
+          &copy; 2025 Universidad Privada Antenor Orrego. Todos los derechos
+          reservados.
+        </p>
+      </div>
+    </div>
+  </footer>
+</div>

@@ -313,17 +313,17 @@ export const IISUPAOTheme: any = definePreset(Material, {
     iconSize: '1rem',
     anchorGutter: '0',
     primary: {
-      50: '#f1f7fb', // Color más claro (ajusta según el tono deseado)
-      100: '#d2e0f2', // Color más claro
-      200: '#a4c7e4', // Color intermedio
-      300: '#75aee7', // Color intermedio
-      400: '#478bd9', // Color oscuro
-      500: '#1C3D67', // Tu color principal
-      600: '#183256', // Tono más oscuro
-      700: '#112c45', // Más oscuro
-      800: '#0b2235', // Aún más oscuro
-      900: '#061621', // Tono más oscuro
-      950: '#040f10', // Tono casi negro
+      50:  '#f3f6fc', // muy claro, casi blanco azulado
+      100: '#dce5f7', // azul muy claro
+      200: '#b8cbef', // azul claro intermedio
+      300: '#8daae3', // azul suave
+      400: '#5c80cf', // azul medio
+      500: '#2e55b1', // tu color principal
+      600: '#254695', // más oscuro
+      700: '#1d3878', // bastante más oscuro
+      800: '#152a5a', // casi navy
+      900: '#0e1d3d', // azul muy profundo
+      950: '#080f24', // casi negro
     },
     formField: {
       paddingX: '0.75rem',
