@@ -10,11 +10,13 @@ import { Programacion_JobI } from '../../../interfaces/Programacion_Job';
 export class ProgramacionJobS {
     http = inject(HttpClient);
   
-    private getHeaders(): HttpHeaders {
-      return new HttpHeaders({
-        Accept: 'application/json',
-      });
-    }
+  private getHeaders(): HttpHeaders {
+    const token = environment.token;
+    return new HttpHeaders({
+      Accept: 'application/json',
+      Authorization: `Bearer ${token ?? ''}`,
+    });
+  }
   
     getAllProgramacionJob(): Observable<{ result: { data: any[] } }> {
       return this.http.get<{ result: { data: any[] } }>(

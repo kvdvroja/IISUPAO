@@ -11,8 +11,10 @@ export class PlantillaDestinoS {
   http = inject(HttpClient);
 
   private getHeaders(): HttpHeaders {
+    const token = environment.token;
     return new HttpHeaders({
       Accept: 'application/json',
+      Authorization: `Bearer ${token ?? ''}`,
     });
   }
 

@@ -2,7 +2,7 @@ export const environment = {
   production: false,
   apiLocalUrl: 'http://127.0.0.1:8015', // cambia según entorno
   apiVersion: 'v1',
-  token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwibmlja25hbWUiOiJzeXMiLCJuYW1lIjoiTWt0T2ZmaWNlIiwibmJmIjoxNzQ1OTQ4NDMzLCJleHAiOjE3NDU5NTIwMzMsImlzcyI6Imh0dHBzOi8vdGVzaXMudXBhby5lZHUucGUiLCJhdWQiOiJ0ZXNpc2luZm9hcGkifQ.6u2Qv1_304l1ZoFJdI3rs61Cmh9Wi1XwnusdDiPh-MA',
+  token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbiIsImV4cCI6MTc1NTkwNDA1NH0.6I1oJzcV7s40GQSLX_Zp7vLGqNJkKfyjBG9CPnp-04k',
   get apiBaseUrl() {
     return `${this.apiLocalUrl}/api/${this.apiVersion}/`;
   },

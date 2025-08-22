@@ -121,7 +121,6 @@ export class Sistemas implements OnInit, OnChanges, AfterViewInit {
     sistema_nombre: '',
     sistema_descripcion: '',
     sistema_usua_id: '',
-    sistema_ind_estado: '',
     sistema_requiere_auth: false,
   };
 
@@ -243,18 +242,7 @@ export class Sistemas implements OnInit, OnChanges, AfterViewInit {
       sistema_nombre: '',
       sistema_descripcion: '',
       sistema_usua_id: '',
-      sistema_ind_estado: '',
       sistema_requiere_auth: false,
-    };
-  }
-
-  mapToPayload(s: any) {
-    return {
-      system_id: s.sistema_id,
-      system_name: s.sistema_nombre,
-      system_description: s.sistema_descripcion,
-      system_status: s.sistema_ind_estado,
-      user_id: s.sistema_usua_id,
     };
   }
 
@@ -265,9 +253,8 @@ export class Sistemas implements OnInit, OnChanges, AfterViewInit {
     )
       return;
     this.nuevoSistema.sistema_usua_id = 'ADMIN';
-    this.nuevoSistema.sistema_ind_estado = 'A';
     const accion = this.editando ? 'U' : 'I';
-    const payload = this.mapToPayload(this.nuevoSistema);
+    const payload = this.nuevoSistema;
 
     this.sistemasService.sistemasCrud(payload as any, accion).subscribe({
       next: () => {
