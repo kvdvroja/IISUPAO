@@ -19,13 +19,22 @@ export class TransformacionValorS {
   }
 
   getAllTransformacionValor(): Observable<{
-    result: { data: Transformacion_ValorI[] };
+    data: Transformacion_ValorI[];
+    count: number;
+    success: boolean;
+    message: string;
+    error: any;
   }> {
-    return this.http.get<{ result: { data: Transformacion_ValorI[] } }>(
-      environment.getAlltransformacionValores,
-      {
-        headers: this.getHeaders(),
-      }
+    return this.http.post<{
+      data: Transformacion_ValorI[];
+      count: number;
+      success: boolean;
+      message: string;
+      error: any;
+    }>(
+      `${environment.transformacionValorespiUrl}/SEL`,
+      {},
+      { headers: this.getHeaders() }
     );
   }
 
@@ -33,7 +42,7 @@ export class TransformacionValorS {
     sistemas: Transformacion_ValorI,
     action: string
   ): Observable<any> {
-    const url = `${environment.transformacionValoresCrudUrl}?action=${action}`; // Agregar el parámetro 'action' a la URL
+    const url = `${environment.transformacionValorespiUrl}/${action}`;
     return this.http.post<any>(url, sistemas, {
       headers: this.getHeaders(),
     });

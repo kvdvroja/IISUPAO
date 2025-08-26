@@ -117,7 +117,7 @@ export class TransformacionValores implements OnInit, OnChanges {
   cargarCamposTransformacion(): void {
     this.transformacionCamposService.getAllTransformacionCampos().subscribe({
       next: (resp) => {
-        const data = resp.result?.data ?? [];
+        const data = resp.data ?? [];
         // Asumiendo que cada item tiene ct_id y ct_campo_destino (ajusta según tu API)
         this.camposOptions = data.map((c: any) => ({
           value: c.ct_id,
@@ -147,7 +147,7 @@ export class TransformacionValores implements OnInit, OnChanges {
   cargarData(): void {
     this.transformacionValoresService.getAllTransformacionValor().subscribe({
       next: (response) => {
-        this.valores = response.result.data;
+        this.valores = response.data;
         this.cdRef.detectChanges();
       },
       error: (err) => {

@@ -122,10 +122,10 @@ export class TransformacionCampos implements OnInit, OnChanges {
   private cargarPlantillasDestinoOptions(): void {
     this.plantillaDestinoService.getAllPlantillas().subscribe({
       next: (res) => {
-        this.plantillasDestino = res.result.data;
+        this.plantillasDestino = res.data ?? [];
         this.pdOptions = this.plantillasDestino.map((pd) => ({
-          label: `${pd.pd_id} - ${pd.pd_url} [${pd.pd_metodo_http}]`,
-          value: String(pd.pd_id),
+          label: `${pd.pd_id}`,
+          value: String(pd.pd_id), // ← string
         }));
         this.cdRef.detectChanges();
       },
@@ -134,12 +134,9 @@ export class TransformacionCampos implements OnInit, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    this.cargarData();
-    if (changes['pdId'] && this.pdId) {
-      // si el diálogo de agregar está abierto, bloquear pd_id al nuevo pdId
-      if (this.mostrarDialogoAgregar) {
-        this.nuevoCampo.pd_id = Number(this.pdId);
-      }
+    if (changes['pdId'] && this.mostrarDialogoAgregar && this.pdId != null) {
+      this.nuevoCampo.pd_id = String(this.pdId); // 👈 string
+      this.cdRef.detectChanges();
     }
   }
 
@@ -153,7 +150,7 @@ export class TransformacionCampos implements OnInit, OnChanges {
   cargarData(): void {
     this.transformacionCamposService.getAllTransformacionCampos().subscribe({
       next: (response) => {
-        this.campos = response.result.data;
+        this.campos = response.data;
         this.cdRef.detectChanges();
       },
       error: (err) => {
@@ -164,7 +161,7 @@ export class TransformacionCampos implements OnInit, OnChanges {
 
   get datosFiltrados(): Transformacion_CamposI[] {
     const pid = Number(this.pdId);
-    if (Number.isNaN(pid)) return this.campos; // si aún no hay selección
+    if (Number.isNaN(pid)) return this.campos;
     return this.campos.filter((c) => Number((c as any).pd_id) === pid);
   }
 
@@ -179,20 +176,30 @@ export class TransformacionCampos implements OnInit, OnChanges {
   }
 
   Agregar(): void {
+    // Asegura tener opciones antes de abrir
+    if (!this.pdOptions.length) {
+      this.cargarPlantillasDestinoOptions();
+    }
+
     this.mostrarDialogoAgregar = true;
+
     this.nuevoCampo = {
       ct_campo_origen: '',
       ct_campo_destino: '',
       ct_tipo_transformacion: '',
       ct_validacion: '',
-      ct_obligatorio: 'N',
+      ct_obligatorio: false,
       ct_usua_id: '',
-      pd_id: this.pdId ? String(this.pdId) : '',
+      pd_id: this.pdId != null ? String(this.pdId) : '',
     };
+
     this.validacionPairs = [];
     this.newValKey = '';
     this.newValValue = '';
     this.editingValIndex = null;
+
+    // En algunos casos ayuda empujar change detection tras cargar opciones
+    setTimeout(() => this.cdRef.detectChanges());
   }
 
   agregarDesdeValores(): void {
@@ -233,7 +240,7 @@ export class TransformacionCampos implements OnInit, OnChanges {
       const n = Number(payload.ct_id);
       if (!Number.isNaN(n)) payload.ct_id = n; // UPDATE
     }
-    payload.ct_usua_id = 'ADMIN';
+    payload.ct_usua_id = '000000044';
     const accion: 'I' | 'U' = payload.ct_id ? 'U' : 'I';
 
     this.transformacionCamposService
@@ -371,6 +378,7 @@ export class TransformacionCampos implements OnInit, OnChanges {
 
   onChildStep(step: StepKey) {
     this.stepNavigate.emit(step);
-    this.ocultarTarjetaTransformacionCampo = step === 'campos' || step === 'valores';
+    this.ocultarTarjetaTransformacionCampo =
+      step === 'campos' || step === 'valores';
   }
 }

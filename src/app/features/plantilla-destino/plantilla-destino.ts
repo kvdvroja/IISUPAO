@@ -136,8 +136,6 @@ export class PlantillaDestino implements OnInit {
     pd_sist_dest_id: '',
     pd_schema: '',
     pd_sist_id: '',
-    pd_url: '',
-    pd_metodo_http: '',
     pd_tipo_transformacion: '',
   };
 
@@ -161,7 +159,7 @@ export class PlantillaDestino implements OnInit {
   private cargarPlantillasIntegracion(): void {
     this.plantillaIntegracionService.getAllPlantillas().subscribe({
       next: (res) => {
-        this.plantillasI = res.result.data;
+        this.plantillasI = res.data;
         this.plantillasIOptions = this.plantillasI.map((p) => ({
           label: `${p.pi_codigo ?? p.pi_id} - ${p.pi_nombre} [${
             p.pi_metodo_http
@@ -182,7 +180,7 @@ export class PlantillaDestino implements OnInit {
   private cargarSistemasOptions(): void {
     this.sistemasService.getAllSistemas().subscribe({
       next: (res) => {
-        this.sistemas = res.result.data;
+        this.sistemas = res.data;
         this.sistemasOptions = this.sistemas.map((s) => ({
           label: `${s.sistema_id} - ${s.sistema_nombre}`,
           value: String(s.sistema_id),
@@ -196,7 +194,7 @@ export class PlantillaDestino implements OnInit {
   cargarPlantillas(): void {
     this.plantillaDestinoService.getAllPlantillas().subscribe({
       next: (response) => {
-        this.plantillaDestinos = response.result.data;
+        this.plantillaDestinos = response.data;
         this.cdRef.detectChanges();
       },
       error: (err) => {
@@ -254,8 +252,6 @@ export class PlantillaDestino implements OnInit {
       pd_sist_dest_id: '',
       pd_schema: '',
       pd_sist_id: '',
-      pd_url: '',
-      pd_metodo_http: '',
       pd_tipo_transformacion: '',
     };
   }
@@ -264,8 +260,6 @@ export class PlantillaDestino implements OnInit {
       !this.nuevo.pd_plan_inte_id ||
       !this.nuevo.pd_priodridad ||
       !this.nuevo.pd_sist_dest_id ||
-      !this.nuevo.pd_url ||
-      !this.nuevo.pd_metodo_http ||
       !this.nuevo.pd_tipo_transformacion
     )
       return;
@@ -395,7 +389,7 @@ export class PlantillaDestino implements OnInit {
 
     this.endpointService.getAllEndpoints().subscribe({
       next: (res) => {
-        const all: EndpointI[] = res.result.data;
+        const all: EndpointI[] = res.data;
 
         // filtra por el sistema
         this.endpoints = all.filter(
@@ -431,10 +425,6 @@ export class PlantillaDestino implements OnInit {
     if (!ep) return;
 
     this.nuevo.pd_sist_dest_id = Number(endpointId);
-
-    if (!this.nuevo.pd_url) this.nuevo.pd_url = ep.se_url || '';
-    if (!this.nuevo.pd_metodo_http)
-      this.nuevo.pd_metodo_http = ep.se_metodo_http || '';
   }
 
   onDestinoSelected(
@@ -481,7 +471,7 @@ export class PlantillaDestino implements OnInit {
     // 2) Si fue un endpointId por error, lo resuelvo a su se_sistema_id
     this.endpointService.getAllEndpoints().subscribe({
       next: (res) => {
-        const all: EndpointI[] = res.result.data;
+        const all: EndpointI[] = res.data;
         const ep = all.find((e) => String(e.se_id) === String(id));
         if (ep) {
           this.nuevo.pd_sist_id = String((ep as any).se_sistema_id ?? '');

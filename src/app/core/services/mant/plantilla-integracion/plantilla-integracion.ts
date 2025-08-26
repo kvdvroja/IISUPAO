@@ -18,22 +18,18 @@ export class PlantillaIntegracionS {
     });
   }
 
-  getAllPlantillas(): Observable<{
-    result: { data: Plantilla_IntegracionI[] };
-  }> {
-    return this.http.get<{ result: { data: Plantilla_IntegracionI[] } }>(
-      environment.getAllPlantillaIntegracion,
-      {
-        headers: this.getHeaders(),
-      }
+
+    getAllPlantillas(): Observable<{ data: Plantilla_IntegracionI[], count: number, success: boolean, message: string, error: any }> {
+    return this.http.post<{ data: Plantilla_IntegracionI[], count: number, success: boolean, message: string, error: any }>(
+      `${environment.plantillaIntegracionApiUrl}/SEL`,
+      {},
+      { headers: this.getHeaders() }
     );
   }
 
-  plantillaIntegracionCrud(
-    plantilla: Plantilla_IntegracionI,
-    action: string
-  ): Observable<any> {
-    const url = `${environment.plantillaIntegracionCrud}?action=${action}`; // Agregar el parámetro 'action' a la URL
+
+    plantillaIntegracionCrud(plantilla: Plantilla_IntegracionI, action: string): Observable<any> {
+    const url = `${environment.plantillaIntegracionApiUrl}/${action}`;
     return this.http.post<any>(url, plantilla, {
       headers: this.getHeaders(),
     });

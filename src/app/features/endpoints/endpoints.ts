@@ -152,21 +152,6 @@ export class Endpoints implements OnInit, OnChanges {
     //this.cargarEndpoints();
   }
 
-  cargarAuthOptions(): void {
-    this.authService.getAllAutenticacion().subscribe({
-      next: (res) => {
-        const rows = res?.result?.data ?? [];
-        this.authOptions = rows.map((r: any) => ({
-          label: `${r.auth_codigo ?? r.auth_id} - ${
-            r.auth_nombre ?? ''
-          }`.trim(),
-          value: r.auth_id, // ajusta al campo real de tu tabla
-        }));
-      },
-      error: (e) => console.error('Error cargando opciones de auth', e),
-    });
-  }
-
   ngOnChanges(): void {
     this.cargarEndpoints();
   }
@@ -199,7 +184,7 @@ export class Endpoints implements OnInit, OnChanges {
   cargarEndpoints(): void {
     this.endpointService.getAllEndpoints().subscribe({
       next: (response) => {
-        this.endpoint = response.result.data;
+        this.endpoint = response.data;
         this.cdRef.detectChanges();
       },
       error: (err) => {
@@ -216,7 +201,6 @@ export class Endpoints implements OnInit, OnChanges {
       se_requiere_transformar: !!(endpoint as any).se_requiere_transformar,
     };
     this.mostrarDialogoAgregar = true;
-    this.cargarAuthOptions();
   }
 
   onTipoChange(): void {
@@ -230,13 +214,11 @@ export class Endpoints implements OnInit, OnChanges {
       this.nuevoEndpoint.se_sistema_id = this.sistemaId;
     }
     this.mostrarDialogoAgregar = true;
-    this.cargarAuthOptions();
   }
 
   AgregarEndpointT(sistema_id: string): void {
     this.nuevoEndpoint.se_sistema_id = sistema_id;
     this.mostrarDialogoAgregar = true;
-    this.cargarAuthOptions();
   }
 
   cerrarDialogoAgregar(): void {
@@ -268,7 +250,7 @@ export class Endpoints implements OnInit, OnChanges {
       return;
     }
 
-    this.nuevoEndpoint.se_usua_id = 'ADMIN';
+    this.nuevoEndpoint.se_usua_id = '000000044';
     this.nuevoEndpoint.se_ind_estado = this.nuevoEndpoint.se_ind_estado || 'A';
 
     if (this.nuevoEndpoint.se_tipo === 'NORM') {

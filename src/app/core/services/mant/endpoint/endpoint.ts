@@ -18,18 +18,29 @@ export class Endpoint {
     });
   }
 
-  getAllEndpoints(): Observable<{ result: { data: EndpointI[] } }> {
-    return this.http.get<{ result: { data: EndpointI[] } }>(
-      environment.getAllEndpoints,
-      {
-        headers: this.getHeaders(),
-      }
+  getAllEndpoints(): Observable<{
+    data: EndpointI[];
+    count: number;
+    success: boolean;
+    message: string;
+    error: any;
+  }> {
+    return this.http.post<{
+      data: EndpointI[];
+      count: number;
+      success: boolean;
+      message: string;
+      error: any;
+    }>(
+      `${environment.endpointsApiUrl}/SEL`,
+      {},
+      { headers: this.getHeaders() }
     );
   }
 
-  endpointCrud(endpoint: EndpointI, action: string): Observable<any> {
-    const url = `${environment.EndpointCrudUrl}?action=${action}`; // Agregar el parámetro 'action' a la URL
-    return this.http.post<any>(url, endpoint, {
+  endpointCrud(sistemas: EndpointI, action: string): Observable<any> {
+    const url = `${environment.endpointsApiUrl}/${action}`;
+    return this.http.post<any>(url, sistemas, {
       headers: this.getHeaders(),
     });
   }

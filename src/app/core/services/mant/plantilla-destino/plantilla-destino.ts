@@ -18,21 +18,32 @@ export class PlantillaDestinoS {
     });
   }
 
-  getAllPlantillas(): Observable<{ result: { data: Plantilla_DestinoI[] } }> {
-    return this.http.get<{ result: { data: Plantilla_DestinoI[] } }>(
-      environment.getAllPlantillaDestino,
-      {
-        headers: this.getHeaders(),
-      }
+  getAllPlantillas(): Observable<{
+    data: Plantilla_DestinoI[];
+    count: number;
+    success: boolean;
+    message: string;
+    error: any;
+  }> {
+    return this.http.post<{
+      data: Plantilla_DestinoI[];
+      count: number;
+      success: boolean;
+      message: string;
+      error: any;
+    }>(
+      `${environment.plantillaDestinoApiUrl}/SEL`,
+      {},
+      { headers: this.getHeaders() }
     );
   }
 
   plantillaDestinoCrud(
-    plantilla: Plantilla_DestinoI,
+    plantillas: Plantilla_DestinoI,
     action: string
   ): Observable<any> {
-    const url = `${environment.plantillaDestinoCrudUrl}?action=${action}`; // Agregar el parámetro 'action' a la URL
-    return this.http.post<any>(url, plantilla, {
+    const url = `${environment.plantillaDestinoApiUrl}/${action}`;
+    return this.http.post<any>(url, plantillas, {
       headers: this.getHeaders(),
     });
   }

@@ -180,8 +180,6 @@ export class Plantillas implements OnInit, OnChanges {
     pi_data: '',
     pi_numreg_peticion: '',
     pi_schema: '',
-    pi_url: '',
-    pi_metodo_http: '',
     pi_sist_id: '',
     pi_valida: '',
     pi_transforma: '',
@@ -235,7 +233,7 @@ export class Plantillas implements OnInit, OnChanges {
   private cargarEndpointsOptions(preselectId?: string): void {
     this.endpointService.getAllEndpoints().subscribe({
       next: (res) => {
-        this.endpoints = res.result.data;
+        this.endpoints = res.data;
         this.endpointsOptions = this.endpoints.map((e) => ({
           label: `${e.se_id} - ${e.se_nombre}`,
           value: String(e.se_id),
@@ -260,8 +258,6 @@ export class Plantillas implements OnInit, OnChanges {
     if (!ep) return;
 
     this.selectedEndpointId = id;
-    this.nuevaPlantilla.pi_url = ep.se_url || '';
-    this.nuevaPlantilla.pi_metodo_http = ep.se_metodo_http || '';
     this.nuevaPlantilla.pi_sist_orig_id = String(ep.se_id);
     this.nuevaPlantilla.pi_sist_id = String((ep as any).se_sistema_id ?? '');
   }
@@ -274,7 +270,7 @@ export class Plantillas implements OnInit, OnChanges {
   cargarPlantillas(): void {
     this.plantillaIntegracionService.getAllPlantillas().subscribe({
       next: (response) => {
-        this.plantillas = response.result.data;
+        this.plantillas = response.data;
         this.cdRef.detectChanges();
       },
       error: (err) => {
@@ -407,9 +403,7 @@ export class Plantillas implements OnInit, OnChanges {
   guardar(): void {
     if (
       !this.nuevaPlantilla.pi_codigo ||
-      !this.nuevaPlantilla.pi_nombre ||
-      !this.nuevaPlantilla.pi_url ||
-      !this.nuevaPlantilla.pi_metodo_http
+      !this.nuevaPlantilla.pi_nombre
     )
       return;
 
@@ -680,8 +674,6 @@ export class Plantillas implements OnInit, OnChanges {
       pi_data: '',
       pi_numreg_peticion: '',
       pi_schema: '',
-      pi_url: '',
-      pi_metodo_http: '',
       pi_sist_id: '',
       pi_valida: '',
       pi_transforma: '',

@@ -114,8 +114,6 @@
     <div><strong>Plan Integración:</strong> {{ item.pd_plan_inte_id }}</div>
     <div><strong>Prioridad:</strong> {{ item.pd_priodridad }}</div>
     <div><strong>Sistema Destino:</strong> {{ item.pd_sist_dest_id }}</div>
-    <div><strong>URL:</strong> {{ item.pd_url }}</div>
-    <div><strong>Método HTTP:</strong> {{ item.pd_metodo_http }}</div>
     <div>
       <strong>Transformación:</strong> {{ item.pd_tipo_transformacion }}
     </div>
@@ -179,7 +177,7 @@
     [paginator]="true"
     [rows]="10"
     [rowsPerPageOptions]="[10, 25, 50]"
-    [globalFilterFields]="['pd_plan_inte_id', 'pd_url', 'pd_metodo_http']"
+    [globalFilterFields]="['pd_plan_inte_id']"
   >
     <ng-template #header>
       <tr>
@@ -187,8 +185,6 @@
         <th>Plan Integración</th>
         <th>Prioridad</th>
         <th>Sistema Destino</th>
-        <th>URL</th>
-        <th>Método HTTP</th>
         <th>Transformación</th>
         <th>Estado</th>
         <th>Acciones</th>
@@ -201,8 +197,6 @@
         <td>{{ row.pd_plan_inte_id }}</td>
         <td>{{ row.pd_priodridad }}</td>
         <td>{{ row.pd_sist_dest_id }}</td>
-        <td>{{ row.pd_url }}</td>
-        <td>{{ row.pd_metodo_http }}</td>
         <td>{{ row.pd_tipo_transformacion }}</td>
         <td>{{ row.pd_ind_estado }}</td>
         <td>
@@ -373,22 +367,6 @@
         optionLabel="label"
         optionValue="value"
         placeholder="Seleccionar Transformación"
-        style="width: 100%"
-      ></p-select>
-    </p-inputgroup>
-    <p-inputgroup>
-      <p-inputgroup-addon><i class="pi pi-link"></i></p-inputgroup-addon>
-      <input pInputText placeholder="URL" [(ngModel)]="nuevo.pd_url" />
-    </p-inputgroup>
-
-    <p-inputgroup>
-      <p-inputgroup-addon><i class="pi pi-server"></i></p-inputgroup-addon>
-      <p-select
-        [(ngModel)]="nuevo.pd_metodo_http"
-        [options]="httpMethodOptions"
-        optionLabel="label"
-        optionValue="value"
-        placeholder="Seleccionar Método HTTP"
         style="width: 100%"
       ></p-select>
     </p-inputgroup>

@@ -18,17 +18,16 @@ export class SistemasS {
     });
   }
 
-  getAllSistemas(): Observable<{ result: { data: SistemasI[] } }> {
-    return this.http.get<{ result: { data: SistemasI[] } }>(
-      environment.getAllSistemas,
-      {
-        headers: this.getHeaders(),
-      }
+  getAllSistemas(): Observable<{ data: SistemasI[], count: number, success: boolean, message: string, error: any }> {
+    return this.http.post<{ data: SistemasI[], count: number, success: boolean, message: string, error: any }>(
+      `${environment.sistemasApiUrl}/SEL`,
+      {},
+      { headers: this.getHeaders() }
     );
   }
 
   sistemasCrud(sistemas: SistemasI, action: string): Observable<any> {
-    const url = `${environment.SistemasCrudUrl}?action=${action}`; // Agregar el parámetro 'action' a la URL
+    const url = `${environment.sistemasApiUrl}/${action}`;
     return this.http.post<any>(url, sistemas, {
       headers: this.getHeaders(),
     });

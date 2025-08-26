@@ -159,7 +159,6 @@
       <div><strong>Código:</strong> {{ plantilla.pi_codigo }}</div>
       <div><strong>Nombre:</strong> {{ plantilla.pi_nombre }}</div>
       <div><strong>Servicio:</strong> {{ plantilla.pi_tipo_servicio }}</div>
-      <div><strong>URL:</strong> {{ plantilla.pi_url }}</div>
       <div class="flex justify-end mt-2 gap-2">
         <button
           pButton
@@ -235,8 +234,7 @@
     [globalFilterFields]="[
       'pi_codigo',
       'pi_nombre',
-      'pi_tipo_servicio',
-      'pi_url'
+      'pi_tipo_servicio'
     ]"
   >
     <ng-template #header>
@@ -244,10 +242,8 @@
         <th>Código</th>
         <th>Nombre</th>
         <th>Servicio</th>
-        <th>URL</th>
-        <th>Método</th>
         <th>Fecha</th>
-        <th>Acciones</th>
+        <th><div class="flex justify-center">Acciones</div></th>
       </tr>
     </ng-template>
 
@@ -256,8 +252,6 @@
         <td>{{ plantilla.pi_codigo }}</td>
         <td>{{ plantilla.pi_nombre }}</td>
         <td>{{ plantilla.pi_tipo_servicio }}</td>
-        <td>{{ plantilla.pi_url }}</td>
-        <td>{{ plantilla.pi_metodo_http }}</td>
         <td>
           {{ plantilla.pi_fecha_actividad | date : "dd MMM yyyy, HH:mm" }}
         </td>
@@ -399,33 +393,11 @@
         placeholder="Seleccione endpoint"
         class="w-full"
         appendTo="body"
+        disabled
         (onChange)="onEndpointSelect($event.value)"
       ></p-select>
     </div>
 
-    <!-- URL -->
-    <div class="flex flex-row gap-2">
-      <p-inputgroup>
-        <p-inputgroup-addon><i class="pi pi-globe"></i></p-inputgroup-addon>
-        <input
-          pInputText
-          placeholder="URL"
-          [(ngModel)]="nuevaPlantilla.pi_url"
-          disabled="true"
-        />
-      </p-inputgroup>
-
-      <!-- Método HTTP -->
-      <p-inputgroup>
-        <p-inputgroup-addon><i class="pi pi-server"></i></p-inputgroup-addon>
-        <input
-          pInputText
-          placeholder="Método HTTP"
-          [(ngModel)]="nuevaPlantilla.pi_metodo_http"
-          disabled="true"
-        />
-      </p-inputgroup>
-    </div>
     <div class="flex flex-col">
       <label class="font-semibold text-sm">Colas</label>
       <p-select
@@ -723,9 +695,7 @@
         icon="pi pi-check"
         (click)="guardar()"
         [disabled]="
-          !nuevaPlantilla.pi_nombre ||
-          !nuevaPlantilla.pi_url ||
-          !nuevaPlantilla.pi_metodo_http
+          !nuevaPlantilla.pi_nombre || !nuevaPlantilla.pi_codigo || !nuevaPlantilla.pi_tipo_servicio
         "
       ></p-button>
     </div>

@@ -19,22 +19,31 @@ export class TransformacionCampoS {
   }
 
   getAllTransformacionCampos(): Observable<{
-    result: { data: Transformacion_CamposI[] };
+    data: Transformacion_CamposI[];
+    count: number;
+    success: boolean;
+    message: string;
+    error: any;
   }> {
-    return this.http.get<{ result: { data: Transformacion_CamposI[] } }>(
-      environment.getAlltransformacionCampos,
-      {
-        headers: this.getHeaders(),
-      }
+    return this.http.post<{
+      data: Transformacion_CamposI[];
+      count: number;
+      success: boolean;
+      message: string;
+      error: any;
+    }>(
+      `${environment.plantillaDestinoApiUrl}/SEL`,
+      {},
+      { headers: this.getHeaders() }
     );
   }
 
   transformacionCamposCrud(
-    campos: Transformacion_CamposI,
+    plantillas: Transformacion_CamposI,
     action: string
   ): Observable<any> {
-    const url = `${environment.transformacionCamposCrudUrl}?action=${action}`; // Agregar el parámetro 'action' a la URL
-    return this.http.post<any>(url, campos, {
+    const url = `${environment.plantillaDestinoApiUrl}/${action}`;
+    return this.http.post<any>(url, plantillas, {
       headers: this.getHeaders(),
     });
   }

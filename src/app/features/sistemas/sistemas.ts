@@ -212,7 +212,7 @@ export class Sistemas implements OnInit, OnChanges, AfterViewInit {
   cargarSistemas(): void {
     this.sistemasService.getAllSistemas().subscribe({
       next: (res) => {
-        this.sistemas = res.result.data;
+        this.sistemas = res.data;
       },
       error: (err) => console.error('Error al cargar sistemas', err),
     });
@@ -252,7 +252,7 @@ export class Sistemas implements OnInit, OnChanges, AfterViewInit {
       !this.nuevoSistema.sistema_descripcion
     )
       return;
-    this.nuevoSistema.sistema_usua_id = 'ADMIN';
+    this.nuevoSistema.sistema_usua_id = '000000044';
     const accion = this.editando ? 'U' : 'I';
     const payload = this.nuevoSistema;
 

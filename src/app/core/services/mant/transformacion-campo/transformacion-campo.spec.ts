@@ -1,13 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 
-import { TransformacionCampo } from './transformacion-campo';
+import { TransformacionCampoS } from './transformacion-campo';
 
 describe('TransformacionCampo', () => {
-  let service: TransformacionCampo;
+  let service: TransformacionCampoS;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    service = TestBed.inject(TransformacionCampo);
+    service = TestBed.inject(TransformacionCampoS);
   });
 
   it('should be created', () => {
