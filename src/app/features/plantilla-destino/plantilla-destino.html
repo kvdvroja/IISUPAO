@@ -22,9 +22,8 @@
 
   <div class="flex items-center space-x-2">
     <p-button
-      label="Nueva Plantilla Destino"
+      label="Nuevo"
       icon="pi pi-plus"
-      severity="success"
       class="p-button-sm"
       (onClick)="
         abrirAgregarPreconfigurado({
@@ -68,16 +67,16 @@
     class="flex items-center justify-between border-b border-gray-200 bg-white p-3"
   >
     <div class="flex items-center gap-2">
-    <button
-      pButton
-      type="button"
-      [text]="true"
-      class="h-8 w-8 flex items-center justify-center rounded-md !bg-[#3B6FEB] !text-white hover:!bg-blue-100 hover:!text-blue-500 transition-colors"
-      (click)="limpiarSeleccionDestino()"
-      title="Volver"
-    >
-      <i class="pi pi-chevron-left"></i>
-    </button>
+      <button
+        pButton
+        type="button"
+        [text]="true"
+        class="h-8 w-8 flex items-center justify-center rounded-md !bg-[#3B6FEB] !text-white hover:!bg-blue-100 hover:!text-blue-500 transition-colors"
+        (click)="limpiarSeleccionDestino()"
+        title="Volver"
+      >
+        <i class="pi pi-chevron-left"></i>
+      </button>
       <div class="flex flex-row items-end gap-2">
         <h2 class="text-md font-medium text-gray-800">
           PLANTILLA DESTINO SELECCIONADA
@@ -130,18 +129,6 @@
         (click)="$event.stopPropagation(); showEditar(item)"
       >
         <i class="pi pi-pencil"></i>
-      </button>
-      <button
-        pButton
-        type="button"
-        [text]="true"
-        [rounded]="true"
-        [severity]="'success'"
-        class="btn-icon"
-        pTooltip="Agregar Plantilla de Campos"
-        (click)="$event.stopPropagation(); agregarTransformacionCampos(item)"
-      >
-        <i class="pi pi-plus"></i>
       </button>
 
       <button
@@ -212,18 +199,6 @@
           >
             <i class="pi pi-pencil"></i>
           </button>
-          <button
-            pButton
-            type="button"
-            [text]="true"
-            [rounded]="true"
-            [severity]="'success'"
-            class="btn-icon"
-            pTooltip="Agregar Plantilla de Campos"
-            (click)="$event.stopPropagation(); agregarTransformacionCampos(row)"
-          >
-            <i class="pi pi-plus"></i>
-          </button>
 
           <button
             pButton
@@ -278,11 +253,11 @@
     </div>
     }
 
-      <app-transformacion-campos
-        #transfCmp
-        [pdId]="pdIdAsNumber"
-        (stepNavigate)="onChildStep($event)"
-      ></app-transformacion-campos>
+    <app-transformacion-campos
+      #transfCmp
+      [pdId]="pdIdAsNumber"
+      (stepNavigate)="onChildStep($event)"
+    ></app-transformacion-campos>
   </div>
 </div>
 
@@ -371,6 +346,22 @@
       ></p-select>
     </p-inputgroup>
 
+    <div class="flex items-center justify-between">
+      <span class="text-sm text-gray-600">
+        Estado actual:
+        <strong>{{ selectedDestino?.pd_ind_estado || "A" }}</strong>
+      </span>
+
+      <!-- Botón de desactivar -->
+      <p-button
+        *ngIf="editando && (selectedDestino?.pd_ind_estado || 'A') === 'A'"
+        label="Desactivar"
+        icon="pi pi-ban"
+        severity="danger"
+        (click)="desactivarDestino(selectedDestino!)"
+      ></p-button>
+    </div>
+
     <div class="flex justify-end gap-2 pt-4">
       <p-button
         label="Cancelar"
@@ -387,7 +378,7 @@
   </div>
 </p-dialog>
 <p-toast></p-toast>
-<p-confirmDialog #cd>
+<p-confirmDialog #cd [key]="'plantilla-destino-confirm'">
   <ng-template
     #headless
     let-message
@@ -416,8 +407,4 @@
     </div>
   </ng-template>
 </p-confirmDialog>
-<app-transformacion-campos
-  #transfCmp
-  [pdId]="pdIdAsNumber"
-  style="display: none"
-></app-transformacion-campos>
+

@@ -98,6 +98,7 @@ export class Plantillas implements OnInit, OnChanges {
   plantillaISeleccionado: Plantilla_IntegracionI | null = null;
   modoFiltradoPorSistema: boolean = false;
   mostrarDialogoAsignarJob = false;
+  activeDialogKey: string | null = null;
 
   plantillas: Plantilla_IntegracionI[] = [];
   plantillaParaJob: Plantilla_IntegracionI | null = null;
@@ -490,39 +491,94 @@ export class Plantillas implements OnInit, OnChanges {
       });
   }
 
-  eliminar(row: Plantilla_IntegracionI): void {
+  desactivarPlantilla(plantilla: Plantilla_IntegracionI): void {
+    if (this.activeDialogKey === 'desactivar') return; // Evitar abrir múltiples diálogos
+
+    this.activeDialogKey = 'desactivar'; // Asignar la clave para el diálogo de desactivación
+
     this.confirmService.confirm({
+      key: 'plantillas-confirm',
       header: 'Confirmación',
-      message: `¿Deseas eliminar la plantilla "${row.pi_nombre}"?`,
+      message: `¿Deseas desactivar la plantilla "${plantilla.pi_nombre}"?`,
       icon: 'pi pi-exclamation-triangle',
       accept: () => {
-        const payload: any = { pi_id: row.pi_id };
-        if (payload.pi_id && !isNaN(Number(payload.pi_id)))
-          payload.pi_id = Number(payload.pi_id);
+        // Cambiar el estado a 'I' (Inactivo)
+        plantilla.pi_ind_estado = 'I';
 
-        this.plantillaIntegracionService
-          .plantillaIntegracionCrud(payload, 'D')
-          .subscribe({
-            next: () => {
-              this.messageService.add({
-                severity: 'success',
-                summary: 'Plantilla eliminada',
-                detail: 'Se eliminó correctamente.',
-              });
-              this.cargarPlantillas();
-            },
-            error: (err) => {
-              this.messageService.add({
-                severity: 'error',
-                summary: 'Error',
-                detail: 'No se pudo eliminar la plantilla',
-              });
-              console.error(err);
-            },
-          });
+        // Aquí va el servicio para desactivar la plantilla
+        this.plantillaIntegracionService.plantillaIntegracionCrud(plantilla, 'D').subscribe({
+          next: () => {
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Plantilla desactivada',
+              detail: 'La plantilla fue desactivada correctamente.',
+            });
+            this.cargarPlantillas(); // Recargar la lista de plantillas
+          },
+          error: (err) => {
+            console.error('Error al desactivar la plantilla', err);
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Error',
+              detail: 'No se pudo desactivar la plantilla.',
+            });
+          },
+        });
+
+        // Limpiar la clave del diálogo cuando se acepte
+        this.activeDialogKey = null;
+      },
+      reject: () => {
+        console.log('Desactivación cancelada');
+        // Limpiar la clave del diálogo cuando se rechace
+        this.activeDialogKey = null;
       },
     });
   }
+
+  // Función para eliminar la plantilla
+  eliminar(plantilla: Plantilla_IntegracionI): void {
+    if (this.activeDialogKey === 'eliminar') return; // Evitar abrir múltiples diálogos
+
+    this.activeDialogKey = 'eliminar'; // Asignar la clave para el diálogo de eliminación
+
+    this.confirmService.confirm({
+      key: 'plantillas-confirm',
+      message: `¿Estás seguro de eliminar la plantilla "${plantilla.pi_nombre}"?`,
+      header: 'Confirmar eliminación',
+      icon: 'pi pi-exclamation-triangle',
+      accept: () => {
+        // Aquí va el servicio para eliminar la plantilla
+        this.plantillaIntegracionService.plantillaIntegracionCrud(plantilla, 'D').subscribe({
+          next: () => {
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Plantilla eliminada',
+              detail: 'La plantilla fue eliminada correctamente.',
+            });
+            this.cargarPlantillas(); // Recargar la lista de plantillas
+          },
+          error: (err) => {
+            console.error('Error al eliminar la plantilla', err);
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Error',
+              detail: 'No se pudo eliminar la plantilla.',
+            });
+          },
+        });
+
+        // Limpiar la clave del diálogo cuando se acepte
+        this.activeDialogKey = null;
+      },
+      reject: () => {
+        console.log('Eliminación cancelada');
+        // Limpiar la clave del diálogo cuando se rechace
+        this.activeDialogKey = null;
+      },
+    });
+  }
+
   verTodasLasPlantillasD(): void {
     this.modoFiltradoPorSistema = false;
     this.plantillaISeleccionado = null;
@@ -545,7 +601,7 @@ export class Plantillas implements OnInit, OnChanges {
           .filter((x: any) => x && typeof x.key === 'string')
           .map((x: any) => ({ key: x.key, value: String(x.value ?? '') }));
       }
-    } catch {}
+    } catch { }
   }
 
   private pairsToObject(): Record<string, string> {
@@ -603,7 +659,7 @@ export class Plantillas implements OnInit, OnChanges {
           .filter((x: any) => x && typeof x.key === 'string')
           .map((x: any) => ({ key: x.key, value: String(x.value ?? '') }));
       }
-    } catch {}
+    } catch { }
   }
 
   private schemaPairsToObject(): Record<string, string> {

@@ -121,13 +121,6 @@
     <div><strong>Estado:</strong> {{ endpoint.se_ind_estado }}</div>
     <div class="flex justify-end mt-2">
       <p-button
-        icon="pi pi-plus"
-        severity="success"
-        rounded
-        (onClick)="crearPlantillaIntegracion(endpoint)"
-        [title]="'Nueva plantilla de integración'"
-      ></p-button>
-      <p-button
         icon="pi pi-pencil"
         severity="secondary"
         rounded
@@ -213,20 +206,6 @@
               (click)="$event.stopPropagation(); showEditar(endpoint)"
             >
               <i class="pi pi-pencil"></i>
-            </button>
-            <button
-              pButton
-              type="button"
-              [text]="true"
-              [rounded]="true"
-              [severity]="'success'"
-              class="btn-icon"
-              pTooltip="Agregar Plantilla de Integración"
-              (click)="
-                $event.stopPropagation(); crearPlantillaIntegracion(endpoint)
-              "
-            >
-              <i class="pi pi-plus"></i>
             </button>
             <button
               pButton
@@ -406,6 +385,23 @@
         </span>
       </div>
     </div>
+    <div class="flex items-center justify-between">
+      <span class="text-sm text-gray-600">
+        Estado actual:
+        <strong>{{ nuevoEndpoint.se_ind_estado || "A" }}</strong>
+      </span>
+
+      <!-- Solo muestra el botón de desactivar si estamos editando -->
+      <p-button
+        *ngIf="
+          nuevoEndpoint.se_id && (nuevoEndpoint.se_ind_estado || 'A') === 'A'
+        "
+        label="Desactivar"
+        icon="pi pi-ban"
+        severity="danger"
+        (click)="desactivarEndpoint(nuevoEndpoint)"
+      ></p-button>
+    </div>
 
     <!-- Acciones -->
     <div class="flex justify-end gap-2 pt-4">
@@ -423,15 +419,14 @@
           !nuevoEndpoint.se_sistema_id ||
           !nuevoEndpoint.se_nombre ||
           !nuevoEndpoint.se_url ||
-          !nuevoEndpoint.se_metodo_http ||
-          !nuevoEndpoint.se_requiere_auth
+          !nuevoEndpoint.se_metodo_http
         "
       />
     </div>
   </div>
 </p-dialog>
 
-<p-confirmDialog #cd>
+<p-confirmDialog #cd [key]="'endpoints-confirm'">
   <ng-template
     #headless
     let-message
@@ -460,7 +455,7 @@
     </div>
   </ng-template>
 </p-confirmDialog>
-<app-plantillas #plantCmp style="display: none"></app-plantillas>
+
 <app-autenticacion
   [(visible)]="mostrarDialogoAutenticacion"
   [endpoint]="endpointParaAuth"

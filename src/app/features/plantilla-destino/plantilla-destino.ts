@@ -95,6 +95,7 @@ export class PlantillaDestino implements OnInit {
 
   endpoints: EndpointI[] = [];
   endpointsOptions: { label: string; value: number }[] = [];
+  activeDialogKey: string | null = null;
 
   prioridadOptions = [
     { label: '1', value: 1 },
@@ -307,37 +308,94 @@ export class PlantillaDestino implements OnInit {
       });
   }
 
-  eliminar(row: Plantilla_DestinoI): void {
-    this.confirmService.confirm({
-      message: `¿Deseas eliminar la plantilla destino con ID: ${row.pd_id}?`,
-      header: 'Confirmación',
-      icon: 'pi pi-exclamation-triangle',
-      accept: () => {
-        const payload = { pd_id: row.pd_id };
+desactivarDestino(destino: Plantilla_DestinoI): void {
+  if (this.activeDialogKey === 'desactivar') return; // Evitar abrir múltiples diálogos
 
-        this.plantillaDestinoService
-          .plantillaDestinoCrud(payload as any, 'D')
-          .subscribe({
-            next: () => {
-              this.messageService.add({
-                severity: 'success',
-                summary: 'Plantilla eliminada',
-                detail: 'La plantilla destino fue eliminada exitosamente.',
-              });
-              this.cargarPlantillas();
-            },
-            error: (err) => {
-              this.messageService.add({
-                severity: 'error',
-                summary: 'Error',
-                detail: 'No se pudo eliminar la plantilla destino',
-              });
-              console.error(err);
-            },
+  this.activeDialogKey = 'desactivar'; // Asignar la clave para el diálogo de desactivación
+
+  this.confirmService.confirm({
+    key: 'plantilla-destino-confirm',
+    header: 'Confirmación',
+    message: `¿Deseas desactivar el destino "${destino.pd_id}"?`,
+    icon: 'pi pi-exclamation-triangle',
+    accept: () => {
+      // Cambiar el estado a 'I' (Inactivo)
+      destino.pd_ind_estado = 'I';
+
+      // Aquí va el servicio para desactivar la plantilla destino
+      this.plantillaDestinoService.plantillaDestinoCrud(destino, 'D').subscribe({
+        next: () => {
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Plantilla destino desactivada',
+            detail: 'La plantilla destino fue desactivada correctamente.',
           });
-      },
-    });
-  }
+          this.cargarPlantillas(); // Recargar la lista de plantillas destino
+        },
+        error: (err) => {
+          console.error('Error al desactivar el destino', err);
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'No se pudo desactivar la plantilla destino.',
+          });
+        },
+      });
+
+      // Limpiar la clave del diálogo cuando se acepte
+      this.activeDialogKey = null;
+    },
+    reject: () => {
+      console.log('Desactivación cancelada');
+      // Limpiar la clave del diálogo cuando se rechace
+      this.activeDialogKey = null;
+    },
+  });
+}
+
+// Función para eliminar la plantilla destino
+eliminar(destino: Plantilla_DestinoI): void {
+  if (this.activeDialogKey === 'eliminar') return; // Evitar abrir múltiples diálogos
+
+  this.activeDialogKey = 'eliminar'; // Asignar la clave para el diálogo de eliminación
+
+  this.confirmService.confirm({
+    key: 'plantilla-destino-confirm',
+    message: `¿Estás seguro de eliminar la plantilla destino con ID: ${destino.pd_id}?`,
+    header: 'Confirmar eliminación',
+    icon: 'pi pi-exclamation-triangle',
+    accept: () => {
+      // Aquí va el servicio para eliminar la plantilla destino
+      this.plantillaDestinoService.plantillaDestinoCrud(destino, 'D').subscribe({
+        next: () => {
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Plantilla destino eliminada',
+            detail: 'La plantilla destino fue eliminada correctamente.',
+          });
+          this.cargarPlantillas(); // Recargar la lista de plantillas destino
+        },
+        error: (err) => {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'No se pudo eliminar la plantilla destino',
+          });
+          console.error(err);
+        },
+      });
+
+      // Limpiar la clave del diálogo cuando se acepte
+      this.activeDialogKey = null;
+    },
+    reject: () => {
+      console.log('Eliminación cancelada');
+      // Limpiar la clave del diálogo cuando se rechace
+      this.activeDialogKey = null;
+    },
+  });
+}
+
   public abrirAgregarPreconfigurado(
     opts: { planInteId?: string | number; sistId?: string | number } = {}
   ): void {

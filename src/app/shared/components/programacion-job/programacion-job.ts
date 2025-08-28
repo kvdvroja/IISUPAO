@@ -51,8 +51,8 @@ export class ProgramacionJob implements OnChanges {
   }>();
   @Output() cancel = new EventEmitter<void>();
 
-  private progSrv = inject(ProgramacionJobS);
-  private msg = inject(MessageService);
+  progSrv = inject(ProgramacionJobS);
+  msg = inject(MessageService);
 
   isEdit = false;
   loading = false;

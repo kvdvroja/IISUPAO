@@ -78,6 +78,7 @@ export class TransformacionCampos implements OnInit, OnChanges {
   newValValue = '';
   editingValIndex: number | null = null;
   campoSeleccionado: Transformacion_CamposI | null = null;
+  activeDialogKey: string | null = null;
 
   tipoTransfOptions = [
     { label: 'DIRECTA', value: 'DIRECTA' },
@@ -138,6 +139,7 @@ export class TransformacionCampos implements OnInit, OnChanges {
       this.nuevoCampo.pd_id = String(this.pdId); // 👈 string
       this.cdRef.detectChanges();
     }
+    this.cargarData();
   }
 
   exportarDatos(): void {}
@@ -159,11 +161,15 @@ export class TransformacionCampos implements OnInit, OnChanges {
     });
   }
 
-  get datosFiltrados(): Transformacion_CamposI[] {
-    const pid = Number(this.pdId);
-    if (Number.isNaN(pid)) return this.campos;
-    return this.campos.filter((c) => Number((c as any).pd_id) === pid);
+get datosFiltrados(): Transformacion_CamposI[] {
+  if (this.pdId === null || this.pdId === undefined || this.pdId === '') {
+    return this.campos ?? [];
   }
+  const pid = Number(this.pdId);
+  if (Number.isNaN(pid)) return [];
+
+  return (this.campos ?? []).filter((c: any) => Number(c?.pd_id) === pid);
+}
 
   filtrarGlobal(event: Event) {
     const valor = (event.target as HTMLInputElement).value;
@@ -353,7 +359,93 @@ export class TransformacionCampos implements OnInit, OnChanges {
     this.valoresComponent?.abrirAgregar();
   }
 
-  eliminar(): void {}
+desactivarCampo(campo: Transformacion_CamposI): void {
+  if (this.activeDialogKey === 'desactivar') return; // Evitar abrir múltiples diálogos
+
+  this.activeDialogKey = 'desactivar'; // Asignar la clave para el diálogo de desactivación
+
+  this.confirmationService.confirm({
+    key: 'transformacion-campo-confirm',
+    header: 'Confirmación',
+    message: `¿Deseas desactivar el campo "${campo.ct_campo_origen}"?`,
+    icon: 'pi pi-exclamation-triangle',
+    accept: () => {
+      // Cambiar el estado a 'Inactivo' o el estado que corresponda
+      campo.ct_obligatorio = false; // Cambiarlo a no obligatorio
+
+      // Aquí va el servicio para desactivar el campo
+      this.transformacionCamposService.transformacionCamposCrud(campo, 'D').subscribe({
+        next: () => {
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Campo desactivado',
+            detail: 'El campo fue desactivado correctamente.',
+          });
+          this.cargarData(); // Recargar la lista de campos
+        },
+        error: (err) => {
+          console.error('Error al desactivar el campo', err);
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'No se pudo desactivar el campo.',
+          });
+        },
+      });
+
+      // Limpiar la clave del diálogo cuando se acepte
+      this.activeDialogKey = null;
+    },
+    reject: () => {
+      console.log('Desactivación cancelada');
+      // Limpiar la clave del diálogo cuando se rechace
+      this.activeDialogKey = null;
+    },
+  });
+}
+
+// Función para eliminar el campo
+eliminar(campo: Transformacion_CamposI): void {
+  if (this.activeDialogKey === 'eliminar') return; // Evitar abrir múltiples diálogos
+
+  this.activeDialogKey = 'eliminar'; // Asignar la clave para el diálogo de eliminación
+
+  this.confirmationService.confirm({
+    key: 'transformacion-campo-confirm',
+    message: `¿Estás seguro de eliminar el campo "${campo.ct_campo_origen}"?`,
+    header: 'Confirmar eliminación',
+    icon: 'pi pi-exclamation-triangle',
+    accept: () => {
+      // Aquí va el servicio para eliminar el campo
+      this.transformacionCamposService.transformacionCamposCrud(campo, 'D').subscribe({
+        next: () => {
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Campo eliminado',
+            detail: 'El campo fue eliminado correctamente.',
+          });
+          this.cargarData(); // Recargar la lista de campos
+        },
+        error: (err) => {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'No se pudo eliminar el campo',
+          });
+          console.error(err);
+        },
+      });
+
+      // Limpiar la clave del diálogo cuando se acepte
+      this.activeDialogKey = null;
+    },
+    reject: () => {
+      console.log('Eliminación cancelada');
+      // Limpiar la clave del diálogo cuando se rechace
+      this.activeDialogKey = null;
+    },
+  });
+}
 
   onCampoSelected(
     row: Transformacion_CamposI | Transformacion_CamposI[] | undefined

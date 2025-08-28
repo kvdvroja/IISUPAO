@@ -32,7 +32,7 @@ export class TransformacionCampoS {
       message: string;
       error: any;
     }>(
-      `${environment.plantillaDestinoApiUrl}/SEL`,
+      `${environment.transformacionCampospiUrl}/SEL`,
       {},
       { headers: this.getHeaders() }
     );
@@ -42,7 +42,7 @@ export class TransformacionCampoS {
     plantillas: Transformacion_CamposI,
     action: string
   ): Observable<any> {
-    const url = `${environment.plantillaDestinoApiUrl}/${action}`;
+    const url = `${environment.transformacionCampospiUrl}/${action}`;
     return this.http.post<any>(url, plantillas, {
       headers: this.getHeaders(),
     });

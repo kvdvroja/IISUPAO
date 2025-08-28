@@ -32,9 +32,8 @@
     <!-- NUEVO: botón para agregar la plantilla desde aquí -->
     <p-button
       *ngIf="endpointIdFilter"
-      label="Nueva Plantilla Integración"
+      label="Nuevo"
       icon="pi pi-plus"
-      severity="success"
       class="p-button-sm"
       (onClick)="abrirAgregarDesdeEndpoint(endpointIdFilter!)"
     >
@@ -75,16 +74,16 @@
     class="flex items-center justify-between border-b border-gray-200 bg-white p-3"
   >
     <div class="flex items-center gap-2">
-    <button
-      pButton
-      type="button"
-      [text]="true"
-      class="h-8 w-8 flex items-center justify-center rounded-md !bg-[#3B6FEB] !text-white hover:!bg-blue-100 hover:!text-blue-500 transition-colors"
-      (click)="limpiarSeleccionPlantilla()"
-      title="Volver"
-    >
-      <i class="pi pi-chevron-left"></i>
-    </button>
+      <button
+        pButton
+        type="button"
+        [text]="true"
+        class="h-8 w-8 flex items-center justify-center rounded-md !bg-[#3B6FEB] !text-white hover:!bg-blue-100 hover:!text-blue-500 transition-colors"
+        (click)="limpiarSeleccionPlantilla()"
+        title="Volver"
+      >
+        <i class="pi pi-chevron-left"></i>
+      </button>
       <div class="flex flex-row items-end gap-2">
         <h2 class="text-md font-medium text-gray-800">
           PLANTILLA DE INTEGRACIÓN SELECCIONADA
@@ -172,21 +171,6 @@
         >
           <i class="pi pi-pencil"></i>
         </button>
-        <!-- único botón para agregar Plantilla Destino -->
-        <button
-          pButton
-          type="button"
-          [text]="true"
-          [rounded]="true"
-          [severity]="'success'"
-          class="btn-icon"
-          pTooltip="Agregar Plantilla Destino"
-          (click)="
-            $event.stopPropagation(); agregarDestinoDesdeIntegracion(plantilla)
-          "
-        >
-          <i class="pi pi-plus"></i>
-        </button>
         @if(plantilla.pi_tipo_servicio === 'JOB'){
         <button
           pButton
@@ -231,14 +215,11 @@
     [paginator]="true"
     [rows]="10"
     [rowsPerPageOptions]="[10, 25, 50]"
-    [globalFilterFields]="[
-      'pi_codigo',
-      'pi_nombre',
-      'pi_tipo_servicio'
-    ]"
+    [globalFilterFields]="['pi_codigo', 'pi_nombre', 'pi_tipo_servicio']"
   >
     <ng-template #header>
       <tr>
+        <th>Id</th>
         <th>Código</th>
         <th>Nombre</th>
         <th>Servicio</th>
@@ -249,6 +230,7 @@
 
     <ng-template #body let-plantilla>
       <tr [pSelectableRow]="plantilla">
+        <td>{{ plantilla.pi_id }}</td>
         <td>{{ plantilla.pi_codigo }}</td>
         <td>{{ plantilla.pi_nombre }}</td>
         <td>{{ plantilla.pi_tipo_servicio }}</td>
@@ -256,7 +238,7 @@
           {{ plantilla.pi_fecha_actividad | date : "dd MMM yyyy, HH:mm" }}
         </td>
         <td>
-          <div class="flex gap-2 justify-center">
+          <div class="flex gap-2 justify-start">
             <button
               pButton
               type="button"
@@ -269,22 +251,20 @@
             >
               <i class="pi pi-pencil"></i>
             </button>
-            <!-- único botón para agregar Plantilla Destino -->
+            
             <button
               pButton
               type="button"
               [text]="true"
               [rounded]="true"
-              [severity]="'success'"
+              [severity]="'danger'"
               class="btn-icon"
-              pTooltip="Agregar Plantilla Destino"
-              (click)="
-                $event.stopPropagation();
-                agregarDestinoDesdeIntegracion(plantilla)
-              "
+              pTooltip="Eliminar"
+              (click)="$event.stopPropagation(); eliminar(plantilla)"
             >
-              <i class="pi pi-plus"></i>
+              <i class="pi pi-trash"></i>
             </button>
+
             @if(plantilla.pi_tipo_servicio === 'JOB'){
             <button
               pButton
@@ -299,19 +279,6 @@
               <i class="pi pi-briefcase"></i>
             </button>
             }
-
-            <button
-              pButton
-              type="button"
-              [text]="true"
-              [rounded]="true"
-              [severity]="'danger'"
-              class="btn-icon"
-              pTooltip="Eliminar"
-              (click)="$event.stopPropagation(); eliminar(plantilla)"
-            >
-              <i class="pi pi-trash"></i>
-            </button>
           </div>
         </td>
       </tr>
@@ -513,8 +480,7 @@
           class="w-full"
         ></textarea>
         @if(piDataRawError){
-                  <small class="text-red-600"
-          >JSON inválido.</small>
+        <small class="text-red-600">JSON inválido.</small>
         }
       </ng-template>
     </div>
@@ -682,6 +648,22 @@
       </p-inputgroup>
     </div>
 
+    <div class="flex items-center justify-between">
+      <span class="text-sm text-gray-600">
+        Estado actual:
+        <strong>{{ nuevaPlantilla.pi_ind_estado || "A" }}</strong>
+      </span>
+
+      <!-- Botón de desactivar -->
+      <p-button
+        *ngIf="editando && (nuevaPlantilla.pi_ind_estado || 'A') === 'A'"
+        label="Desactivar"
+        icon="pi pi-ban"
+        severity="danger"
+        (click)="desactivarPlantilla(nuevaPlantilla)"
+      ></p-button>
+    </div>
+
     <!-- Acciones -->
     <div class="flex justify-end gap-2 pt-4">
       <p-button
@@ -695,7 +677,9 @@
         icon="pi pi-check"
         (click)="guardar()"
         [disabled]="
-          !nuevaPlantilla.pi_nombre || !nuevaPlantilla.pi_codigo || !nuevaPlantilla.pi_tipo_servicio
+          !nuevaPlantilla.pi_nombre ||
+          !nuevaPlantilla.pi_codigo ||
+          !nuevaPlantilla.pi_tipo_servicio
         "
       ></p-button>
     </div>
@@ -709,7 +693,7 @@
 >
 </app-programacion-job>
 
-<p-confirmDialog #cd>
+<p-confirmDialog #cd [key]="'plantillas-confirm'">
   <ng-template
     #headless
     let-message
@@ -738,4 +722,3 @@
     </div>
   </ng-template>
 </p-confirmDialog>
-<app-plantilla-destino #pdCmp style="display: none"></app-plantilla-destino>

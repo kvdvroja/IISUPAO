@@ -150,8 +150,8 @@ export class Sistemas implements OnInit, OnChanges, AfterViewInit {
   ngOnInit(): void {
     this.cargarSistemas();
   }
-  ngOnChanges(_: SimpleChanges): void {}
-  ngAfterViewInit(): void {}
+  ngOnChanges(_: SimpleChanges): void { }
+  ngAfterViewInit(): void { }
 
   get sistemasFiltradas(): SistemasI[] {
     return this.sistemas;
@@ -275,32 +275,49 @@ export class Sistemas implements OnInit, OnChanges, AfterViewInit {
     });
   }
 
+  desactivarSistema(s: SistemasI | any): void {
+    if (!s?.sistema_id) return;
+    this.confirmService.confirm({
+      key: 'sistemas-confirm',                         // 🔑
+      header: 'Confirmación',
+      message: `¿Deseas desactivar el sistema "${s.sistema_nombre}"?`,
+      icon: 'pi pi-exclamation-triangle',
+      accept: () => {
+        const payload = { sistema_id: s.sistema_id, sistema_usua_id: '000000044' };
+        this.sistemasService.sistemasCrud(payload as any, 'D').subscribe({
+          next: () => {
+            this.messageService.add({ severity: 'success', summary: 'Sistema desactivado', detail: 'El sistema fue desactivado correctamente.' });
+            if (this.selectedSystem?.sistema_id === s.sistema_id) {
+              this.selectedSystem = { ...this.selectedSystem, sistema_ind_estado: 'I' } as any;
+            }
+            this.cerrarDialogoAgregar();
+            this.cargarSistemas();
+          },
+          error: () => this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo desactivar el sistema.' })
+        });
+      }
+    });
+  }
+
   eliminarSistema(s: SistemasI): void {
     this.confirmService.confirm({
+      key: 'sistemas-confirm',                         // 🔑
       message: `¿Deseas eliminar el sistema "${s.sistema_nombre}"?`,
       header: 'Confirmación',
       icon: 'pi pi-exclamation-triangle',
       accept: () => {
-        const payload = { system_id: s.sistema_id, user_id: 'ADMIN' };
-        this.sistemasService.sistemasCrud(payload as any, 'D').subscribe({
+        const payload = { sistema_id: s.sistema_id, sistema_usua_id: '000000044' };
+        this.sistemasService.sistemasCrud(payload as any, 'E').subscribe({
           next: () => {
-            this.messageService.add({
-              severity: 'success',
-              summary: 'Sistema eliminado',
-              detail: 'El sistema fue eliminado exitosamente.',
-            });
+            this.messageService.add({ severity: 'success', summary: 'Sistema eliminado', detail: 'El sistema fue eliminado exitosamente.' });
             this.cargarSistemas();
           },
-          error: () =>
-            this.messageService.add({
-              severity: 'error',
-              summary: 'Error',
-              detail: 'No se pudo eliminar el sistema',
-            }),
+          error: () => this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo eliminar el sistema.' })
         });
-      },
+      }
     });
   }
+
 
   entrarADetalle(s: SistemasI) {
     this.selectedSystem = s;

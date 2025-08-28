@@ -78,6 +78,7 @@ export class Endpoints implements OnInit, OnChanges {
       value: s.sistema_id,
     }));
   }
+  private activeDialogKey: string | null = null;
   selectedEndpoint: EndpointI | null = null;
   ocultarTarjetaEndpoint = false;
   endpointService = inject(Endpoint);
@@ -161,7 +162,7 @@ export class Endpoints implements OnInit, OnChanges {
     this.dt.filterGlobal(input.value, 'contains');
   }
 
-  exportarDatos() {}
+  exportarDatos() { }
 
   get endpointsFiltrados(): any[] {
     if (!this.sistemaId) return this.endpoint;
@@ -282,36 +283,93 @@ export class Endpoints implements OnInit, OnChanges {
     });
   }
 
-  eliminarEndpoint(endpoint: any): void {
+  desactivarEndpoint(endpoint: EndpointI): void {
+    // Evitar que se abran múltiples diálogos de confirmación
+    if (this.activeDialogKey === 'desactivar') return;
+
+    this.activeDialogKey = 'desactivar';  // Asignar la clave para el diálogo
+
     this.confirmationService.confirm({
-      message: '¿Estás seguro de eliminar este endpoint?',
+      key: 'endpoints-confirm', // Usamos la misma key para controlar el diálogo
+      header: 'Confirmación',
+      message: `¿Deseas desactivar el endpoint "${endpoint.se_nombre}"?`,
+      icon: 'pi pi-exclamation-triangle',
+      accept: () => {
+        // Cambiar el estado a 'I' (Inactivo)
+        endpoint.se_ind_estado = 'I';
+
+        this.endpointService.endpointCrud(endpoint, 'D').subscribe({
+          next: () => {
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Endpoint desactivado',
+              detail: 'El endpoint fue desactivado correctamente.',
+            });
+            this.cargarEndpoints();  // Recargar la lista de endpoints
+          },
+          error: (err) => {
+            console.error('Error al desactivar el endpoint', err);
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Error',
+              detail: 'No se pudo desactivar el endpoint.',
+            });
+          },
+        });
+
+        // Limpiar la clave del diálogo cuando se acepte
+        this.activeDialogKey = null;
+      },
+      reject: () => {
+        console.log('Desactivación cancelada');
+        // Limpiar la clave del diálogo cuando se rechace
+        this.activeDialogKey = null;
+      },
+    });
+  }
+
+  eliminarEndpoint(endpoint: EndpointI): void {
+    // Evitar que se abran múltiples diálogos de confirmación
+    if (this.activeDialogKey === 'eliminar') return;
+
+    this.activeDialogKey = 'eliminar';  // Asignar la clave para el diálogo
+
+    this.confirmationService.confirm({
+      key: 'endpoints-confirm', // Usamos la misma key para controlar el diálogo
+      message: `¿Estás seguro de eliminar el endpoint "${endpoint.se_nombre}"?`,
       header: 'Confirmar eliminación',
       icon: 'pi pi-exclamation-triangle',
       accept: () => {
-        this.endpointService.endpointCrud(endpoint, 'D').subscribe({
-          next: (response) => {
+        this.endpointService.endpointCrud(endpoint, 'E').subscribe({
+          next: () => {
             this.messageService.add({
               severity: 'success',
               summary: 'Endpoint eliminado',
               detail: 'El endpoint fue eliminado exitosamente.',
             });
-            this.cargarEndpoints();
+            this.cargarEndpoints();  // Recargar la lista de endpoints
           },
           error: (err) => {
-            console.error('Error al eliminar endpoint', err);
+            console.error('Error al eliminar el endpoint', err);
             this.messageService.add({
               severity: 'error',
               summary: 'Error',
-              detail: 'Hubo un error al eliminar el endpoint.',
+              detail: 'No se pudo eliminar el endpoint.',
             });
           },
         });
+
+        // Limpiar la clave del diálogo cuando se acepte
+        this.activeDialogKey = null;
       },
       reject: () => {
         console.log('Eliminación cancelada');
+        // Limpiar la clave del diálogo cuando se rechace
+        this.activeDialogKey = null;
       },
     });
   }
+
   crearPlantillaIntegracion(ep: EndpointI): void {
     if (!this.plantCmp) {
       console.warn('plantCmp aún no está disponible');
@@ -353,8 +411,8 @@ export class Endpoints implements OnInit, OnChanges {
   }
 
   abrirAutenticacion(ep: EndpointI): void {
-  this.endpointParaAuth = ep;
-  this.mostrarDialogoAutenticacion = true;
-}
+    this.endpointParaAuth = ep;
+    this.mostrarDialogoAutenticacion = true;
+  }
 
 }

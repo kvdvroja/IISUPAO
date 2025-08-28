@@ -14,9 +14,8 @@
   </div>
   <div class="flex items-center space-x-2">
     <p-button
-      label="Nuevo Valor"
+      label="Nuevo"
       icon="pi pi-plus"
-      severity="success"
       class="p-button-sm"
       (onClick)="abrirAgregar({ vt_camp_tran_id: campoId! })"
       [disabled]="!campoId"
@@ -132,18 +131,30 @@
         <td>{{ valor.vt_valor_destino }}</td>
         <td>
           <div class="flex gap-2 justify-center">
-            <p-button
-              icon="pi pi-pencil"
-              severity="secondary"
-              rounded
-              (onClick)="editar(valor)"
-            ></p-button>
-            <p-button
-              icon="pi pi-trash"
-              severity="danger"
-              rounded
-              (onClick)="eliminar(valor)"
-            ></p-button>
+          <button
+            pButton
+            type="button"
+            [text]="true"
+            [rounded]="true"
+            [severity]="'secondary'"
+            class="btn-icon"
+            pTooltip="Editar"
+            (click)="$event.stopPropagation(); editar(valor)"
+          >
+            <i class="pi pi-pencil"></i>
+          </button>
+          <button
+            pButton
+            type="button"
+            [text]="true"
+            [rounded]="true"
+            [severity]="'danger'"
+            class="btn-icon"
+            pTooltip="Eliminar"
+            (click)="$event.stopPropagation(); eliminar(valor)"
+          >
+            <i class="pi pi-trash"></i>
+          </button>
           </div>
         </td>
       </tr>
@@ -180,6 +191,7 @@
         placeholder="Seleccione un campo"
         [filter]="true"
         [showClear]="true"
+        disabled
         class="w-full"
       />
     </p-inputgroup>
