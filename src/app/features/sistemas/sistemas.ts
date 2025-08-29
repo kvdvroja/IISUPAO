@@ -1,4 +1,5 @@
 import {
+  AfterViewInit,
   ChangeDetectorRef,
   Component,
   OnInit,
@@ -19,8 +20,10 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { SplitButtonModule } from 'primeng/splitbutton';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { FormsModule } from '@angular/forms';
+import { Input } from '@angular/core';
 
 import { SistemasI } from '../../core/interfaces/Sistemas';
+import { EndpointI } from '../../core/interfaces/Endpoint';
 import { SistemasS } from '../../core/services/mant/sistemas/sistemas';
 
 import { Endpoints } from '../endpoints/endpoints';
@@ -55,7 +58,14 @@ type StepKey = 'endpoints' | 'integracion' | 'destino' | 'campos' | 'valores';
 export class Sistemas implements OnInit {
   @ViewChild('dt') dt!: Table;
   @ViewChild('endpointsCmp', { static: false }) endpointsComponent!: Endpoints;
+  selectedEndpoint: EndpointI | null = null;
   endpointIdForPlantillas: string | number | null = null;
+
+  onEndpointSeleccionado(endpoint: EndpointI): void {
+    this.selectedEndpoint = endpoint;
+    console.log('Endpoint seleccionado:', this.selectedEndpoint);
+  }
+  informacionHeader: string = '';
 
   modo: 'lista' | 'detalle' = 'lista';
 
@@ -150,6 +160,16 @@ export class Sistemas implements OnInit {
     this.cargarSistemas();
   }
 
+  cargarSistemas(): void {
+    this.sistemasService.getAllSistemas().subscribe({
+      next: (res) => {
+        this.sistemas = res.data;
+        this.cdr.detectChanges();  // Solo si es necesario
+      },
+      error: (err) => console.error('Error al cargar sistemas', err),
+    });
+  }
+
   get sistemasFiltradas(): SistemasI[] {
     return this.sistemas;
   }
@@ -204,16 +224,6 @@ export class Sistemas implements OnInit {
       if (this.currentStep === 'endpoints')
         this.endpointsComponent?.limpiarFormulario?.();
     }
-  }
-
-  cargarSistemas(): void {
-    this.sistemasService.getAllSistemas().subscribe({
-      next: (res) => {
-        this.sistemas = res.data;
-        this.cdr.detectChanges();
-      },
-      error: (err) => console.error('Error al cargar sistemas', err),
-    });
   }
 
   AgregarSistema(): void {
@@ -325,7 +335,8 @@ export class Sistemas implements OnInit {
 
   volverALaLista() {
     this.modo = 'lista';
-    this.selectedSystem = null;
+    this.selectedSystem = null;    // Limpiar el sistema seleccionado
+    this.selectedEndpoint = null;  // Limpiar el endpoint seleccionado
     this.currentIndex = 0;
   }
 

@@ -71,6 +71,7 @@ export class Endpoints implements OnInit, OnChanges {
 
   @Output() stepNavigate = new EventEmitter<StepKey>();
   @Output() stepProgress = new EventEmitter<number>();
+  @Output() endpointSeleccionado = new EventEmitter<EndpointI>();
   @Input() set sistemasLista(value: SistemasI[]) {
     this._sistemasLista = value;
     this.sistemasOptions = value.map((s) => ({
@@ -378,25 +379,18 @@ export class Endpoints implements OnInit, OnChanges {
     this.plantCmp.abrirAgregarDesdeEndpoint(ep.se_id);
   }
 
-  onEndpointSelected(ep: EndpointI) {
-    this.selectedEndpoint = ep;
-    this.ocultarTarjetaEndpoint = false;
+  onEndpointSelected(endpoint: EndpointI): void {
+    this.endpointSeleccionado.emit(endpoint); 
+    this.ocultarTarjetaEndpoint = true;  
     this.stepNavigate.emit('integracion');
-
-    setTimeout(
-      () =>
-        document
-          .getElementById('plantillasPorEndpoint')
-          ?.scrollIntoView({ behavior: 'smooth' }),
-      0
-    );
   }
 
-  limpiarSeleccion() {
-    this.selectedEndpoint = null;
-    this.ocultarTarjetaEndpoint = false;
-    this.stepNavigate.emit('endpoints');
-  }
+limpiarSeleccion() {
+  this.selectedEndpoint = null;
+  this.ocultarTarjetaEndpoint = false;
+  this.stepNavigate.emit('endpoints');
+  this.endpointSeleccionado.emit(undefined);
+}
 
   onChildStep(step: StepKey) {
     this.stepNavigate.emit(step);
