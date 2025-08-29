@@ -142,12 +142,8 @@
       ></div>
     </div>
   </div>
-  }
-
-  <!-- ======= CONTENIDO: LISTA O DETALLE ======= -->
-  @if (modo === 'lista') {
+  } @if (modo === 'lista') {
   <div class="p-2 text-gray-600">
-    <!-- Tabla de sistemas -->
     <p-table
       #dt
       [value]="sistemasFiltradas"
@@ -236,11 +232,12 @@
             <div class="flex justify-center">
               <span
                 class="estado-badge"
-                [ngClass]="
-                  (sistema.sistema_ind_estado || '').toUpperCase() === 'A'
-                    ? 'estado-a'
-                    : 'estado-i'
-                "
+                [ngClass]="{
+                  'estado-a':
+                    (sistema.sistema_ind_estado || '').toUpperCase() === 'A',
+                  'estado-i':
+                    (sistema.sistema_ind_estado || '').toUpperCase() === 'I'
+                }"
               >
                 {{ sistema.sistema_ind_estado }}
               </span>
@@ -306,24 +303,25 @@
   @if (modo === 'detalle') {
   <div class="py-2">
     <ng-container [ngSwitch]="currentStep">
-      <ng-container *ngSwitchCase="'endpoints'">
+      <div *ngSwitchCase="'endpoints'">
+        @if(sistemas.length) {
         <app-endpoints
           #endpointsCmp
-          *ngIf="sistemas?.length"
           [sistemaId]="selectedSystem?.sistema_id || null"
           [sistemasLista]="sistemas"
           (stepNavigate)="onChildNavigate($event)"
           (stepProgress)="onChildProgress($event)"
         ></app-endpoints>
-      </ng-container>
+        }
+      </div>
     </ng-container>
   </div>
   }
 </div>
 
 <!-- ======= Barra de progreso INFERIOR: SOLO EN DETALLE ======= -->
+@if(modo === 'detalle'){
 <div
-  *ngIf="modo === 'detalle'"
   class="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg cursor-default"
 >
   <div class="max-w-7xl mx-auto px-4 py-4">
@@ -353,17 +351,16 @@
               </p>
             </div>
           </div>
-          <div
-            *ngIf="i < steps.length - 1"
-            class="w-12 h-0.5 mx-2 bg-gray-300"
-          ></div>
+          @if(i < steps.length - 1){
+          <div class="w-12 h-0.5 mx-2 bg-gray-300"></div>
+          }
         </ng-container>
       </div>
     </div>
   </div>
 </div>
+}
 
-<!-- Toast + diálogos -->
 <p-toast></p-toast>
 
 <p-dialog
@@ -468,14 +465,28 @@
 </p-dialog>
 
 <p-confirmDialog #cd [key]="'sistemas-confirm'">
-  <ng-template #headless let-message let-onAccept="onAccept" let-onReject="onReject">
+  <ng-template
+    #headless
+    let-message
+    let-onAccept="onAccept"
+    let-onReject="onReject"
+  >
     <div class="flex flex-col items-center p-6 bg-white rounded">
       <i class="pi pi-exclamation-triangle text-orange-500 text-4xl mb-3"></i>
       <div class="text-lg font-semibold mb-2">{{ message.header }}</div>
       <p class="text-center">{{ message.message }}</p>
       <div class="flex justify-center gap-3 mt-4">
-        <p-button label="SI" (onClick)="onAccept()" styleClass="w-32"></p-button>
-        <p-button label="NO" [outlined]="true" (onClick)="onReject()" styleClass="w-32"></p-button>
+        <p-button
+          label="SI"
+          (onClick)="onAccept()"
+          styleClass="w-32"
+        ></p-button>
+        <p-button
+          label="NO"
+          [outlined]="true"
+          (onClick)="onReject()"
+          styleClass="w-32"
+        ></p-button>
       </div>
     </div>
   </ng-template>

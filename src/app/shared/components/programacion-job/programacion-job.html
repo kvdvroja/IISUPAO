@@ -4,6 +4,7 @@
   [style]="{ width: '62rem' }"
   [breakpoints]="{ '960px': '95vw' }"
   modal
+  (onHide)="onHide()"
   [dismissableMask]="true"
   appendTo="body"
 >
@@ -61,15 +62,6 @@
         ></p-select>
       </div>
       }
-
-      <div class="md:col-span-4">
-        <label class="font-semibold text-sm">Usuario</label>
-        <input
-          pInputText
-          [(ngModel)]="programacion.pj_usua_id"
-          class="w-full"
-        />
-      </div>
 
       <div class="md:col-span-12">
         <label class="font-semibold text-sm">Descripción</label>

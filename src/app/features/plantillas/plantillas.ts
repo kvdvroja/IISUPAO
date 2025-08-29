@@ -351,10 +351,6 @@ export class Plantillas implements OnInit, OnChanges {
     this.modoFiltradoPorSistema = false;
   }
 
-  agregarDesdeDestino(): void {
-    this.plantillasDComponent.Agregar();
-  }
-
   onBuscarGlobal(event: Event): void {
     const input = (event.target as HTMLInputElement).value;
     this.dt.filterGlobal(input, 'contains');
@@ -768,9 +764,8 @@ export class Plantillas implements OnInit, OnChanges {
   }
 
   onTogglePiDataRaw(): void {
-    // Si pasas de estructurado → bruto, precarga JSON formateado
     if (!this.modoPiDataRaw) {
-      const obj = this.pairsToObject(); // ya existe
+      const obj = this.pairsToObject();
       this.piDataRawText = JSON.stringify(obj, null, 2);
     }
     this.modoPiDataRaw = !this.modoPiDataRaw;
@@ -779,7 +774,7 @@ export class Plantillas implements OnInit, OnChanges {
 
   onTogglePiSchemaRaw(): void {
     if (!this.modoPiSchemaRaw) {
-      const obj = this.schemaPairsToObject(); // ya existe
+      const obj = this.schemaPairsToObject(); 
       this.piSchemaRawText = JSON.stringify(obj, null, 2);
     }
     this.modoPiSchemaRaw = !this.modoPiSchemaRaw;
@@ -813,21 +808,20 @@ export class Plantillas implements OnInit, OnChanges {
       this.piValidaRawError = false;
       return;
     }
-    // Si quieres exigir JSON válido en valida raw:
     this.piValidaRawError = !(
       this.piValidaRawText?.trim() && this.isValidJson(this.piValidaRawText)
     );
   }
 
-  abrirAsignarJob(plantilla: Plantilla_IntegracionI): void {
-    this.plantillaParaJob = plantilla;
-    this.mostrarDialogoAsignarJob = true;
-    this.cargarJobsOptions();
-  }
+abrirAsignarJob(plantilla: Plantilla_IntegracionI): void {
+  this.plantillaParaJob = { ...plantilla };
+  this.mostrarDialogoAsignarJob = true;
+  this.cargarJobsOptions();
+}
 
   validateJobParamsRaw(): void {
     if (!this.jobParamsRawText?.trim()) {
-      this.jobParamsRawError = false; // vacío es permitido
+      this.jobParamsRawError = false;
       return;
     }
     try {
@@ -839,8 +833,6 @@ export class Plantillas implements OnInit, OnChanges {
   }
 
   cargarJobsOptions(): void {
-    // TODO: reemplazar por tu servicio real de JOBs
-    // this.jobsService.getAll().subscribe(...)
     this.jobOptions = [
       { label: 'JOB Diario (ID 101)', value: 101 },
       { label: 'JOB Semanal (ID 102)', value: 102 },
@@ -859,14 +851,6 @@ export class Plantillas implements OnInit, OnChanges {
         ? JSON.parse(this.jobParamsRawText)
         : null,
     };
-
-    // TODO: llama a tu endpoint real de asignación
-    // this.plantillaIntegracionService.asignarJob(payload).subscribe({
-    //   next: () => { ... },
-    //   error: () => { ... }
-    // });
-
-    // Por ahora, feedback inmediato:
     console.log('Asignar JOB payload:', payload);
     this.messageService.add({
       severity: 'success',

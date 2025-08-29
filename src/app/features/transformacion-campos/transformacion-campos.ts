@@ -96,7 +96,6 @@ export class TransformacionCampos implements OnInit, OnChanges {
     ct_validacion: '',
     ct_obligatorio: '',
     ct_usua_id: '',
-    ct_fecha_actividad: '',
     pd_id: '',
   };
 

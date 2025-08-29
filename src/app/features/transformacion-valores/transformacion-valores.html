@@ -1,12 +1,16 @@
 <div
   class="flex items-center justify-between border-b border-gray-200 p-3 bg-white"
 >
-<div class="flex-1">
+  <div class="flex-1">
     <!-- Título con barra y badge -->
     <div class="flex items-center gap-2">
       <div class="w-1 h-6 bg-blue-600 rounded"></div>
-      <h2 class="text-2xl font-bold text-gray-800">TRANSFORMACIÓN DE VALORES</h2>
-      <span class="ml-2 px-2 py-0.5 text-xs rounded-lg bg-blue-600 text-white font-semibold">
+      <h2 class="text-2xl font-bold text-gray-800">
+        TRANSFORMACIÓN DE VALORES
+      </h2>
+      <span
+        class="ml-2 px-2 py-0.5 text-xs rounded-lg bg-blue-600 text-white font-semibold"
+      >
         Gestión Activa
       </span>
     </div>
@@ -131,30 +135,30 @@
         <td>{{ valor.vt_valor_destino }}</td>
         <td>
           <div class="flex gap-2 justify-center">
-          <button
-            pButton
-            type="button"
-            [text]="true"
-            [rounded]="true"
-            [severity]="'secondary'"
-            class="btn-icon"
-            pTooltip="Editar"
-            (click)="$event.stopPropagation(); editar(valor)"
-          >
-            <i class="pi pi-pencil"></i>
-          </button>
-          <button
-            pButton
-            type="button"
-            [text]="true"
-            [rounded]="true"
-            [severity]="'danger'"
-            class="btn-icon"
-            pTooltip="Eliminar"
-            (click)="$event.stopPropagation(); eliminar(valor)"
-          >
-            <i class="pi pi-trash"></i>
-          </button>
+            <button
+              pButton
+              type="button"
+              [text]="true"
+              [rounded]="true"
+              [severity]="'secondary'"
+              class="btn-icon"
+              pTooltip="Editar"
+              (click)="$event.stopPropagation(); editar(valor)"
+            >
+              <i class="pi pi-pencil"></i>
+            </button>
+            <button
+              pButton
+              type="button"
+              [text]="true"
+              [rounded]="true"
+              [severity]="'danger'"
+              class="btn-icon"
+              pTooltip="Eliminar"
+              (click)="$event.stopPropagation(); eliminar(valor)"
+            >
+              <i class="pi pi-trash"></i>
+            </button>
           </div>
         </td>
       </tr>
@@ -216,6 +220,23 @@
       />
     </p-inputgroup>
 
+    <div
+      *ngIf="nuevoValor?.vt_id"
+      class="flex items-center justify-between border rounded px-3 py-2"
+    >
+      <span class="text-sm text-gray-600">
+        Estado:
+        <strong>{{ nuevoValor?.vt_ind_estado || "A" }}</strong>
+      </span>
+      <p-button
+        *ngIf="(nuevoValor?.vt_ind_estado || 'A') === 'A'"
+        label="Desactivar"
+        icon="pi pi-ban"
+        severity="danger"
+        (click)="desactivarValor(nuevoValor)"
+      ></p-button>
+    </div>
+
     <!-- Botones -->
     <div class="flex justify-end gap-2 pt-4">
       <p-button
@@ -238,31 +259,15 @@
   </div>
 </p-dialog>
 
-<p-confirmDialog #cd>
-  <ng-template
-    #headless
-    let-message
-    let-onAccept="onAccept"
-    let-onReject="onReject"
-  >
-    <div
-      class="flex flex-col items-center p-6 bg-white dark:bg-surface-900 rounded"
-    >
+<p-confirmDialog #cd [key]="'valores-confirm'">
+  <ng-template #headless let-message let-onAccept="onAccept" let-onReject="onReject">
+    <div class="flex flex-col items-center p-6 bg-white dark:bg-surface-900 rounded">
       <i class="pi pi-exclamation-triangle text-orange-500 text-4xl mb-3"></i>
       <div class="text-lg font-semibold mb-2">{{ message.header }}</div>
       <p class="text-center">{{ message.message }}</p>
       <div class="flex justify-center gap-3 mt-4">
-        <p-button
-          label="SI"
-          (onClick)="onAccept()"
-          styleClass="w-32"
-        ></p-button>
-        <p-button
-          label="NO"
-          [outlined]="true"
-          (onClick)="onReject()"
-          styleClass="w-32"
-        ></p-button>
+        <p-button label="SI" (onClick)="onAccept()" styleClass="w-32"></p-button>
+        <p-button label="NO" [outlined]="true" (onClick)="onReject()" styleClass="w-32"></p-button>
       </div>
     </div>
   </ng-template>

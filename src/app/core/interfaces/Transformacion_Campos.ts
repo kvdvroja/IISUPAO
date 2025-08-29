@@ -8,4 +8,5 @@ export interface Transformacion_CamposI {
   ct_usua_id: string;
   ct_fecha_actividad: string;
   pd_id: number;
+  ct_ind_estado: boolean;
 }

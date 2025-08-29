@@ -309,9 +309,9 @@ export class PlantillaDestino implements OnInit {
   }
 
 desactivarDestino(destino: Plantilla_DestinoI): void {
-  if (this.activeDialogKey === 'desactivar') return; // Evitar abrir múltiples diálogos
+  if (this.activeDialogKey === 'desactivar') return;
 
-  this.activeDialogKey = 'desactivar'; // Asignar la clave para el diálogo de desactivación
+  this.activeDialogKey = 'desactivar'; 
 
   this.confirmService.confirm({
     key: 'plantilla-destino-confirm',
@@ -365,15 +365,14 @@ eliminar(destino: Plantilla_DestinoI): void {
     header: 'Confirmar eliminación',
     icon: 'pi pi-exclamation-triangle',
     accept: () => {
-      // Aquí va el servicio para eliminar la plantilla destino
-      this.plantillaDestinoService.plantillaDestinoCrud(destino, 'D').subscribe({
+      this.plantillaDestinoService.plantillaDestinoCrud(destino, 'E').subscribe({
         next: () => {
           this.messageService.add({
             severity: 'success',
             summary: 'Plantilla destino eliminada',
             detail: 'La plantilla destino fue eliminada correctamente.',
           });
-          this.cargarPlantillas(); // Recargar la lista de plantillas destino
+          this.cargarPlantillas();
         },
         error: (err) => {
           this.messageService.add({
@@ -385,12 +384,10 @@ eliminar(destino: Plantilla_DestinoI): void {
         },
       });
 
-      // Limpiar la clave del diálogo cuando se acepte
       this.activeDialogKey = null;
     },
     reject: () => {
       console.log('Eliminación cancelada');
-      // Limpiar la clave del diálogo cuando se rechace
       this.activeDialogKey = null;
     },
   });

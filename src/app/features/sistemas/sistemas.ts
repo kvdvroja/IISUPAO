@@ -1,11 +1,9 @@
 import {
+  ChangeDetectorRef,
   Component,
   OnInit,
-  OnChanges,
-  AfterViewInit,
   ViewChild,
   inject,
-  SimpleChanges,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Table, TableModule } from 'primeng/table';
@@ -54,7 +52,7 @@ type StepKey = 'endpoints' | 'integracion' | 'destino' | 'campos' | 'valores';
   templateUrl: './sistemas.html',
   styleUrl: './sistemas.css',
 })
-export class Sistemas implements OnInit, OnChanges, AfterViewInit {
+export class Sistemas implements OnInit {
   @ViewChild('dt') dt!: Table;
   @ViewChild('endpointsCmp', { static: false }) endpointsComponent!: Endpoints;
   endpointIdForPlantillas: string | number | null = null;
@@ -140,6 +138,7 @@ export class Sistemas implements OnInit, OnChanges, AfterViewInit {
   sistemasService = inject(SistemasS);
   messageService = inject(MessageService);
   confirmService = inject(ConfirmationService);
+  cdr = inject(ChangeDetectorRef)
 
   onRowSelectedEvent(ev: TableRowSelectEvent): void {
     const sistema = ev.data as SistemasI | undefined;
@@ -150,8 +149,6 @@ export class Sistemas implements OnInit, OnChanges, AfterViewInit {
   ngOnInit(): void {
     this.cargarSistemas();
   }
-  ngOnChanges(_: SimpleChanges): void { }
-  ngAfterViewInit(): void { }
 
   get sistemasFiltradas(): SistemasI[] {
     return this.sistemas;
@@ -213,6 +210,7 @@ export class Sistemas implements OnInit, OnChanges, AfterViewInit {
     this.sistemasService.getAllSistemas().subscribe({
       next: (res) => {
         this.sistemas = res.data;
+        this.cdr.detectChanges();
       },
       error: (err) => console.error('Error al cargar sistemas', err),
     });

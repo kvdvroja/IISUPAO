@@ -108,7 +108,7 @@
     <div><strong>Destino:</strong> {{ campo.ct_campo_destino }}</div>
     <div><strong>Tipo:</strong> {{ campo.ct_tipo_transformacion }}</div>
     <div><strong>Fecha Actividad:</strong> {{ campo.ct_fecha_actividad }}</div>
-    <div><strong>Obligatorio:</strong> {{ campo.ct_obligatorio }}</div>
+    <div><strong>Estado:</strong> {{ campo.ct_ind_estado }}</div>
     <div class="flex justify-end mt-2">
       <button
         pButton
@@ -181,7 +181,7 @@
         <th>Destino</th>
         <th>Transformación</th>
         <th>Fecha Actividad</th>
-        <th>Obligatorio</th>
+        <th>Estado</th>
         <th>Acciones</th>
       </tr>
     </ng-template>
@@ -193,7 +193,7 @@
         <td>{{ row.ct_campo_destino }}</td>
         <td>{{ row.ct_tipo_transformacion }}</td>
         <td>{{ row.ct_fecha_actividad | date : "dd MMM yyyy, HH:mm" }}</td>
-        <td>{{ row.ct_obligatorio }}</td>
+        <td>{{ row.ct_ind_estado }}</td>
         <td class="flex gap-2">
           <button
             pButton
@@ -443,16 +443,16 @@
     <div class="flex items-center justify-between">
       <span class="text-sm text-gray-600">
         Estado actual:
-        <strong>{{ campoSeleccionado?.ct_obligatorio ? "SI" : "NO" }}</strong>
+        <strong>{{ nuevoCampo?.ct_ind_estado}}</strong>
       </span>
 
       <!-- Botón de desactivar -->
       <p-button
-        *ngIf="campoSeleccionado?.ct_id"
+        *ngIf="nuevoCampo?.ct_id"
         label="Desactivar"
         icon="pi pi-ban"
         severity="danger"
-        (click)="desactivarCampo(campoSeleccionado!)"
+        (click)="desactivarCampo(nuevoCampo!)"
       ></p-button>
     </div>
 

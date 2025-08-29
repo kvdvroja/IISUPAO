@@ -56,6 +56,8 @@ export class ProgramacionJob implements OnChanges {
 
   isEdit = false;
   loading = false;
+  private prevVisible = false;
+
 
   programaciones: any[] = [];
   selectedProgId: number | NewOption | null = null;
@@ -69,11 +71,10 @@ export class ProgramacionJob implements OnChanges {
     pj_dia: 'ALL',
     pj_hora: '',
     pj_tipo: 'INCLUDE',
-    pj_usua_id: 'ADMIN',
+    pj_usua_id: '',
     pj_fecha: new Date(),
     pj_frecuencia: 'DIARIA',
     pj_dia_mes: 1,
-    pj_ind_estado: 'ACTIVO',
     pj_fecha_unica: new Date(),
     pj_fecha_inicio: new Date(),
     pj_fecha_fin: new Date(),
@@ -84,6 +85,38 @@ export class ProgramacionJob implements OnChanges {
     pj_prioridad: 1,
     pj_schedule_version: 1,
   };
+
+  private resetAll(): void {
+  this.isEdit = false;
+  this.loading = false;
+
+  this.programaciones = [];
+  this.selectedProgId = 'NEW';
+
+  this.jobParamsRawText = '';
+  this.jobParamsRawError = false;
+
+  this.programacion = {
+    pj_id: 0,
+    pj_pi_id: '',          
+    pj_dia: 'ALL',
+    pj_hora: '',
+    pj_tipo: 'INCLUDE',
+    pj_usua_id: '000000044',
+    pj_fecha: new Date(),
+    pj_frecuencia: 'DIARIA',
+    pj_dia_mes: 1,
+    pj_fecha_unica: new Date(),
+    pj_fecha_inicio: new Date(),
+    pj_fecha_fin: new Date(),
+    pj_descripcion: '',
+    pj_ultima_ejecucion: new Date(),
+    pj_proxima_ejecucion: new Date(),
+    pj_zona_horaria: 'America/Lima',
+    pj_prioridad: 1,
+    pj_schedule_version: 1,
+  };
+}
 
   zonasHorarias = [
     { label: 'America/Lima', value: 'America/Lima' },
@@ -117,15 +150,22 @@ export class ProgramacionJob implements OnChanges {
     { label: 'Pausado', value: 'PAUSADO' },
   ];
 
-  ngOnChanges(changes: SimpleChanges): void {
-    if (
-      (changes['visible'] || changes['plantilla']) &&
-      this.visible &&
-      this.plantilla
-    ) {
+ngOnChanges(changes: SimpleChanges): void {
+  if (changes['visible']) {
+    const now = this.visible;
+    if (now && this.plantilla) {
       this.refreshListForPi();
     }
+    if (!now && this.prevVisible) {
+      this.resetAll();
+    }
+    this.prevVisible = now;
   }
+
+  if (changes['plantilla'] && this.visible && this.plantilla) {
+    this.refreshListForPi();
+  }
+}
 
   private refreshListForPi(): void {
     const pj_pi_id = String(this.plantilla?.pi_id ?? '');
@@ -202,7 +242,7 @@ export class ProgramacionJob implements OnChanges {
       ...this.programacion,
       pj_id: 0,
       pj_pi_id: String(this.plantilla?.pi_id ?? ''),
-      pj_descripcion: `Job para ${this.plantilla?.pi_nombre ?? ''}`,
+      pj_descripcion: '',
       pj_frecuencia: 'DIARIA',
       pj_dia: 'ALL',
       pj_hora: '',
@@ -243,7 +283,7 @@ export class ProgramacionJob implements OnChanges {
         } ${hhmm}`;
         break;
     }
-    return `#${p.pj_id} — ${det} — ${p.pj_tipo} — ${p.pj_ind_estado}`;
+    return `#${p.pj_id} — ${det} — ${p.pj_tipo}`;
   }
 
   onChangeSelectedProg(): void {
@@ -345,8 +385,6 @@ export class ProgramacionJob implements OnChanges {
       : null;
     const mode: 'insert' | 'update' = this.isEdit ? 'update' : 'insert';
     const action = this.isEdit ? 'U' : 'I';
-
-    // ¡OJO! Sólo lo que tu función espera:
     const dbPayload = this.isEdit
       ? this.buildUpdatePayload()
       : this.buildInsertPayload();
@@ -361,7 +399,6 @@ export class ProgramacionJob implements OnChanges {
             : 'Programación creada',
           detail: 'Operación exitosa.',
         });
-        // Emito por si el padre quiere reaccionar; NO incluyo payload enviado para evitar confusiones
         this.save.emit({ mode, programacion: this.programacion, params });
         this.refreshListForPi();
         this.visibleChange.emit(false);
@@ -378,12 +415,6 @@ export class ProgramacionJob implements OnChanges {
       },
     });
   }
-
-  private dateOnlyOrNull(v: any): string | null {
-    const d = this.toDateOrNull(v);
-    return d ? d.toISOString().slice(0, 10) : null; // "YYYY-MM-DD"
-  }
-
   private dateOnly(v: any): string | undefined {
     if (!v) return undefined;
     const d = new Date(v);
@@ -411,7 +442,6 @@ export class ProgramacionJob implements OnChanges {
       pj_descripcion: f.pj_descripcion,
     };
 
-    // Sólo el campo que corresponde por frecuencia
     switch (f.pj_frecuencia) {
       case 'SEMANAL':
         p.pj_dia = f.pj_dia;
@@ -422,15 +452,8 @@ export class ProgramacionJob implements OnChanges {
       case 'UNICA':
         p.pj_fecha_unica = this.dateOnly(f.pj_fecha_unica);
         break;
-      // DIARIA: no agrega nada extra
     }
 
-    // pj_ind_estado sólo si quieres forzar distinto del DEFAULT
-    if (f.pj_ind_estado && f.pj_ind_estado !== 'ACTIVO') {
-      p.pj_ind_estado = f.pj_ind_estado;
-    }
-
-    // Fecha fin (si aplica)
     const fin = this.dateOnly(f.pj_fecha_fin);
     if (fin) p.pj_fecha_fin = fin;
 
@@ -447,7 +470,6 @@ export class ProgramacionJob implements OnChanges {
       pj_tipo: f.pj_tipo,
       pj_frecuencia: f.pj_frecuencia,
       pj_descripcion: f.pj_descripcion,
-      pj_ind_estado: f.pj_ind_estado,
     };
 
     switch (f.pj_frecuencia) {
@@ -465,6 +487,12 @@ export class ProgramacionJob implements OnChanges {
     const fin = this.dateOnly(f.pj_fecha_fin);
     if (fin) p.pj_fecha_fin = fin;
 
-    return this.pruneNullish(p); // no envía null/undefined/''
+    return this.pruneNullish(p);
   }
+
+  onHide(): void {
+  this.visibleChange.emit(false);
+  this.resetAll();
+  this.cancel.emit();
+}
 }

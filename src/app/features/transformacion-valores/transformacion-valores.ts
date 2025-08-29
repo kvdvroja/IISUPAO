@@ -67,6 +67,7 @@ export class TransformacionValores implements OnInit, OnChanges {
   pantallaPequena = false;
   camposOptions: Array<{ label: string; value: number | string }> = [];
   private camposMap = new Map<number | string, string>();
+  private confirmOpen = false;
 
   mostrarDialogoAgregar = false;
 
@@ -212,17 +213,18 @@ export class TransformacionValores implements OnInit, OnChanges {
       });
   }
 
-  eliminar(valor: Transformacion_ValorI): void {
+eliminar(valor: Transformacion_ValorI): void {
+    if (this.confirmOpen) return;
+    this.confirmOpen = true;
+
     this.confirmService.confirm({
-      message: `¿Deseas eliminar el valor con ID: ${valor.vt_id}?`,
+      key: 'valores-confirm',
       header: 'Confirmación',
+      message: `¿Deseas eliminar el valor con ID: ${valor.vt_id}?`,
       icon: 'pi pi-exclamation-triangle',
       accept: () => {
         this.transformacionValoresService
-          .transformacionValoresCrud(
-            { vt_id: valor.vt_id } as Transformacion_ValorI,
-            'D'
-          )
+          .transformacionValoresCrud({ vt_id: valor.vt_id } as Transformacion_ValorI, 'D')
           .subscribe({
             next: () => {
               this.messageService.add({
@@ -231,6 +233,7 @@ export class TransformacionValores implements OnInit, OnChanges {
                 detail: 'El valor fue eliminado exitosamente.',
               });
               this.cargarData();
+              this.confirmOpen = false;
             },
             error: (err) => {
               this.messageService.add({
@@ -239,8 +242,81 @@ export class TransformacionValores implements OnInit, OnChanges {
                 detail: 'No se pudo eliminar el valor',
               });
               console.error(err);
+              this.confirmOpen = false;
             },
           });
+      },
+      reject: () => {
+        this.confirmOpen = false;
+      },
+    });
+  }
+
+  desactivarValor(valor: any): void {
+    if (this.confirmOpen) return;
+    this.confirmOpen = true;
+
+    this.confirmService.confirm({
+      key: 'valores-confirm',
+      header: 'Confirmación',
+      message: `¿Deseas desactivar el valor con ID: ${valor.vt_id}?`,
+      icon: 'pi pi-exclamation-triangle',
+      accept: () => {
+        // Si el modelo tiene vt_ind_estado, hacemos UPDATE a 'I'; si no, fallback a D (borrado lógico)
+        const payload: any = { vt_id: valor.vt_id };
+        if ('vt_ind_estado' in valor) {
+          payload.vt_ind_estado = 'I';
+          this.transformacionValoresService.transformacionValoresCrud(payload, 'U').subscribe({
+            next: () => {
+              this.messageService.add({
+                severity: 'success',
+                summary: 'Valor desactivado',
+                detail: 'El valor fue desactivado correctamente.',
+              });
+              this.cargarData();
+              // Refresca el estado del formulario abierto
+              this.nuevoValor = { ...this.nuevoValor, vt_ind_estado: 'I' };
+              this.confirmOpen = false;
+            },
+            error: (err) => {
+              this.messageService.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'No se pudo desactivar el valor',
+              });
+              console.error(err);
+              this.confirmOpen = false;
+            },
+          });
+        } else {
+          // Fallback: si no existe campo de estado, tratamos la desactivación como delete
+          this.transformacionValoresService
+            .transformacionValoresCrud({ vt_id: valor.vt_id } as Transformacion_ValorI, 'D')
+            .subscribe({
+              next: () => {
+                this.messageService.add({
+                  severity: 'success',
+                  summary: 'Valor desactivado',
+                  detail: 'Se realizó la desactivación.',
+                });
+                this.cargarData();
+                this.mostrarDialogoAgregar = false;
+                this.confirmOpen = false;
+              },
+              error: (err) => {
+                this.messageService.add({
+                  severity: 'error',
+                  summary: 'Error',
+                  detail: 'No se pudo desactivar el valor',
+                });
+                console.error(err);
+                this.confirmOpen = false;
+              },
+            });
+        }
+      },
+      reject: () => {
+        this.confirmOpen = false;
       },
     });
   }
